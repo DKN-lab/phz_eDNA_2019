@@ -5,7 +5,7 @@ author: 'Scott H Saunders'
 output:
   html_document:
     theme: cosmo
-    code_folding: hide
+    code_folding: show
     self_contained: no
     toc: yes
   github_document:
@@ -46,11 +46,13 @@ theme_1 <- function () {
 theme_set(theme_1())
 ```
 
+
+
 # Panel D
 
 Read in the data - concentrations quantified from LC (Absorbance) peaks with standard curve.
 ```{r}
-wt_extracts <- read_csv('../data/HPLC_data_colonies_02_16_18.csv')
+wt_extracts <- read_csv('../../data/HPLC_data_colonies_02_16_18.csv')
 
 wt_extracts %>% 
   kable() %>% 
@@ -83,8 +85,7 @@ plot_wt_fixed <- ggplot(wt_conc_means, aes(x = material, fill = material)) +
 #Plot styling
 plot_wt_fixed +
   labs(x = NULL, y = expression("Phenazine concentration" ~ ( mu*M ))) + 
-  theme(axis.title.x = element_text(size = 14)) + 
-  scale_fill_manual(guide = F, values = c("#F0E442","light green"))
+  theme(axis.title.x = element_text(size = 14)) 
          
 ```
 
@@ -146,7 +147,7 @@ Let's first read in the data. This csv contains the data for multiple experiment
 
 ```{r}
 # Read in only the dPHZstar data, and convert the amount of phenazine added to a numeric
-dphz_extracts <- read_csv('../data/2018_10_30_HPLC_concentrations_df.csv',comment = "#") %>% 
+dphz_extracts <- read_csv('../../data/2018_10_30_HPLC_concentrations_df.csv',comment = "#") %>% 
   filter(strain == 'dPHZstar') %>% 
   mutate(added_phz_num=as.double(str_extract(amount_added,"^[0-9.]+")))
 
@@ -212,7 +213,7 @@ plot_dphz_binding_styled
 ```
 
 ```{r}
-pdaMan_data <- read_csv("../data/dPHZstar_PDAmanual_PHZretention_08_29_18.csv") %>% 
+pdaMan_data <- read_csv("../../data/dPHZstar_PDAmanual_PHZretention_08_29_18.csv") %>% 
   mutate(calcConc = Amount * 2 *(800 / 62) ) %>% 
   group_by(Condition,Day,measured_phenazine) %>% 
   mutate(mean = ifelse(Rep==1,mean(calcConc),NA))
