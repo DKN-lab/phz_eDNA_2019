@@ -1,0 +1,81 @@
+---
+title: "Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms."
+output: 
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    includes:
+      before_body: index_files/header.html
+      after_body: index_files/footer.html
+  
+---
+
+```{r setup, echo = F, message = F, warning = F}
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE, echo = F, message=FALSE, warning=FALSE, fig.align="center")
+
+library(tidyverse)
+```
+
+<br>
+
+# Abstract
+
+---
+
+Extracellular electron transfer (EET) enables metabolic activity by microorganisms, particularly under oxidant-limited conditions that occur in biofilm communities. Although different mechanisms underpin this process in select organisms, a widespread strategy involves extracellular electron shuttles (EES), redox-active metabolites that are secreted and recycled by diverse bacteria. How EES catalyze electron transfer within biofilms has been a long-standing question. Here, we describe studies of phenazine EES and how they mediate efficient EET in Pseudomonas aeruginosa biofilms, which are important in nature and disease. We find that phenazine retention in the biofilm matrix is facilitated by extracellular DNA (eDNA). In vitro studies reveal that eDNA binds the phenazines pyocyanin (PYO) and phenazine carboxamide (PCN), and that PCN participates in DNA charge-transfer reactions. Electrochemical measurements of biofilms indicate that eDNA-retained-PYO experiences slow physical diffusion within the biofilm yet supports rapid EET. Taken together, these results suggest that eDNA may play a hitherto unrecognized role in coordinating and stimulating metabolic processes in diverse biofilm systems.
+
+<br>
+
+# Authors
+
+---
+
+* [Scott H. Saunders](https://scott-saunders.github.io/labwork/), Graduate student, Caltech BBE, Pasadena, CA
+* [Jacqueline K. Barton](http://www.its.caltech.edu/~jkbgrp/)
+* [Leonard M. Tender](NRL), Scientist, Navy Research Lab
+* [Dianne K. Newman](http://dknweb.caltech.edu/Newman_Lab.html), Professor, Caltech BBE & GPS, Pasadena, CA
+
+<br>
+
+# Summary {.tabset}
+
+We have found a few things merp derp:
+
+## 1
+
+Colony biofilms retain certain phenazines
+
+[some data and narrative here]
+
+## 2
+
+Phenazines bind extracellular DNA
+
+[some more data]
+
+## 3
+
+Electron transfer can occur in three ways
+
+1. Solution ET
+2. Self-exchange
+3. DNA mediated self-exchange
+
+## 4
+
+Growing biofilms on electrodes
+
+[some more data]
+
+## 5
+
+Electron transfer mechanisms in vivo
+
+[merp]
+
+## 6
+
+A model
+
+[merp]
