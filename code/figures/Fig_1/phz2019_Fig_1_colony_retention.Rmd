@@ -5,7 +5,10 @@ author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez
 output:
   html_document:
     theme: cosmo
+<<<<<<< HEAD:code/figures/Fig_1/phz2019_Fig_1_colony_retention.Rmd
     highlight: tango
+=======
+>>>>>>> 2e2d4b480be4ceb95ab231ffa2c902acb88146b7:code/figures/phz2019_Fig_1_colony_retention.Rmd
     code_folding: show
     self_contained: no
     toc: yes
@@ -54,6 +57,7 @@ theme_1 <- function () {
 theme_set(theme_1())
 ```
 
+<<<<<<< HEAD:code/figures/Fig_1/phz2019_Fig_1_colony_retention.Rmd
 -----
 
 # Fig. 1C - Wildtype phenazine concentrations
@@ -61,6 +65,15 @@ theme_set(theme_1())
 Read in the data - concentrations quantified from LC (Absorbance) peaks with standard curve.
 ```{r}
 wt_extracts <- read_csv('../../../data/HPLC_data_colonies_02_16_18.csv')
+=======
+
+
+# Panel D
+
+Read in the data - concentrations quantified from LC (Absorbance) peaks with standard curve.
+```{r}
+wt_extracts <- read_csv('../../data/HPLC_data_colonies_02_16_18.csv')
+>>>>>>> 2e2d4b480be4ceb95ab231ffa2c902acb88146b7:code/figures/phz2019_Fig_1_colony_retention.Rmd
 
 wt_extracts %>% kable() %>% kable_styling() %>% scroll_box(height = '250px')
 ```
@@ -79,6 +92,23 @@ wt_conc_means <- wt_conc %>%
   mutate(mean = ifelse(replicate==1, mean(phz_conc), NA)) 
 ```
 
+<<<<<<< HEAD:code/figures/Fig_1/phz2019_Fig_1_colony_retention.Rmd
+=======
+Let's plot the data with a fixed scale, so we can see the pattern of phenazine production by the WT cells:
+```{r}
+#Plot layout
+plot_wt_fixed <- ggplot(wt_conc_means, aes(x = material, fill = material)) + 
+  geom_col(aes(y = mean)) + 
+  geom_jitter(aes(y = phz_conc), height = 0, width = 0.1, shape = 21) +
+  facet_wrap(~Name)
+
+#Plot styling
+plot_wt_fixed +
+  labs(x = NULL, y = expression("Phenazine concentration" ~ ( mu*M ))) + 
+  theme(axis.title.x = element_text(size = 14)) 
+         
+```
+>>>>>>> 2e2d4b480be4ceb95ab231ffa2c902acb88146b7:code/figures/phz2019_Fig_1_colony_retention.Rmd
 
 Here you can see that the abundance of phena
 
@@ -140,7 +170,11 @@ Let's first read in the data. This csv contains the data for multiple experiment
 
 ```{r}
 # Read in only the dPHZstar data, and convert the amount of phenazine added to a numeric
+<<<<<<< HEAD:code/figures/Fig_1/phz2019_Fig_1_colony_retention.Rmd
 dphz_extracts <- read_csv('../../../data/2018_10_30_HPLC_concentrations_df.csv',comment = "#") %>% 
+=======
+dphz_extracts <- read_csv('../../data/2018_10_30_HPLC_concentrations_df.csv',comment = "#") %>% 
+>>>>>>> 2e2d4b480be4ceb95ab231ffa2c902acb88146b7:code/figures/phz2019_Fig_1_colony_retention.Rmd
   filter(strain == 'dPHZstar') %>% 
   mutate(added_phz_num=as.double(str_extract(amount_added,"^[0-9.]+")))
 
@@ -210,7 +244,11 @@ plot_dphz_binding_styled
 # Fig. 1F - ∆phz* phenazine retention
 
 ```{r}
+<<<<<<< HEAD:code/figures/Fig_1/phz2019_Fig_1_colony_retention.Rmd
 pdaMan_data <- read_csv("../../../data/dPHZstar_PDAmanual_PHZretention_08_29_18.csv") %>% 
+=======
+pdaMan_data <- read_csv("../../data/dPHZstar_PDAmanual_PHZretention_08_29_18.csv") %>% 
+>>>>>>> 2e2d4b480be4ceb95ab231ffa2c902acb88146b7:code/figures/phz2019_Fig_1_colony_retention.Rmd
   mutate(calcConc = Amount * 2 *(800 / 62) ) %>% 
   group_by(Condition,Day,measured_phenazine) %>% 
   mutate(mean = ifelse(Rep==1,mean(calcConc),NA))
