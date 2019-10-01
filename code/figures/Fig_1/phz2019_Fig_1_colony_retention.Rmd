@@ -1,31 +1,39 @@
 ---
 title: "Figure 1"
-subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in Pseudomonas aeruginosa biofilms.'
-author: 'Scott H Saunders'
+subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
 output:
   html_document:
     theme: cosmo
-    code_folding: hide
+    highlight: tango
+    code_folding: show
     self_contained: no
     toc: yes
-  github_document:
-    pandoc_args: --webtex
 ---
 
+--------
+
+# Notes
+
+Panels A-X of Figure 1 are diagrams and images. The remaining panels were generated in R as shown here. Note all LC-MS data was quantified via absorbance. Chromatogram peaks were integrated in the Waters Empower software and integrations were exported and are contained in the csv files used here.
+
+----
+
+Setup packages and plotting for the notebook:
 
 ```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Load packages
 library(tidyverse)
 library(cowplot)
-library(broom) 
-library(modelr) 
-library(viridis)
 library(kableExtra)
 
-knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center")
+# Code display options
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center")
 
-source("../tools/plotting_tools.R")
+# Load plotting tools
+source("../../tools/plotting_tools.R")
 
-
+# Modify the plot theme 
 theme_1 <- function () { 
   theme_classic( ) %+replace% 
     theme(
@@ -46,16 +54,15 @@ theme_1 <- function () {
 theme_set(theme_1())
 ```
 
-# Panel D
+-----
+
+# Fig. 1C - Wildtype phenazine concentrations
 
 Read in the data - concentrations quantified from LC (Absorbance) peaks with standard curve.
 ```{r}
-wt_extracts <- read_csv('../data/HPLC_data_colonies_02_16_18.csv')
+wt_extracts <- read_csv('../../../data/HPLC_data_colonies_02_16_18.csv')
 
-wt_extracts %>% 
-  kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>% 
-  scroll_box(height = '250px')
+wt_extracts %>% kable() %>% kable_styling() %>% scroll_box(height = '250px')
 ```
 
 
@@ -72,21 +79,6 @@ wt_conc_means <- wt_conc %>%
   mutate(mean = ifelse(replicate==1, mean(phz_conc), NA)) 
 ```
 
-Let's plot the data with a fixed scale, so we can see the pattern of phenazine production by the WT cells:
-```{r}
-#Plot layout
-plot_wt_fixed <- ggplot(wt_conc_means, aes(x = material, fill = material)) + 
-  geom_col(aes(y = mean)) + 
-  geom_jitter(aes(y = phz_conc), height = 0, width = 0.1, shape = 21) +
-  facet_wrap(~Name)
-
-#Plot styling
-plot_wt_fixed +
-  labs(x = NULL, y = expression("Phenazine concentration" ~ ( mu*M ))) + 
-  theme(axis.title.x = element_text(size = 14)) + 
-  scale_fill_manual(guide = F, values = c("#F0E442","light green"))
-         
-```
 
 Here you can see that the abundance of phena
 
@@ -107,7 +99,9 @@ plot_wt_free_styled
 ```
 ok and now this makes our point.
 
-# Retention Ratio
+---
+
+# Fig. 1D - WT phenazine retention ratio
 
 ```{r}
 # Split dataset by material
@@ -118,18 +112,16 @@ wt_conc_means_biofilm <- wt_conc_means %>%
   filter(material=='biofilm')
 
 # Join agar and cell observations and calculate retention ratios = biofilm / agar
-wt_conc_means_join <- left_join(wt_conc_means_biofilm, 
-                                     wt_conc_means_agar, 
-                                     by=c('strain','replicate','Name'), 
-                                     suffix = c('_from_biofilm','_from_agar') 
-                                     ) %>% 
+wt_conc_means_join <- left_join(wt_conc_means_biofilm, wt_conc_means_agar, 
+                                by = c('strain','replicate','Name'), 
+                                suffix = c('_from_biofilm','_from_agar')) %>% 
   mutate(retention_ratio = phz_conc_from_biofilm / phz_conc_from_agar) %>% 
   mutate(mean_retention_ratio = mean_from_biofilm / mean_from_agar)
 
 # Plot Layout
 wt_ret_ratio <- ggplot(wt_conc_means_join ,aes(x=Name,y=retention_ratio))+
   geom_col( aes(y = mean_retention_ratio), fill = 'light gray') +
-    geom_jitter(width=0.1,height=0,shape=21,size=1)
+  geom_jitter(width=0.1,height=0,shape=21,size=1)
 
 # Plot Stlying
 wt_ret_ratio_styled <- wt_ret_ratio +
@@ -140,19 +132,21 @@ wt_ret_ratio_styled <- wt_ret_ratio +
 wt_ret_ratio_styled
 ```
 
-# Panel E
+---
+
+# Fig. 1E - ∆phz* phenazine accumlation
 
 Let's first read in the data. This csv contains the data for multiple experiments that were run on the LC-MS on the same day, so let's just look at the dPHZ* colonies.
 
 ```{r}
 # Read in only the dPHZstar data, and convert the amount of phenazine added to a numeric
-dphz_extracts <- read_csv('../data/2018_10_30_HPLC_concentrations_df.csv',comment = "#") %>% 
+dphz_extracts <- read_csv('../../../data/2018_10_30_HPLC_concentrations_df.csv',comment = "#") %>% 
   filter(strain == 'dPHZstar') %>% 
   mutate(added_phz_num=as.double(str_extract(amount_added,"^[0-9.]+")))
 
 dphz_extracts %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>% 
+  kable_styling() %>% 
   scroll_box(height = '250px')
 ```
 
@@ -211,8 +205,12 @@ plot_dphz_binding_styled <- plot_dphz_binding +
 plot_dphz_binding_styled
 ```
 
+---
+
+# Fig. 1F - ∆phz* phenazine retention
+
 ```{r}
-pdaMan_data <- read_csv("../data/dPHZstar_PDAmanual_PHZretention_08_29_18.csv") %>% 
+pdaMan_data <- read_csv("../../../data/dPHZstar_PDAmanual_PHZretention_08_29_18.csv") %>% 
   mutate(calcConc = Amount * 2 *(800 / 62) ) %>% 
   group_by(Condition,Day,measured_phenazine) %>% 
   mutate(mean = ifelse(Rep==1,mean(calcConc),NA))
@@ -239,9 +237,7 @@ For dPHZ* incubated with individual phenazines
 
 ```{r}
 
-
-pdaMan_indPhz_plot <- ggplot(pdaMan_data %>% filter(Condition == measured_phenazine), 
-                             aes(x = Day, y = calcConc, )) + 
+pdaMan_indPhz_plot <- ggplot(pdaMan_data %>% filter(Condition == measured_phenazine), aes(x = Day, y = calcConc, )) + 
   geom_col(aes(y = mean), fill='light gray')+
   geom_jitter(height = 0, width = 0.1, shape = 21, size = 1) +
   facet_wrap(~measured_phenazine, scales = 'free') + 
@@ -257,7 +253,10 @@ pdaMan_indPhz_plot_styled <- pdaMan_indPhz_plot +
 pdaMan_indPhz_plot_styled
 ```
 
-# Combine Panels 
+---
+
+# Create Fig. 1
+
 ```{r}
 top_panel <- plot_grid(NULL, wt_ret_ratio_styled, ncol = 2, rel_widths = c(2.5,1), scale = 1.0, labels = c('',"E"))
 
@@ -290,4 +289,11 @@ fig_1
 
 save_plot("../figures/2019_09_20_PNAS_fig_1.pdf", fig_1, base_width = 3.42, base_height = 3)
 
+```
+
+
+-------
+
+```{r}
+sessionInfo()
 ```
