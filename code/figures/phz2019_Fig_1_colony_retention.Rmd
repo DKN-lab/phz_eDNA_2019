@@ -3,13 +3,12 @@ title: "Figure 1"
 subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in Pseudomonas aeruginosa biofilms.'
 author: 'Scott H Saunders'
 output:
+  github_document:
+    pandoc_args: --webtex
   html_document:
     theme: cosmo
     code_folding: show
-    self_contained: no
     toc: yes
-  github_document:
-    pandoc_args: --webtex
 ---
 
 
