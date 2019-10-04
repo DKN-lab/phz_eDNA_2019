@@ -1,0 +1,226 @@
+---
+title: "Figure 3"
+subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
+output:
+  html_document:
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+    toc: yes
+    keep_md: true
+---
+
+--------
+
+# Notes
+
+Panel A of figure 2 is isothermal titration calorimetry data that was analyzed outside of R. 
+
+----
+
+Setup packages and plotting for the notebook:
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Load packages
+library(tidyverse)
+library(cowplot)
+library(kableExtra)
+library(modelr)
+library(broom)
+
+# Code display options
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center")
+
+# Load plotting tools
+source("../../tools/plotting_tools.R")
+
+# Modify the plot theme 
+theme_1 <- function () { 
+  theme_classic( ) %+replace% 
+    theme(
+      axis.ticks = element_line(color = 'black'),
+      axis.text = element_text( size=6),
+      axis.title=element_text(size=6),
+      strip.text = element_text(size = 6),
+      strip.background = element_blank(),
+      legend.background = element_blank(),
+      legend.title=element_text(size=6),
+      legend.text=element_text(size=6),
+      legend.text.align=0,
+      panel.spacing = unit(0,'cm'),
+      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
+    )
+}
+
+theme_set(theme_1())
+```
+
+# Panel E - MM Discrimination
+
+This data is electrochemical and contains the third/final sweep of an electrode with two different DNA monolayers.
+```{r}
+df_noO2 <- read_csv('../../../data/Electrochemistry/DNA_modified_electrode_noO2.csv',comment = "#") %>% 
+  mutate(Construct=fct_relevel(Construct,'wm','mm'))
+
+df_noO2 %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>% 
+  scroll_box(height = '250px')
+```
+
+Let's make the figure:
+```{r}
+
+plot_dnaCT_noO2 <- ggplot(df_noO2,aes(x=E,y=Current, color = Construct))+
+  geom_path(size = 1)
+
+plot_dnaCT_noO2_styled <- plot_dnaCT_noO2 +
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  scale_color_manual(breaks = c('wm','mm'), labels=c("Well matched DNA","Mismatched DNA"), values = c("#66CCFF","#FFCC66")) +
+  labs(x='E (mV vs. Ag/AgCl)',y='Current (nA)')+
+  theme(legend.position = c(0.3, 0.8),
+        legend.title = element_blank(),
+        legend.background = element_rect(fill=NA))
+
+plot_dnaCT_noO2_styled
+```
+
+
+
+
+# Panel F - DNA CT Catalytic
+
+```{r}
+df_wO2 <- read_csv('../../../data/Electrochemistry/DNA_modified_electrode_wO2.csv',comment = "#") %>% 
+  mutate(Condition=paste(Construct,Aerobic,PCN,sep='_')) %>% 
+  mutate(Condition=fct_relevel(Condition,"wm_TRUE_TRUE","mm_TRUE_TRUE","wm_TRUE_FALSE"))
+
+df_wO2 %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>% 
+  scroll_box(height = '250px')
+```
+
+```{r}
+plot_dnaCT_wO2 <- ggplot(df_wO2 %>% filter(Aerobic==T),aes(x = E, y = Current, color = Condition))+
+  geom_path(size = 1)
+
+plot_dnaCT_wO2_styled <- plot_dnaCT_wO2 +
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  scale_color_manual(
+    breaks = c('wm_TRUE_TRUE','mm_TRUE_TRUE','wm_TRUE_FALSE'), values = c("#66CCFF","#FFCC66","gray"),
+    labels=c(expression("wmDNA"+"PCN"+O[2]),expression("mmDNA"+"PCN"+O[2]),expression("wmDNA"-"PCN"+O[2]))
+    ) +
+  labs(x='E (mV vs. Ag/AgCl)',y='Current (nA)')+
+  theme(
+    legend.position = c(0.3, 0.8),
+    legend.title = element_blank(),
+    legend.background = element_rect(fill=NA))
+
+plot_dnaCT_wO2_styled
+```
+
+# Spectroscopy
+
+```{r}
+
+
+df_spec <- read_csv("../../../data/Spectroscopy/2019_08_29_spectroscopy_RuRh_dphz.csv") %>% filter(exp_num == 2)
+
+df_spec <- df_spec %>% 
+  mutate(min = ifelse(ruphen_conc==0,intensity, NA)) %>% 
+  group_by(time) %>% 
+  mutate(bg = min(min, na.rm = T)) %>% 
+  mutate(bg_sub = intensity - bg)
+
+ggplot(df_spec, aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + geom_path()
+
+ggplot(df_spec %>% filter(run %in% 2:6) %>% filter(time>30e-9), aes(x = time, y = bg_sub, color = quencher_eq, group = quencher_eq)) + geom_path()
+
+```
+
+```{r}
+df_spec_fit <- df_spec %>% 
+  filter(run %in% 2:5) %>% 
+  filter(time>30e-9) %>% 
+  filter(bg_sub>0) %>% 
+  group_by(run, quencher_eq) %>% 
+  nest()
+
+fit_biexp_bg_sub <- function(df){
+  
+  A1 = 0.02; lrc1 = 16.5; A2 = 0.02; lrc2 = 15.7
+  
+  mod <- nls(bg_sub~SSbiexp(time, A1, lrc1, A2, lrc2), data = df)
+  
+  mod
+}
+
+df_spec_models <- df_spec_fit %>% 
+  mutate(models = map(data, fit_biexp_bg_sub)) 
+
+df_spec_preds <- df_spec_models %>% 
+  mutate(preds = map2(data, models, add_predictions)) %>% 
+  unnest(preds)
+
+df_spec_ests <- df_spec_models %>% 
+  mutate(ests = map(models, tidy)) %>% 
+  unnest(ests)
+
+
+df_spec_preds %>% head()
+```
+
+
+```{r}
+#write_csv(df_exp_2_ests, "2019_09_27_spectroscopy_fits_bg_sub.csv")
+
+df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
+```
+
+
+```{r}
+
+ggplot(df_spec_preds, aes(x = time, group = run, color = quencher_eq)) + geom_path(aes(y = pred), color = 'black') + geom_point(aes(y = bg_sub),alpha = 0.2, shape = 21) +xlim(0,5e-7) + facet_wrap(~quencher_eq)
+
+```
+
+
+```{r}
+
+ggplot(df_spec_preds, aes(x = time, group = run, color = quencher_eq)) + geom_path(aes(y = pred)) + geom_point(aes(y = bg_sub),alpha = 0.2, shape = 21)
+
+```
+
+
+```{r}
+background_ests <- df_spec_ests %>% filter(is.na(quencher_eq))
+
+#background_ests
+
+ggplot(df_spec_ests, aes(x = quencher_eq, y = estimate)) + 
+  geom_hline(data = background_ests, aes(yintercept = estimate), linetype = 2, color = 'light gray') + 
+  geom_pointrange(aes(ymin = estimate - 2*std.error, ymax = estimate + 2*std.error)) +
+  facet_wrap(~term, scales = 'free')
+
+```
+
+```{r}
+df_spec_tau <- df_spec_ests %>% filter(term %in% c('lrc1','lrc2')) %>% mutate(tau = 1/exp(estimate)) %>% mutate(tau_low = 1/exp(estimate + 2*std.error), tau_high = 1/exp(estimate - 2*std.error))
+
+
+background_spec_tau <- df_spec_tau %>% filter(is.na(quencher_eq))
+
+#background_ests
+
+plot_spec_tau <- ggplot(df_spec_tau, aes(x = quencher_eq, y = tau)) + 
+  geom_hline(data = background_spec_tau, aes(yintercept = tau), linetype = 1, color = 'light gray') + 
+  geom_pointrange(aes(ymin = tau_low, ymax = tau_high)) +
+  facet_wrap(~term, scales = 'free', labeller = labeller(term = c(lrc1 = 'Component 1', lrc2 = 'Component 2'))) + 
+  scale_y_continuous(labels = ns_label, limits = c(0,NA))
+
+plot_spec_tau
+```

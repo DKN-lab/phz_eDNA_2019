@@ -310,7 +310,7 @@ fig_1
 
 #save_plot("../figures/02_12_19_fig_1_draft_2.pdf", fig_1, base_width = 8.5, base_height = 6)
 
-save_plot("../../figures/2019_09_20_PNAS_fig_1.pdf", fig_1, base_width = 3.42, base_height = 3)
+save_plot("../../../figures/phz2019_Fig_1.pdf", fig_1, base_width = 3.42, base_height = 3)
 
 ```
 
