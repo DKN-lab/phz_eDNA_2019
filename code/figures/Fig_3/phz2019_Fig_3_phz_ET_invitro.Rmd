@@ -40,13 +40,13 @@ theme_1 <- function () {
   theme_classic( ) %+replace% 
     theme(
       axis.ticks = element_line(color = 'black'),
-      axis.text = element_text( size=6),
-      axis.title=element_text(size=6),
-      strip.text = element_text(size = 6),
+      axis.text = element_text( size=8),
+      axis.title=element_text(size=8),
+      strip.text = element_text(size = 8),
       strip.background = element_blank(),
       legend.background = element_blank(),
-      legend.title=element_text(size=6),
-      legend.text=element_text(size=6),
+      legend.title=element_text(size=8),
+      legend.text=element_text(size=8),
       legend.text.align=0,
       panel.spacing = unit(0,'cm'),
       plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
@@ -136,7 +136,22 @@ df_spec <- df_spec %>%
   mutate(bg = min(min, na.rm = T)) %>% 
   mutate(bg_sub = intensity - bg)
 
-ggplot(df_spec, aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + geom_path()
+plot_raw_spec <- ggplot(df_spec %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
+  geom_path() + 
+  scale_x_continuous(limits = c(NA, 5e-7), labels = ns_label) + 
+  labs(x = 'Time', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + 
+  guides(color = F)
+  
+plot_raw_spec
+
+df_liq <- read_csv("../../../data/Spectroscopy/2019_08_29_spectroscopy_RuRh_dphz.csv") %>% filter(exp_num == 7)
+
+plot_liq_spec <- ggplot(df_liq %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
+  geom_path() + 
+  scale_x_continuous(limits = c(NA, 5e-7), labels = ns_label) + 
+  labs(x = 'Time', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + guides(color = F)
+
+plot_liq_spec
 
 ggplot(df_spec %>% filter(run %in% 2:6) %>% filter(time>30e-9), aes(x = time, y = bg_sub, color = quencher_eq, group = quencher_eq)) + geom_path()
 
@@ -144,7 +159,7 @@ ggplot(df_spec %>% filter(run %in% 2:6) %>% filter(time>30e-9), aes(x = time, y 
 
 ```{r}
 df_spec_fit <- df_spec %>% 
-  filter(run %in% 2:5) %>% 
+  filter(run %in% 2:6) %>% 
   filter(time>30e-9) %>% 
   filter(bg_sub>0) %>% 
   group_by(run, quencher_eq) %>% 
@@ -191,7 +206,13 @@ ggplot(df_spec_preds, aes(x = time, group = run, color = quencher_eq)) + geom_pa
 
 ```{r}
 
-ggplot(df_spec_preds, aes(x = time, group = run, color = quencher_eq)) + geom_path(aes(y = pred)) + geom_point(aes(y = bg_sub),alpha = 0.2, shape = 21)
+plot_bg_spec <- ggplot(df_spec %>% filter(run %in% 1:6), aes(x = time, group = run, color = quencher_eq)) + 
+  geom_point( aes(y = bg_sub),alpha = 0.2, shape = 21, size = 1) + 
+  geom_path(data = df_spec_preds,aes(y = pred)) + scale_x_continuous(limits = c(NA,1e-6), labels = ns_label) + 
+  ylim(-0.001, NA) + labs(y = 'Background subtracted - Intensity (620nm)', y = 'Time', color = 'Quencher\nequivalents')+
+  guides(color = guide_colorbar(barwidth = 0.5, barheight = 2.5))
+
+plot_bg_spec
 
 ```
 
@@ -223,4 +244,29 @@ plot_spec_tau <- ggplot(df_spec_tau, aes(x = quencher_eq, y = tau)) +
   scale_y_continuous(labels = ns_label, limits = c(0,NA))
 
 plot_spec_tau
+```
+
+```{r}
+plot_pyo_ox <- readRDS("../../../../labwork/Figures/2019_09_27_group_meeting/plot_pyo_ox") + labs(title = NULL)
+plot_pyo_red <- readRDS("../../../../labwork/Figures/2019_09_27_group_meeting/plot_pyo_red")+ labs(title = NULL)
+plot_rxn_pct <- readRDS("../../../../labwork/Figures/2019_09_27_group_meeting/plot_rxn_pct")+ labs(title = NULL)
+```
+
+```{r}
+fig3_top <- plot_grid(plot_pyo_ox, plot_pyo_red, plot_rxn_pct,scale = 0.95, labels = c('A','B','C'), ncol = 3)
+
+fig3_middle <- plot_grid(plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled, scale = 0.95, labels = c('D','E','F'), ncol = 3)
+
+fig3_bottom <- plot_grid(plot_liq_spec, plot_raw_spec, plot_bg_spec, scale = 0.95, labels = c('G','H','I'), ncol = 3, rel_widths = c(1,1,1.25))
+
+fig3_combined <- plot_grid(fig3_top, fig3_middle, fig3_bottom, ncol = 1)
+
+fig_3_et <- plot_grid(plot_pyo_ox, plot_pyo_red, plot_rxn_pct,
+          plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
+          plot_liq_spec, plot_raw_spec, plot_bg_spec, 
+          ncol = 3, scale = 0.95)
+
+fig_3_et
+
+save_plot("../../../figures/phz2019_Fig_3.pdf", fig3_combined,base_height = 7, base_width = 7)
 ```
