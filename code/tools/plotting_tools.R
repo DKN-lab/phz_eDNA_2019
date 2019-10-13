@@ -36,6 +36,11 @@ nA_label <- function(x){
   lab <- x / 1e-9
 }
 
+ns_label <- function(x){
+  # from s to ns
+  lab <-  paste(x / 1e-9, "ns", sep = '')
+}
+
 mV_label <- function(x){
 # From V to mV
   lab <- x * 1000

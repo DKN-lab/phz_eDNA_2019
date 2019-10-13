@@ -1,0 +1,322 @@
+---
+title: "Figure 2"
+subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
+output:
+  html_document:
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+    toc: yes
+    keep_md: true
+---
+
+--------
+
+# Notes
+
+Panel A of figure 2 is isothermal titration calorimetry data that was analyzed outside of R. 
+
+----
+
+Setup packages and plotting for the notebook:
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Load packages
+library(tidyverse)
+library(cowplot)
+library(kableExtra)
+
+# Code display options
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center")
+
+# Load plotting tools
+source("../../tools/plotting_tools.R")
+
+# Modify the plot theme 
+theme_1 <- function () { 
+  theme_classic( ) %+replace% 
+    theme(
+      axis.ticks = element_line(color = 'black'),
+      axis.text = element_text( size=6),
+      axis.title=element_text(size=6),
+      strip.text = element_text(size = 6),
+      strip.background = element_blank(),
+      legend.background = element_blank(),
+      legend.title=element_text(size=6),
+      legend.text=element_text(size=6),
+      legend.text.align=0,
+      panel.spacing = unit(0,'cm'),
+      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
+    )
+}
+
+theme_set(theme_1())
+```
+
+# Fig. 2B - PYO redox binding to DNA
+
+```{r}
+plot_redox <- readRDS("plot_etbr_redox")
+```
+
+# Fig. 2C - WT eDNA with TOTO-1
+
+See the processing of this data in this notebook: [link here]
+
+```{r eval = T}
+
+wt_preds <- read_csv("../../processing/07_23_19_wt_TOTO_calCurve_estimates.csv")
+
+wt_preds %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
+    scroll_box(width = "100%", height = "400px")
+```
+
+```{r}
+wt_pred_summary <- wt_preds %>% 
+  filter(Condition == 'TOTO') %>% 
+  group_by(Condition, Colony_number) %>% 
+  summarise(mean_eDNA = mean(eDNA_dsDNA_uM), sd_eDNA = sd(eDNA_dsDNA_uM))
+
+wt_hyper <- wt_pred_summary %>% 
+  summarise(hypermean_eDNA = mean(mean_eDNA), hypersd_eDNA = sd(mean_eDNA))
+
+plot_toto <- ggplot(wt_pred_summary %>% filter(Condition == 'TOTO'), aes(x = Colony_number, y = mean_eDNA)) + 
+  geom_hline(yintercept = wt_hyper$hypermean_eDNA, color = 'light gray') + 
+  geom_hline(yintercept = c(wt_hyper$hypermean_eDNA + wt_hyper$hypersd_eDNA, wt_hyper$hypermean_eDNA - wt_hyper$hypersd_eDNA), color = 'light gray', linetype = 2) + 
+  geom_jitter(data = wt_preds %>% filter(Condition == 'TOTO'), aes(y = eDNA_dsDNA_uM), shape = 21, width = 0.1, height = 0, size = 0.5, color = 'gray')+
+  geom_pointrange(aes(ymin = mean_eDNA - sd_eDNA, ymax = mean_eDNA + sd_eDNA), size = 0.5, fatten = 0.5) + 
+  ylim(0,NA) + 
+  labs(x = 'Colony number', y = expression("eDNA" ~ ( mu*M ~ bp)))
+
+plot_toto
+```
+
+# Fig. 2D - WT Colony +/- DNase
+
+Let's read in the dnase dataset and look at the table:
+```{r}
+dnase_extracts <- read_csv('../../../data/LC-MS/2018_10_08_HPLC_concentrations_df.csv',comment = "#") %>% 
+  filter(Strain=='WT' & Day=='D4') %>% 
+  group_by(Phenazine,Condition,Material) %>% 
+  mutate(mean = ifelse(Replicate==1, mean(calcConc), NA))
+  
+
+dnase_extracts %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>% 
+  scroll_box(height = '250px')
+
+```
+
+Now, let's look at an overview of the experiment.
+
+```{r}
+
+ggplot(dnase_extracts ,aes(x=Condition,y=calcConc))+
+  geom_col( aes(y = mean), fill = 'light gray') +
+    geom_jitter(width=0.1,height=0,shape=21,size=1)+
+    facet_wrap(Material~Phenazine,scales='free')
+
+```
+Here you can see that the agar concentrations between the Dnase treated and untreated don't differ meaningfully, but the cell/biofilm concentrations might. This might be because for this experiment the colonies were transferred to a fresh agar plate for only 24hrs as opposed to staying on the same plate for 4 days as with the pel experiment. So, let's ignore the agar concentrations for now. It's also important to note that by calculating a ratio as we did above for pel we do risk amplifying meaningless differences by dividing large numbers by small numbers.
+
+Here's the biofilm only:
+
+```{r}
+# Plot layout
+dnase_plot <- ggplot(dnase_extracts %>% filter(Material=='cells') ,aes(x=Condition,y=calcConc))+
+  geom_col( aes(y = mean), fill = 'light gray') +
+    geom_jitter(width=0.1,height=0,shape=21,size=1)+
+    facet_wrap(~Phenazine,scales='free') 
+
+# Plot styling
+dnase_plot_styled <- dnase_plot +
+  labs(x=NULL, y=expression("Biofilm concentration" ~ (mu*M ))) + 
+  scale_x_discrete(limits = c("none",'DNase')) +
+  guides(fill = F)
+
+dnase_plot_styled
+
+dnase_PYO_none <- dnase_extracts %>% filter(Material=='cells' & Phenazine=='PCA') %>% filter(Condition=='none')
+
+dnase_PYO_dnase <- dnase_extracts %>% filter(Material=='cells' & Phenazine=='PCA') %>% filter(Condition=='DNase')
+
+t.test(x=dnase_PYO_none$calcConc ,y = dnase_PYO_dnase$calcConc, alternative = 'greater')$conf.int[2]
+
+
+dnase_extracts %>% 
+  spread(Condition,calcConc) %>% 
+  filter(Material=='agar') %>% 
+  group_by(Material,Phenazine) %>% 
+  summarise(conf_int_low = t.test(none, DNase, alternative = 'less')$conf.int[1],
+            conf_int_high = t.test(none, DNase, alternative = 'less')$conf.int[2],
+            p_value = t.test(none, DNase, alternative = 'less')$p.value)
+  
+  
+dnase_extracts %>% 
+  spread(Condition,calcConc) %>% 
+  filter(Material=='cells') %>% 
+  group_by(Material,Phenazine) %>% 
+  summarise(conf_int_low = t.test(none, DNase, alternative = 'greater')$conf.int[1],
+            conf_int_high = t.test(none, DNase, alternative = 'greater')$conf.int[2],
+            p_value = t.test(none, DNase, alternative = 'greater')$p.value)
+```
+
+# Fig. 2E - ∆pel colony
+
+Let's read in and look at the table of pel data. 
+```{r}
+pel_extracts <- read_csv('../../../data/LC-MS/2018_10_30_HPLC_concentrations_df.csv',comment = "#") %>% 
+  filter(strain %in% c('WTpar','dPel'))
+
+pel_extracts %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>% 
+  scroll_box(height = '250px')
+```
+
+Ok, now let's plot an overview of the dataset. 
+```{r}
+pel_extracts_means <- pel_extracts %>% 
+  group_by(material, measured_phenazine, strain) %>% 
+  mutate(mean = ifelse(replicate==1, mean(calcConc), NA)) 
+
+ggplot(pel_extracts_means ,aes(x=strain,y=calcConc))+
+  geom_col( aes(y = mean), fill = 'light gray') +
+    geom_jitter(width=0.1,height=0,shape=21,size=2)+
+    facet_wrap(material~measured_phenazine,scales='free')+
+    scale_x_discrete(breaks = c('dPel','WTpar'), labels=c(expression(Delta*"pel"),"WT")) +
+    labs(x='Strain',y=expression("Biofilm concentration" ~ (mu*M )) ) +
+    guides(fill=F)
+
+pel_extracts %>% 
+  spread(strain,calcConc) %>% 
+  group_by( material ,measured_phenazine) %>% 
+  summarise(conf_int_low = t.test(dPel, WTpar,  alternative = 'two.sided')$conf.int[1],
+            conf_int_high = t.test(dPel,WTpar, alternative = 'two.sided')$conf.int[2],
+            p_value = t.test( dPel,WTpar, alternative = 'two.sided')$p.value)
+
+# Plot Layout
+plot_pel_biofilm <- ggplot(pel_extracts_means %>% filter(material=='cells') ,aes(x=strain,y=calcConc))+
+  geom_col( aes(y = mean), fill = 'light gray') +
+    geom_jitter(width=0.1,height=0,shape=21,size=1)+
+    facet_wrap(~measured_phenazine,scales='free')
+
+# Styling
+plot_pel_biofilm_styled <- plot_pel_biofilm +
+  scale_x_discrete(breaks = c('WTpar','dPel'), 
+                   labels=c("WT",expression(Delta*"pel")), 
+                   limits = c('WTpar','dPel')) +
+  scale_y_continuous(labels = fold_label)+
+  labs(x=NULL, y = expression("Biofilm concentration" ~ (mu*M ))) +
+  guides(fill=F) 
+
+plot_pel_biofilm_styled
+```
+You can see that for each phenazine the concentration differs between the strains for both the cells aka biofilm and the agar. What we actually care about is the retention ratio, so let's calculate and look at that. 
+
+```{r}
+
+# Split dataset by material
+pel_extracts_means_agar <- pel_extracts_means %>% 
+  filter(material=='agar')
+
+pel_extracts_means_biofilm <- pel_extracts_means %>% 
+  filter(material=='cells')
+
+# Join agar and cell observations and calculate retention ratios = biofilm / agar
+pel_extracts_means_join <- left_join(pel_extracts_means_biofilm, 
+                                     pel_extracts_means_agar, 
+                                     by=c('strain','replicate','measured_phenazine'), 
+                                     suffix = c('_from_biofilm','_from_agar') 
+                                     ) %>% 
+  mutate(retention_ratio = calcConc_from_biofilm / calcConc_from_agar) %>% 
+  mutate(mean_retention_ratio = mean_from_biofilm / mean_from_agar)
+
+fold_label <- function(x){
+  lab <- paste(x, "x", sep = '')
+}
+
+# Plot Layout
+plot_pel <- ggplot(pel_extracts_means_join ,aes(x=strain,y=retention_ratio))+
+  geom_col( aes(y = mean_retention_ratio), fill = 'light gray') +
+    geom_jitter(width=0.1,height=0,shape=21,size=1)+
+    facet_wrap(~measured_phenazine,scales='free')
+
+# Styling
+plot_pel_styled <- plot_pel +
+  scale_x_discrete(breaks = c('WTpar','dPel'), 
+                   labels=c("WT",expression(Delta*"pel")), 
+                   limits = c('WTpar','dPel')) +
+  scale_y_continuous(labels = fold_label)+
+  labs(x=NULL, y = '[Biofilm] / [Agar]') +
+  guides(fill=F) 
+
+plot_pel_styled
+
+pel_extracts_means_join %>% 
+  spread(strain,retention_ratio) %>% 
+  group_by(measured_phenazine) %>% 
+  summarise(conf_int_low = t.test(dPel, WTpar,  alternative = 'greater')$conf.int[1],
+            conf_int_high = t.test(dPel,WTpar, alternative = 'greater')$conf.int[2],
+            p_value = t.test( dPel,WTpar, alternative = 'greater')$p.value)
+```
+
+# Fig. 1F - EtBr vs. PHZ in colonies
+
+```{r}
+df_dphz_2 <- read_csv("../../../data/LC-MS/2019_07_23_colony_HPLC_dPHZ_data_2.csv")
+
+df_dphz_2 <- df_dphz_2 %>% 
+  mutate(condition_conc = fct_relevel(condition_conc, c('0uM','10uM','100uM','200uM','500uM'))) %>% 
+    mutate(condition = fct_relevel(condition, c('PBS','etbr','dmso','pi')))
+
+df_dphz_conc <- df_dphz_2 %>% 
+  filter(added_phz == measured_phz) %>% 
+  mutate(measured_phz_conc = case_when(
+    material == 'cells' ~ (Amount * 2) * (800 / 60),
+    material == 'agar' ~ (Amount * 2) * (8 / 5)
+  )) %>% 
+  group_by(measured_phz, strain, condition, condition_conc) %>% 
+  mutate(mean_phz_conc = mean(measured_phz_conc))
+  
+  
+```
+
+
+```{r}
+plot_dphz_etbr <- ggplot(df_dphz_conc %>% filter(condition %in% c('etbr','PBS')), 
+       aes(x = condition_conc, y = measured_phz_conc)) + 
+  geom_col(data = df_dphz_conc %>% filter(condition %in% c('etbr','PBS') & rep ==1), 
+           aes(x = condition_conc, y  = mean_phz_conc), fill = 'light gray') +
+  geom_point(shape = 21, size = 1)  + facet_wrap(~measured_phz, scales = 'free') + ylim(0, NA) + 
+  labs(x = expression('EtBr added to agar'~(mu*M)), y = expression('Biofilm phz concentration'~(mu*M)))+
+  scale_x_discrete(labels = c(0, 10, 100, 500))
+
+
+#saveRDS(plot_dphz_etbr, "../../../../Figures/2019_09_27_group_meeting/plot_dphz_etbr")
+
+plot_dphz_etbr
+```
+
+
+
+# Create Figure
+
+
+
+```{r}
+l_plots <- align_plots(plot_redox + labs(title = NULL), plot_pel_styled, align = 'v', axis = 'l')
+
+top_panel <- plot_grid(l_plots[[1]], plot_toto, dnase_plot_styled, ncol = 3, rel_widths = c(0.5, 0.5, 1), align = 'h', axis = 'tb', labels = c('B','C','D'), scale = 0.95)
+
+bottom_panel <- plot_grid(l_plots[[2]], plot_dphz_etbr, ncol = 2, align = 'h', axis = 'tb', labels = c('E','F'), scale = 0.95) 
+
+all_right_panels <- plot_grid(top_panel, bottom_panel, ncol = 1, align = 'v', axis = 'lr')
+
+all_panels <- plot_grid(NULL, all_right_panels, ncol = 2, rel_widths = c(0.5, 1), labels = c('A',''))
+
+save_plot("../../../figures/phz2019_Fig_2.pdf", all_panels, base_width = 7, base_height = 3.5)
+```
+

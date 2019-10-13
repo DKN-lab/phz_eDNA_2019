@@ -3,10 +3,8 @@ title: "Extracellular DNA promotes efficient extracellular electron transfer by 
 fontsize: 12pt
 output:
   html_document:
-    self_contained: false
     code_folding: hide
-  github_document:
-    pandoc_args: --webtex
+  github_document: default
 ---
 
 # Description Here
