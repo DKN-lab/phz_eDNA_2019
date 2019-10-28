@@ -28,7 +28,7 @@ library(cowplot)
 library(kableExtra)
 
 # Code display options
-knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center")
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
 
 # Load plotting tools
 source("../../tools/plotting_tools.R")
@@ -317,6 +317,6 @@ all_right_panels <- plot_grid(top_panel, bottom_panel, ncol = 1, align = 'v', ax
 
 all_panels <- plot_grid(NULL, all_right_panels, ncol = 2, rel_widths = c(0.5, 1), labels = c('A',''))
 
-save_plot("../../../figures/phz2019_Fig_2.pdf", all_panels, base_width = 7, base_height = 3.5)
+#save_plot("../../../figures/phz2019_Fig_2.pdf", all_panels, base_width = 7, base_height = 3.5)
 ```
 

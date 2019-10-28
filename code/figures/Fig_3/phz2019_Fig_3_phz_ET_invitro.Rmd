@@ -30,7 +30,7 @@ library(modelr)
 library(broom)
 
 # Code display options
-knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center")
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
 
 # Load plotting tools
 source("../../tools/plotting_tools.R")
@@ -268,5 +268,9 @@ fig_3_et <- plot_grid(plot_pyo_ox, plot_pyo_red, plot_rxn_pct,
 
 fig_3_et
 
-save_plot("../../../figures/phz2019_Fig_3.pdf", fig3_combined,base_height = 7, base_width = 7)
+#save_plot("../../../figures/phz2019_Fig_3.pdf", fig3_combined,base_height = 7, base_width = 7)
+```
+
+```{r}
+sessionInfo()
 ```

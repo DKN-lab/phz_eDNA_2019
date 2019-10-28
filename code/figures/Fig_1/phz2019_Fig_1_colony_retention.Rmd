@@ -28,7 +28,7 @@ library(cowplot)
 library(kableExtra)
 
 # Code display options
-knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center")
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
 
 # Load plotting tools
 source("../../tools/plotting_tools.R")

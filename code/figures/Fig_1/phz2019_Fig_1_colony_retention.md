@@ -29,7 +29,7 @@ library(cowplot)
 library(kableExtra)
 
 # Code display options
-knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center")
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
 
 # Load plotting tools
 source("../../tools/plotting_tools.R")
@@ -73,17 +73,17 @@ wt_extracts <- read_csv('../../../data/LC-MS/HPLC_data_colonies_02_16_18.csv')
 wt_extracts %>% kable() %>% kable_styling() %>% scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> Name </th>
-   <th style="text-align:left;"> strain </th>
-   <th style="text-align:left;"> material </th>
-   <th style="text-align:right;"> replicate </th>
-   <th style="text-align:right;"> RT </th>
-   <th style="text-align:right;"> Area </th>
-   <th style="text-align:left;"> Channel Name </th>
-   <th style="text-align:right;"> Amount </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Name </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> strain </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> material </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> replicate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> RT </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Area </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Channel Name </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Amount </th>
   </tr>
  </thead>
 <tbody>
@@ -301,7 +301,7 @@ plot_wt_fixed +
   theme(axis.title.x = element_text(size = 14)) 
 ```
 
-<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" />
 
 
 Here you can see that the abundance of phena
@@ -323,7 +323,7 @@ plot_wt_free_styled <- plot_wt_free +
 plot_wt_free_styled     
 ```
 
-<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
 ok and now this makes our point.
 
 ---
@@ -360,7 +360,7 @@ wt_ret_ratio_styled <- wt_ret_ratio +
 wt_ret_ratio_styled
 ```
 
-<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
 
 ---
 
@@ -381,21 +381,21 @@ dphz_extracts %>%
   scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> measured_phenazine </th>
-   <th style="text-align:left;"> strain </th>
-   <th style="text-align:left;"> amount_added </th>
-   <th style="text-align:left;"> added_phenazine </th>
-   <th style="text-align:left;"> material </th>
-   <th style="text-align:right;"> replicate </th>
-   <th style="text-align:right;"> RT </th>
-   <th style="text-align:right;"> Area </th>
-   <th style="text-align:left;"> Channel Name </th>
-   <th style="text-align:right;"> Amount </th>
-   <th style="text-align:right;"> calcConc </th>
-   <th style="text-align:right;"> added_phz_num </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> measured_phenazine </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> strain </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> amount_added </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> added_phenazine </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> material </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> replicate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> RT </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Area </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Channel Name </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Amount </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> calcConc </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> added_phz_num </th>
   </tr>
  </thead>
 <tbody>
@@ -2564,7 +2564,7 @@ plot_dphz_overview +
        y = expression("Biofilm concentration" ~ ( mu*M )) )
 ```
 
-<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" />
 
 Ok, so we can see that when we add a phenazine to this strain, we only measure significant amounts of that phenazine. Therefore, this mutant is "phenazine inert." There is a little bit of PCN detected, but upon inspection of the chromatograms and MS, it is a persistent background peak that is not actually PCN.
 
@@ -2603,7 +2603,7 @@ plot_dphz_binding_styled <- plot_dphz_binding +
 plot_dphz_binding_styled
 ```
 
-<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" />
 
 ---
 
@@ -2633,7 +2633,7 @@ dphz_ret_pdaMan_plot_styled <- dphz_ret_pdaMan_plot +
 dphz_ret_pdaMan_plot_styled
 ```
 
-<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" />
 
 For dPHZ* incubated with individual phenazines
 
@@ -2655,7 +2655,7 @@ pdaMan_indPhz_plot_styled <- pdaMan_indPhz_plot +
 pdaMan_indPhz_plot_styled
 ```
 
-<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" />
 
 ---
 
@@ -2676,7 +2676,7 @@ fig_1 <- plot_grid(top_panel, bottom_panel, ncol = 1, rel_heights = c(1,1.5))
 fig_1
 ```
 
-<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" />
 
 
 ```r
@@ -2691,13 +2691,13 @@ fig_1 <- plot_grid(top_panel, bottom_panel, ncol = 1)
 fig_1
 ```
 
-<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
 
 
 ```r
 #save_plot("../figures/02_12_19_fig_1_draft_2.pdf", fig_1, base_width = 8.5, base_height = 6)
 
-save_plot("../../figures/2019_09_20_PNAS_fig_1.pdf", fig_1, base_width = 3.42, base_height = 3)
+save_plot("../../../figures/phz2019_Fig_1.pdf", fig_1, base_width = 3.42, base_height = 3)
 ```
 
 
@@ -2709,7 +2709,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -2724,23 +2724,23 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.0.1 
-##  [4] cowplot_0.9.4     forcats_0.3.0     stringr_1.3.1    
-##  [7] dplyr_0.8.1       purrr_0.2.5       readr_1.3.1      
-## [10] tidyr_0.8.2       tibble_2.1.3      ggplot2_3.2.0    
+##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.1.0 
+##  [4] cowplot_0.9.4     forcats_0.4.0     stringr_1.4.0    
+##  [7] dplyr_0.8.1       purrr_0.3.2       readr_1.3.1      
+## [10] tidyr_0.8.3       tibble_2.1.3      ggplot2_3.2.1    
 ## [13] tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.3.4      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
-## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       highr_0.7        broom_0.5.1      Rcpp_1.0.1      
-## [25] scales_1.0.0     backports_1.1.3  webshot_0.5.1    jsonlite_1.6    
-## [29] gridExtra_2.3    hms_0.4.2        digest_0.6.18    stringi_1.2.4   
-## [33] grid_3.5.2       cli_1.0.1        tools_3.5.2      magrittr_1.5    
-## [37] lazyeval_0.2.1   crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0      
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
+##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
+## [13] modelr_0.1.4     readxl_1.3.1     munsell_0.5.0    gtable_0.3.0    
+## [17] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
+## [21] knitr_1.23       highr_0.8        broom_0.5.2      Rcpp_1.0.2      
+## [25] scales_1.0.0     backports_1.1.4  webshot_0.5.1    jsonlite_1.6    
+## [29] gridExtra_2.3    hms_0.4.2        digest_0.6.21    stringi_1.4.3   
+## [33] grid_3.5.3       cli_1.1.0        tools_3.5.3      magrittr_1.5    
+## [37] lazyeval_0.2.2   crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.0      
 ## [41] lubridate_1.7.4  assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0      
-## [45] rstudioapi_0.9.0 R6_2.4.0         nlme_3.1-140     compiler_3.5.2
+## [45] rstudioapi_0.10  R6_2.4.0         nlme_3.1-137     compiler_3.5.3
 ```
