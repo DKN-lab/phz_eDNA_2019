@@ -33,11 +33,12 @@ knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, m
 # Load plotting tools
 source("../../tools/plotting_tools.R")
 
-# Modify the plot theme 
-theme_1 <- function () { 
-  theme_classic( ) %+replace% 
+Modify the plot theme
+theme_1 <- function () {
+  theme_classic( ) %+replace%
     theme(
-      axis.ticks = element_line(color = 'black'),
+      axis.line = element_line(color = 'black', size = 0.25),
+      axis.ticks = element_line(color = 'black', size =0.25),
       axis.text = element_text( size=6),
       axis.title=element_text(size=6),
       strip.text = element_text(size = 6),
@@ -50,6 +51,16 @@ theme_1 <- function () {
       plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
     )
 }
+
+#  theme_1 <- function () { 
+#    theme_classic( ) +
+#     theme(
+#       line = element_line(color = 'black', size = 0.25),
+#       text = element_text(color = 'black', size=6),
+#       strip.background = element_blank(),
+#       legend.background = element_blank()
+#     )
+# }
 
 theme_set(theme_1())
 ```
@@ -97,7 +108,7 @@ plot_wt_fixed <- ggplot(wt_conc_means, aes(x = material, fill = material)) +
 #Plot styling
 plot_wt_fixed +
   labs(x = NULL, y = expression("Phenazine concentration" ~ ( mu*M ))) + 
-  theme(axis.title.x = element_text(size = 14)) 
+  theme(axis.title.x = element_text(size = 14), line = element_line(color = 'black', size = 0.25)) 
          
 ```
 
@@ -205,7 +216,7 @@ dphz_extracts_means <- dphz_extracts %>%
 
 # Plot layout
 plot_dphz_binding <- ggplot(dphz_extracts_means, aes(x=added_phz_num,y=calcConc))+
-  geom_line(size=1, aes(y=mean,color=measured_phenazine))+
+  geom_line(size=0.5, aes(y=mean,color=measured_phenazine))+
   geom_point(size=1, shape = 21, aes(fill=measured_phenazine))
 
 plot_dphz_binding <- ggplot(dphz_extracts_means, aes(x=added_phz_num,y=calcConc))+
@@ -295,9 +306,9 @@ fig_1
 ```
 
 ```{r}
-top_panel <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, ncol = 2, rel_widths = c(1.5,1), scale = 0.95, labels = c('D',"E"), align = 'hv', axis = 'tblr')
+top_panel <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, ncol = 2, rel_widths = c(1.5,1), scale = 0.95, labels = c('E',"F"), align = 'hv', axis = 'tblr',label_size = 12)
 
-bottom_panel <- plot_grid(plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('F',"G"), align = 'hv', axis = 'tblr')
+bottom_panel <- plot_grid(plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('G',"H"), align = 'hv', axis = 'tblr',label_size = 12)
 
 fig_1 <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_heights = c(1,1), rel_widths = c(1,1), align = 'hv', axis = 'tblr')
 

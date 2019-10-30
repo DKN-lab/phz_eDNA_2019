@@ -37,7 +37,8 @@ source("../../tools/plotting_tools.R")
 theme_1 <- function () { 
   theme_classic( ) %+replace% 
     theme(
-      axis.ticks = element_line(color = 'black'),
+      axis.line = element_line(color = 'black', size = 0.25),
+      axis.ticks = element_line(color = 'black', size = 0.25),
       axis.text = element_text( size=6),
       axis.title=element_text(size=6),
       strip.text = element_text(size = 6),
@@ -54,11 +55,7 @@ theme_1 <- function () {
 theme_set(theme_1())
 ```
 
-# Fig. 2B - PYO redox binding to DNA
 
-```{r}
-plot_redox <- readRDS("plot_etbr_redox")
-```
 
 # Fig. 2C - WT eDNA with TOTO-1
 
@@ -307,16 +304,25 @@ plot_dphz_etbr
 
 
 ```{r}
-l_plots <- align_plots(plot_redox + labs(title = NULL), plot_pel_styled, align = 'v', axis = 'l')
+#l_plots <- align_plots(plot_redox + labs(title = NULL), plot_pel_styled, align = 'v', axis = 'l')
 
-top_panel <- plot_grid(l_plots[[1]], plot_toto, dnase_plot_styled, ncol = 3, rel_widths = c(0.5, 0.5, 1), align = 'h', axis = 'tb', labels = c('B','C','D'), scale = 0.95)
+#top_panel <- plot_grid(l_plots[[1]], plot_toto, dnase_plot_styled, ncol = 3, rel_widths = c(0.5, 0.5, 1), align = 'h', axis = 'tb', labels = c('B','C','D'), scale = 0.95, label_size = 12)
 
-bottom_panel <- plot_grid(l_plots[[2]], plot_dphz_etbr, ncol = 2, align = 'h', axis = 'tb', labels = c('E','F'), scale = 0.95) 
+#bottom_panel <- plot_grid(l_plots[[2]], plot_dphz_etbr, ncol = 2, align = 'h', axis = 'tb', labels = c('E','F'), scale = 0.95) 
 
-all_right_panels <- plot_grid(top_panel, bottom_panel, ncol = 1, align = 'v', axis = 'lr')
+#all_right_panels <- plot_grid(top_panel, bottom_panel, ncol = 1, align = 'v', axis = 'lr')
 
-all_panels <- plot_grid(NULL, all_right_panels, ncol = 2, rel_widths = c(0.5, 1), labels = c('A',''))
 
-#save_plot("../../../figures/phz2019_Fig_2.pdf", all_panels, base_width = 7, base_height = 3.5)
+
+
+
+
+
+
+all_right_panels <- plot_grid(dnase_plot_styled, plot_pel_styled, plot_dphz_etbr, plot_toto, ncol = 2, align = 'hv', axis = 'tblr', labels = c('B','C','D','E'), scale = 0.95, label_size = 12)
+
+all_panels <- plot_grid(NULL, all_right_panels, ncol = 2, rel_widths = c(0.5, 1), labels = c('A',''), label_size = 12)
+
+save_plot("../../../figures/phz2019_Fig_2.pdf", all_panels, base_width = 7, base_height = 3.5)
 ```
 
