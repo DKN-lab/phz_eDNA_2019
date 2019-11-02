@@ -1,0 +1,247 @@
+---
+title: "Processing: IDA electrochemical data"
+subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
+output:
+  html_document:
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+    toc: yes
+    keep_md: true
+---
+
+--------
+
+# Notes
+
+Panels A-X of Figure 1 are diagrams and images. The remaining panels were generated in R as shown here. Note all LC-MS data was quantified via absorbance. Chromatogram peaks were integrated in the Waters Empower software and integrations were exported and are contained in the csv files used here.
+
+----
+
+Setup packages and plotting for the notebook:
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Load packages
+library(tidyverse)
+library(cowplot)
+library(kableExtra)
+
+# Code display options
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
+
+# Load plotting tools
+source("../tools/plotting_tools.R")
+
+#Modify the plot theme
+theme_1 <- function () {
+  theme_classic( ) %+replace%
+    theme(
+      strip.background = element_blank(),
+      legend.background = element_blank(),
+    )
+}
+
+
+theme_set(theme_1())
+```
+
+# Import
+
+## SWV data
+
+First, import all SWV files. 
+```{r message = F, warning=F}
+
+# Load echem processing tools
+
+source("../tools/echem_processing_tools.R")
+
+file_paths_1 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[SWV]+.+[txt]$",recursive = T,full.names = T)
+
+SWV_filenames <- basename(file_paths_1)
+
+swv_data_cols <-  c('E','i1','i2')
+
+filename_cols = c('reactor','run','echem','rep')
+
+swv_skip_rows=18
+  
+swv_data_1 <- echem_import_to_df(filenames = SWV_filenames, 
+                                       file_paths = SWV_file_paths, 
+                                       data_cols = swv_data_cols, 
+                                       skip_rows = swv_skip_rows,
+                                       filename_cols = filename_cols,
+                                       rep = T, PHZadded = F) %>% 
+  mutate(rep=rep-1, exp = 1)
+```
+
+Should we show i2 here?
+
+```{r}
+ggplot(swv_data_1 %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E , y = current )) +
+  geom_path(aes(group = rep, color = rep)) + facet_wrap(~run)
+```
+
+And now for the second biofilm
+
+```{r}
+swv_file_paths_2 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[SWV]+.+[txt]$",recursive = T,full.names = T)
+
+swv_filenames_2 <- basename(swv_file_paths_2)
+  
+swv_data_2 <- echem_import_to_df(filenames = swv_filenames_2, 
+                                 file_paths = swv_file_paths_2, 
+                                 data_cols = swv_data_cols, 
+                                 skip_rows = swv_skip_rows,
+                                 filename_cols = filename_cols, 
+                                 rep = T, 
+                                 PHZadded = F) %>% 
+  mutate(rep=rep-1, exp = 2)
+```
+
+```{r}
+ggplot(swv_data_2 %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E , y = current )) +
+  geom_path(aes(group = rep, color = rep)) + facet_wrap(~run)
+```
+
+## GC data
+
+```{r}
+
+gc_file_paths_1 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
+
+gc_filenames_1 <- basename(gc_file_paths_1)
+
+gc_data_cols <-  c('E','i1','i2','t')
+
+filename_cols = c('reactor','run','echem','rep')
+
+gc_skip_rows=21
+  
+
+gc_data_1 <- echem_import_to_df(filenames = gc_filenames_1, 
+                                       file_paths = gc_file_paths_1, 
+                                       data_cols = gc_data_cols, 
+                                       skip_rows = gc_skip_rows,
+                                       filename_cols = filename_cols,
+                                       rep = T, PHZadded = F) %>% 
+  mutate(exp = 1)
+
+```
+
+```{r}
+ggplot(gc_data_1 %>% filter(reactor == 'transfer')) + 
+  geom_path(data=. %>% filter(electrode=='i1'), aes(x = E, y = current, color = rep, group = rep)) + 
+  geom_path(data=. %>% filter(electrode=='i2'), aes(x = E, y = current, color = rep, group = rep)) +
+  scale_x_reverse() + facet_wrap(~run)
+```
+
+
+```{r}
+
+gc_file_paths_2 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
+
+gc_filenames_2 <- basename(gc_file_paths_2)
+
+gc_data_cols <-  c('E','i1','i2','t')
+
+filename_cols = c('reactor','run','echem','rep')
+
+gc_skip_rows=21
+  
+
+gc_data_2 <- echem_import_to_df(filenames = gc_filenames_2, 
+                                       file_paths = gc_file_paths_2, 
+                                       data_cols = gc_data_cols, 
+                                       skip_rows = gc_skip_rows,
+                                       filename_cols = filename_cols,
+                                       rep = T, PHZadded = F) %>% 
+  mutate(exp = 2)
+
+```
+
+```{r}
+ggplot(gc_data_2 %>% filter(reactor == 'transfer')) + 
+  geom_path(data=. %>% filter(electrode=='i1'), aes(x = E, y = current, color = rep, group = rep)) + 
+  geom_path(data=. %>% filter(electrode=='i2'), aes(x = E, y = current, color = rep, group = rep)) +
+  scale_x_reverse() + facet_wrap(~run)
+```
+
+# Signal quantification
+
+## SWV
+
+```{r}
+# combine swv data sets
+
+swv_data <- bind_rows(swv_data_1, swv_data_2) 
+
+unique_id_cols = c('reactor','run','echem','rep','rep','minutes','electrode', 'exp')
+
+swv_signals <- echem_signal(df = swv_data, 
+                            unique_id_cols = unique_id_cols,
+                            max_interval = c(-0.2,-0.4), 
+                            min_interval = c(0.0,-0.4)) 
+
+swv_signals %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
+```
+
+```{r}
+ggplot(swv_data %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E , y = current )) +
+  geom_path(aes(group = rep, color = rep)) + facet_wrap(exp~run, scales = 'free') + 
+  geom_point(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E_from_mins, y = current_from_mins), shape = 21, fill = 'light blue') + 
+  geom_point(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E_from_maxs, y = current_from_maxs), shape = 21, fill = 'red')
+```
+
+```{r}
+ggplot(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = rep, y = signal, color = factor(run), fill =factor(run) )) + 
+  geom_line() + 
+  geom_point(shape = 21, color = 'black') +
+  facet_wrap(~exp)
+```
+
+You can see the value of the soak:
+
+```{r}
+ggplot(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = rep, y = signal, color = factor(run), fill =factor(run))) + 
+  geom_point(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'soak'), size = 3)+
+  geom_line() + 
+  geom_point(shape = 21, color = 'black') +
+  facet_wrap(~exp)
+```
+
+## GC
+
+```{r}
+
+# combine swv data sets
+
+gc_data <- bind_rows(gc_data_1, gc_data_2)  
+
+unique_id_cols = c('reactor','run','echem','rep','rep','minutes','electrode', 'exp')
+
+gc_signals <- echem_signal(df = gc_data %>% filter(electrode == 'i2') %>% mutate(current = - current), 
+                            unique_id_cols = unique_id_cols,
+                            max_interval = c(-0.399,-0.399), 
+                            min_interval = c(0.0,-0.4))
+
+```
+
+```{r}
+
+ggplot(gc_data %>% filter(reactor == 'transfer')) + 
+  geom_path(data=. %>% filter(electrode=='i1'), aes(x = E, y = current, color = rep, group = rep)) + 
+  geom_path(data=. %>% filter(electrode=='i2'), aes(x = E, y = current, color = rep, group = rep)) +
+  geom_point(data = gc_signals %>% filter(reactor == 'transfer'), aes(x = E_from_mins, y = -current_from_mins), shape = 21, fill = 'light blue')+
+  geom_point(data = gc_signals %>% filter(reactor == 'transfer'), aes(x = E_from_maxs, y = -current_from_maxs), shape = 21, fill = 'red')+
+  scale_x_reverse() + facet_wrap(exp~run)
+
+```
+
+```{r}
+ggplot(data = gc_signals %>% filter(reactor == 'transfer'), aes(x = rep, y = signal, color = factor(run), fill =factor(run) )) + 
+  geom_line() + 
+  geom_point(shape = 21, color = 'black') +
+  facet_wrap(~exp)
+```

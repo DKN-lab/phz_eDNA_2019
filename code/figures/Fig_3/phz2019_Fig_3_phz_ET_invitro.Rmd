@@ -39,14 +39,15 @@ source("../../tools/plotting_tools.R")
 theme_1 <- function () { 
   theme_classic( ) %+replace% 
     theme(
-      axis.ticks = element_line(color = 'black'),
-      axis.text = element_text( size=8),
-      axis.title=element_text(size=8),
-      strip.text = element_text(size = 8),
+      axis.line = element_line(color = 'black', size = 0.25),
+      axis.ticks = element_line(color = 'black', size = 0.25),
+      axis.text = element_text( size=6),
+      axis.title=element_text(size=6),
+      strip.text = element_text(size = 6),
       strip.background = element_blank(),
       legend.background = element_blank(),
-      legend.title=element_text(size=8),
-      legend.text=element_text(size=8),
+      legend.title=element_text(size=6),
+      legend.text=element_text(size=6),
       legend.text.align=0,
       panel.spacing = unit(0,'cm'),
       plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
@@ -56,219 +57,112 @@ theme_1 <- function () {
 theme_set(theme_1())
 ```
 
-# Panel E - MM Discrimination
+# Results
 
-This data is electrochemical and contains the third/final sweep of an electrode with two different DNA monolayers.
+Here's the info for each well:
 ```{r}
-df_noO2 <- read_csv('../../../data/Electrochemistry/DNA_modified_electrode_noO2.csv',comment = "#") %>% 
-  mutate(Construct=fct_relevel(Construct,'wm','mm'))
+metadata <- read_csv("../../../data/Spectroscopy/2019_10_18_ET_ctDNA_metadata.csv")
 
-df_noO2 %>% 
-  kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>% 
-  scroll_box(height = '250px')
-```
-
-Let's make the figure:
-```{r}
-
-plot_dnaCT_noO2 <- ggplot(df_noO2,aes(x=E,y=Current, color = Construct))+
-  geom_path(size = 1)
-
-plot_dnaCT_noO2_styled <- plot_dnaCT_noO2 +
-  scale_x_reverse(labels = mV_label)+
-  scale_y_continuous(labels = nA_label)+
-  scale_color_manual(breaks = c('wm','mm'), labels=c("Well matched DNA","Mismatched DNA"), values = c("#66CCFF","#FFCC66")) +
-  labs(x='E (mV vs. Ag/AgCl)',y='Current (nA)')+
-  theme(legend.position = c(0.3, 0.8),
-        legend.title = element_blank(),
-        legend.background = element_rect(fill=NA))
-
-plot_dnaCT_noO2_styled
-```
-
-
-
-
-# Panel F - DNA CT Catalytic
-
-```{r}
-df_wO2 <- read_csv('../../../data/Electrochemistry/DNA_modified_electrode_wO2.csv',comment = "#") %>% 
-  mutate(Condition=paste(Construct,Aerobic,PCN,sep='_')) %>% 
-  mutate(Condition=fct_relevel(Condition,"wm_TRUE_TRUE","mm_TRUE_TRUE","wm_TRUE_FALSE"))
-
-df_wO2 %>% 
-  kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>% 
-  scroll_box(height = '250px')
-```
-
-```{r}
-plot_dnaCT_wO2 <- ggplot(df_wO2 %>% filter(Aerobic==T),aes(x = E, y = Current, color = Condition))+
-  geom_path(size = 1)
-
-plot_dnaCT_wO2_styled <- plot_dnaCT_wO2 +
-  scale_x_reverse(labels = mV_label)+
-  scale_y_continuous(labels = nA_label)+
-  scale_color_manual(
-    breaks = c('wm_TRUE_TRUE','mm_TRUE_TRUE','wm_TRUE_FALSE'), values = c("#66CCFF","#FFCC66","gray"),
-    labels=c(expression("wmDNA"+"PCN"+O[2]),expression("mmDNA"+"PCN"+O[2]),expression("wmDNA"-"PCN"+O[2]))
-    ) +
-  labs(x='E (mV vs. Ag/AgCl)',y='Current (nA)')+
-  theme(
-    legend.position = c(0.3, 0.8),
-    legend.title = element_blank(),
-    legend.background = element_rect(fill=NA))
-
-plot_dnaCT_wO2_styled
-```
-
-# Spectroscopy
-
-```{r}
-
-
-df_spec <- read_csv("../../../data/Spectroscopy/2019_08_29_spectroscopy_RuRh_dphz.csv") %>% filter(exp_num == 2)
-
-df_spec <- df_spec %>% 
-  mutate(min = ifelse(ruphen_conc==0,intensity, NA)) %>% 
-  group_by(time) %>% 
-  mutate(bg = min(min, na.rm = T)) %>% 
-  mutate(bg_sub = intensity - bg)
-
-plot_raw_spec <- ggplot(df_spec %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
-  geom_path() + 
-  scale_x_continuous(limits = c(NA, 5e-7), labels = ns_label) + 
-  labs(x = 'Time', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + 
-  guides(color = F)
-  
-plot_raw_spec
-
-df_liq <- read_csv("../../../data/Spectroscopy/2019_08_29_spectroscopy_RuRh_dphz.csv") %>% filter(exp_num == 7)
-
-plot_liq_spec <- ggplot(df_liq %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
-  geom_path() + 
-  scale_x_continuous(limits = c(NA, 5e-7), labels = ns_label) + 
-  labs(x = 'Time', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + guides(color = F)
-
-plot_liq_spec
-
-ggplot(df_spec %>% filter(run %in% 2:6) %>% filter(time>30e-9), aes(x = time, y = bg_sub, color = quencher_eq, group = quencher_eq)) + geom_path()
+metadata %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 
 ```
 
+## Abs Spectrum 1
+
+Now let's read in the first absorbance spectra taken for each condition and we'll add the appropriate metadata:
 ```{r}
-df_spec_fit <- df_spec %>% 
-  filter(run %in% 2:6) %>% 
-  filter(time>30e-9) %>% 
-  filter(bg_sub>0) %>% 
-  group_by(run, quencher_eq) %>% 
-  nest()
 
-fit_biexp_bg_sub <- function(df){
-  
-  A1 = 0.02; lrc1 = 16.5; A2 = 0.02; lrc2 = 15.7
-  
-  mod <- nls(bg_sub~SSbiexp(time, A1, lrc1, A2, lrc2), data = df)
-  
-  mod
-}
+df <- read_csv("../../../data/Spectroscopy/2019_10_18_ET_ctDNA_abs_spectra_1.csv") %>%
+    gather(key = 'well', value = 'intensity', -Wavelength)
 
-df_spec_models <- df_spec_fit %>% 
-  mutate(models = map(data, fit_biexp_bg_sub)) 
+df_meta <- left_join(df, metadata, by = 'well')
 
-df_spec_preds <- df_spec_models %>% 
-  mutate(preds = map2(data, models, add_predictions)) %>% 
-  unnest(preds)
+df_meta %>% kable %>% kable_styling() %>% scroll_box(height = '400px')
 
-df_spec_ests <- df_spec_models %>% 
-  mutate(ests = map(models, tidy)) %>% 
-  unnest(ests)
-
-
-df_spec_preds %>% head()
 ```
 
+Let's look at all the data:
 
 ```{r}
-#write_csv(df_exp_2_ests, "2019_09_27_spectroscopy_fits_bg_sub.csv")
+#ggplot(df_meta, aes(x = Wavelength, y = intensity, color = red_ox)) + geom_smooth(se = T)
 
-df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
+ggplot(df_meta, aes(x = Wavelength, y = intensity, color = red_ox)) + geom_point()
+
+```
+
+This looks pretty much like the past notebook with interphenazine ET. If we look out at 690 for the PYO abs peak it looks like the orange PYOox is higher than all the other conditions. Let's zoom into that region for a closer look:
+
+```{r}
+ggplot(df_meta, aes(x = Wavelength, y = intensity, color = red_ox)) + 
+  geom_jitter(shape=21)+coord_cartesian(xlim = c(600,700), ylim = c(0,0.2))
+```
+
+Ok, this looks pretty much as we expected. All of the conditions show 690 abs closer to PYOred than PYOox.
+
+Let's try and condense this info into some pointranges:
+
+```{r}
+df_690 <- df_meta %>% group_by(red_ox, Wavelength, DNA) %>% mutate(mean = mean(intensity), sd = sd(intensity))  %>% filter(Wavelength == 690)
+
+ggplot(df_690, aes(x = red_ox, y = intensity, color = DNA )) + 
+  geom_jitter(shape = 21, width = 0.1) + 
+  geom_pointrange(data = . %>% filter(rep ==1), 
+                  aes(y = mean,ymin = mean-sd,ymax = mean+sd), 
+                  position = position_jitter(width = 0.1))
 ```
 
 
 ```{r}
 
-ggplot(df_spec_preds, aes(x = time, group = run, color = quencher_eq)) + geom_path(aes(y = pred), color = 'black') + geom_point(aes(y = bg_sub),alpha = 0.2, shape = 21) +xlim(0,5e-7) + facet_wrap(~quencher_eq)
 
+labels = labels = c('PBS + PYO[ox]','PYO[red] + PBS','PCA[red] + PYO[ox]','PCN[red] + PYO[ox]')
+
+
+plot_ctDNA_690 <- ggplot(df_690, aes(x = red_ox, y = mean, color = DNA)) +  
+  geom_hline(yintercept = 0.033, linetype = 2, color = 'light gray')+
+  geom_pointrange(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.4), size = 0.5, fatten = 0.75) + 
+  scale_x_discrete(limits = c('PBS_PYO','PYO_PBS','PCA_PYO','PCN_PYO'), labels = parse(text = labels )) + 
+  scale_color_manual(breaks = c(F,T), labels = c('-DNA','+DNA'), values = colorblind_palette)+
+  labs(x = NULL, y = 'Absorbance at 690nm', color = NULL) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.5,1))
+
+plot_ctDNA_690
 ```
 
+Ok these pointranges show mean +/- 2 standard deviations. So it looks like for all of the conditions there's no significant difference +/- ctDNA.
+
+## Abs690 Kinetic
+
+The Spectrum data looks good, let's also take a look at the kinetic data at 690 to see if there's a difference in the reaction rates. First we'll read it in:
 
 ```{r}
 
-plot_bg_spec <- ggplot(df_spec %>% filter(run %in% 1:6), aes(x = time, group = run, color = quencher_eq)) + 
-  geom_point( aes(y = bg_sub),alpha = 0.2, shape = 21, size = 1) + 
-  geom_path(data = df_spec_preds,aes(y = pred)) + scale_x_continuous(limits = c(NA,1e-6), labels = ns_label) + 
-  ylim(-0.001, NA) + labs(y = 'Background subtracted - Intensity (620nm)', y = 'Time', color = 'Quencher\nequivalents')+
-  guides(color = guide_colorbar(barwidth = 0.5, barheight = 2.5))
+df_kin <- read_csv("../../../data/Spectroscopy/2019_10_18_ET_ctDNA_abs_690kinetic_1.csv") %>%
+    gather(key = 'well', value = 'intensity', -min)
 
-plot_bg_spec
+df_kin_meta <- left_join(df_kin, metadata, by = 'well')
 
-```
-
-
-```{r}
-background_ests <- df_spec_ests %>% filter(is.na(quencher_eq))
-
-#background_ests
-
-ggplot(df_spec_ests, aes(x = quencher_eq, y = estimate)) + 
-  geom_hline(data = background_ests, aes(yintercept = estimate), linetype = 2, color = 'light gray') + 
-  geom_pointrange(aes(ymin = estimate - 2*std.error, ymax = estimate + 2*std.error)) +
-  facet_wrap(~term, scales = 'free')
+df_kin_meta %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 
 ```
 
+Now let's look at the values over time (~2min)
+
 ```{r}
-df_spec_tau <- df_spec_ests %>% filter(term %in% c('lrc1','lrc2')) %>% mutate(tau = 1/exp(estimate)) %>% mutate(tau_low = 1/exp(estimate + 2*std.error), tau_high = 1/exp(estimate - 2*std.error))
 
+ggplot(df_kin_meta, aes(x = min, y = intensity, color = DNA)) + geom_point() + facet_wrap(~red_ox)
 
-background_spec_tau <- df_spec_tau %>% filter(is.na(quencher_eq))
-
-#background_ests
-
-plot_spec_tau <- ggplot(df_spec_tau, aes(x = quencher_eq, y = tau)) + 
-  geom_hline(data = background_spec_tau, aes(yintercept = tau), linetype = 1, color = 'light gray') + 
-  geom_pointrange(aes(ymin = tau_low, ymax = tau_high)) +
-  facet_wrap(~term, scales = 'free', labeller = labeller(term = c(lrc1 = 'Component 1', lrc2 = 'Component 2'))) + 
-  scale_y_continuous(labels = ns_label, limits = c(0,NA))
-
-plot_spec_tau
 ```
 
-```{r}
-plot_pyo_ox <- readRDS("../../../../labwork/Figures/2019_09_27_group_meeting/plot_pyo_ox") + labs(title = NULL)
-plot_pyo_red <- readRDS("../../../../labwork/Figures/2019_09_27_group_meeting/plot_pyo_red")+ labs(title = NULL)
-plot_rxn_pct <- readRDS("../../../../labwork/Figures/2019_09_27_group_meeting/plot_rxn_pct")+ labs(title = NULL)
-```
+Ok, the intensity trends we observed with the spectra looks the same here. There are no obvious differences in slope, so I still don't think we can say anything about reaction rates...they all proceed too fast.
 
 ```{r}
-fig3_top <- plot_grid(plot_pyo_ox, plot_pyo_red, plot_rxn_pct,scale = 0.95, labels = c('A','B','C'), ncol = 3)
 
-fig3_middle <- plot_grid(plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled, scale = 0.95, labels = c('D','E','F'), ncol = 3)
+fig_3 <- plot_grid(NULL, plot_ctDNA_690, ncol = 2, scale = 0.95, labels = 'AUTO', label_size = 12, rel_widths = c(1,1.5))
 
-fig3_bottom <- plot_grid(plot_liq_spec, plot_raw_spec, plot_bg_spec, scale = 0.95, labels = c('G','H','I'), ncol = 3, rel_widths = c(1,1,1.25))
+fig_3
 
-fig3_combined <- plot_grid(fig3_top, fig3_middle, fig3_bottom, ncol = 1)
-
-fig_3_et <- plot_grid(plot_pyo_ox, plot_pyo_red, plot_rxn_pct,
-          plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
-          plot_liq_spec, plot_raw_spec, plot_bg_spec, 
-          ncol = 3, scale = 0.95)
-
-fig_3_et
-
-#save_plot("../../../figures/phz2019_Fig_3.pdf", fig3_combined,base_height = 7, base_width = 7)
+save_plot("../../../figures/phz2019_Fig_3.pdf", fig_3, base_height = 2, base_width = 3.4)
 ```
 
 ```{r}

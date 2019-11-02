@@ -33,7 +33,7 @@ knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, m
 # Load plotting tools
 source("../../tools/plotting_tools.R")
 
-Modify the plot theme
+#Modify the plot theme
 theme_1 <- function () {
   theme_classic( ) %+replace%
     theme(
