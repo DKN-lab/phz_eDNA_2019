@@ -15,7 +15,7 @@ output:
 
 # Notes
 
-Panels A-X of Figure 1 are diagrams and images. The remaining panels were generated in R as shown here. Note all LC-MS data was quantified via absorbance. Chromatogram peaks were integrated in the Waters Empower software and integrations were exported and are contained in the csv files used here.
+This notebook shows how raw electrochemical data from a CH Instruments potentiostat was processed for data vizualization and downstream analysis.
 
 ----
 
@@ -39,6 +39,9 @@ theme_1 <- function () {
     theme(
       strip.background = element_blank(),
       legend.background = element_blank(),
+      axis.line = element_line(color = 'black'),
+      axis.ticks = element_line(color = 'black'),
+      axis.text = element_text(color = 'black')
     )
 }
 
@@ -48,42 +51,66 @@ theme_set(theme_1())
 
 # Import
 
-## SWV data
+In the folder `data/Electrochemistry/IDA/` there are the raw data output to text files from the CH Instruments potentiostat software. There are files from two different biofilms, each containing three technical replicates. 
 
-First, import all SWV files. 
-```{r message = F, warning=F}
+We will use a set of simple tools developed to quickly import these files into data frames with metadata that we can work with. Basically, we will specifify a directory, the structure of the file names and the structure of the underlying data, and a function will import the files (~180 files for this notebook). Please see the the `echem_processing_tools` in the folder `code/tools/` for details.
 
+```{r}
 # Load echem processing tools
 
 source("../tools/echem_processing_tools.R")
+```
 
-file_paths_1 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[SWV]+.+[txt]$",recursive = T,full.names = T)
+## SWV data
 
-SWV_filenames <- basename(file_paths_1)
+First, let's import all of the SWV files for the first ∆phz* biofilm.
 
+```{r message = F, warning=F}
+
+# file names and paths
+swv_file_paths_1 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[SWV]+.+[txt]$", recursive = T, full.names = T)
+
+swv_filenames_1 <- basename(swv_file_paths_1)
+
+# data columns in each file
 swv_data_cols <-  c('E','i1','i2')
 
+# metadata in each file name
 filename_cols = c('reactor','run','echem','rep')
 
+# skip the header that contains detailed information from the potentiostat
 swv_skip_rows=18
-  
-swv_data_1 <- echem_import_to_df(filenames = SWV_filenames, 
-                                       file_paths = SWV_file_paths, 
+
+# Use the function `echem_import_to_df()` from the echem tools to import
+swv_data_1 <- echem_import_to_df(filenames = swv_filenames_1, 
+                                       file_paths = swv_file_paths_1, 
                                        data_cols = swv_data_cols, 
                                        skip_rows = swv_skip_rows,
                                        filename_cols = filename_cols,
                                        rep = T, PHZadded = F) %>% 
-  mutate(rep=rep-1, exp = 1)
+  mutate(rep=rep-1, exp = 1) 
+
+# Change the rep (acquisition number) for the SWVs because the first SWV should be 0.
+# This is used to match SWV and GC by number later on.
+# We also add an experimental id of 1.
 ```
 
-Should we show i2 here?
+Let's look at the data frame we have generated:
+
+```{r}
+swv_data_1 %>% head() %>%  kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
+```
+
+<br>
+
+We can now plot all of these data. This plot will show the data from the first biofilm as it equilibrated in the transfer reactor and the data are separated for each technical replicate.
 
 ```{r}
 ggplot(swv_data_1 %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E , y = current )) +
   geom_path(aes(group = rep, color = rep)) + facet_wrap(~run)
 ```
 
-And now for the second biofilm
+Now let's read in the SWV data for the second biofilm.
 
 ```{r}
 swv_file_paths_2 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[SWV]+.+[txt]$",recursive = T,full.names = T)
@@ -100,12 +127,16 @@ swv_data_2 <- echem_import_to_df(filenames = swv_filenames_2,
   mutate(rep=rep-1, exp = 2)
 ```
 
+Here is the second dataset plotted:
+
 ```{r}
 ggplot(swv_data_2 %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E , y = current )) +
   geom_path(aes(group = rep, color = rep)) + facet_wrap(~run)
 ```
 
 ## GC data
+
+Now, we will repeat the import for the GC data. 
 
 ```{r}
 
@@ -130,6 +161,8 @@ gc_data_1 <- echem_import_to_df(filenames = gc_filenames_1,
 
 ```
 
+Here's the GC data plotted from the first biofilm:
+
 ```{r}
 ggplot(gc_data_1 %>% filter(reactor == 'transfer')) + 
   geom_path(data=. %>% filter(electrode=='i1'), aes(x = E, y = current, color = rep, group = rep)) + 
@@ -137,6 +170,7 @@ ggplot(gc_data_1 %>% filter(reactor == 'transfer')) +
   scale_x_reverse() + facet_wrap(~run)
 ```
 
+And now for the second biofilm.
 
 ```{r}
 
@@ -161,6 +195,8 @@ gc_data_2 <- echem_import_to_df(filenames = gc_filenames_2,
 
 ```
 
+Here's the GC data plotted from the second biofilm:
+
 ```{r}
 ggplot(gc_data_2 %>% filter(reactor == 'transfer')) + 
   geom_path(data=. %>% filter(electrode=='i1'), aes(x = E, y = current, color = rep, group = rep)) + 
@@ -170,29 +206,39 @@ ggplot(gc_data_2 %>% filter(reactor == 'transfer')) +
 
 # Signal quantification
 
+Now that all of the files have been read into convenient data frames we can quantify the peak currents, which are the signals we will use for the analysis later on. 
+
 ## SWV
+
+To do this we will use another function from the echem tools to find the min and max points within a specified potential window in each scan. Let's take a look at the output:
 
 ```{r}
 # combine swv data sets
-
 swv_data <- bind_rows(swv_data_1, swv_data_2) 
 
+# ID columns for function below
 unique_id_cols = c('reactor','run','echem','rep','rep','minutes','electrode', 'exp')
 
+# Use `echem_signal()` from echem tools to find min/max points in each scan
 swv_signals <- echem_signal(df = swv_data, 
                             unique_id_cols = unique_id_cols,
                             max_interval = c(-0.2,-0.4), 
                             min_interval = c(0.0,-0.4)) 
 
-swv_signals %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
+swv_signals %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
+<br>
 
+Here we will plot all of the transfer SWV data with the min/max points we found:
+ 
 ```{r}
 ggplot(swv_data %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E , y = current )) +
   geom_path(aes(group = rep, color = rep)) + facet_wrap(exp~run, scales = 'free') + 
   geom_point(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E_from_mins, y = current_from_mins), shape = 21, fill = 'light blue') + 
   geom_point(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E_from_maxs, y = current_from_maxs), shape = 21, fill = 'red')
 ```
+
+The function we used above `echem_signal()` went ahead and quantified the difference between the max and min points. We called this value signal, and it effectively background subtracts the peak current from any persistent background current. Let's see how the signal decays over time:
 
 ```{r}
 ggplot(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = rep, y = signal, color = factor(run), fill =factor(run) )) + 
@@ -201,7 +247,7 @@ ggplot(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'),
   facet_wrap(~exp)
 ```
 
-You can see the value of the soak:
+We also quantified the peak currents for the soak reactor, before the biofilms were transferred. Here we can plot those values on top:
 
 ```{r}
 ggplot(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = rep, y = signal, color = factor(run), fill =factor(run))) + 
@@ -213,9 +259,9 @@ ggplot(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'),
 
 ## GC
 
-```{r}
+Let's repeat a similar process for the GC data. First we will quantify using `echem_signal()`. For GC data we only take the last point (~ -0.4V), since that point is the closest in time to the following SWV. Later we will pair these datasets, so that's important.
 
-# combine swv data sets
+```{r}
 
 gc_data <- bind_rows(gc_data_1, gc_data_2)  
 
@@ -228,6 +274,8 @@ gc_signals <- echem_signal(df = gc_data %>% filter(electrode == 'i2') %>% mutate
 
 ```
 
+Now we can plot the GC scans and the min / max points.
+
 ```{r}
 
 ggplot(gc_data %>% filter(reactor == 'transfer')) + 
@@ -239,9 +287,40 @@ ggplot(gc_data %>% filter(reactor == 'transfer')) +
 
 ```
 
+Note we always quantify from the negative collector current. Now, let's look at the background subtracted GC peak currents over time:
+
 ```{r}
 ggplot(data = gc_signals %>% filter(reactor == 'transfer'), aes(x = rep, y = signal, color = factor(run), fill =factor(run) )) + 
   geom_line() + 
   geom_point(shape = 21, color = 'black') +
   facet_wrap(~exp)
+```
+
+# Output
+
+Let's write our swv and gc signal dataframes to csv files to be used for further analysis.
+
+```{r}
+
+write_csv(swv_signals, "data/phz_eDNA_2019_swv_signals.csv")
+
+write_csv(gc_signals, "data/phz_eDNA_2019_gc_signals.csv")
+
+```
+
+Let's also write the raw data from the first biofilm, first technical replicate transfer to use as representative data in figure 6.
+
+```{r}
+
+write_csv(swv_data %>% filter(exp == 1, run ==1, reactor == 'transfer', electrode == 'i1'), "data/phz_eDNA_2019_swv_raw_1_1.csv")
+
+write_csv(gc_data %>% filter(exp == 1, run ==1, reactor == 'transfer'), "data/phz_eDNA_2019_gc_raw_1_1.csv")
+
+```
+
+
+-----
+
+```{r}
+sessionInfo()
 ```

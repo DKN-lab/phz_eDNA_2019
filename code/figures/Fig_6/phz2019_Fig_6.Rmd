@@ -15,7 +15,9 @@ output:
 
 # Notes
 
+Links to IDA processing and to supp figure.
 
+Panel A is a diagram.
 
 ----
 
@@ -54,5 +56,137 @@ theme_1 <- function () {
 }
 
 theme_set(theme_1())
+```
+
+# Fig. 6B
+
+
+
+# Fig. 6C
+
+```{r}
+
+df_swv <- read_csv("../../processing/data/phz_eDNA_2019_swv_raw_1_1.csv")
+df_swv_sig <- read_csv("../../processing/data/phz_eDNA_2019_swv_signals.csv") %>% filter(exp == 1 & run == 1 & electrode == 'i1' & reactor == 'transfer')
+
+# Plot Layout
+plot_SWVraw <- ggplot(df_swv %>% filter(E<=0), aes(x = E , y = current )) +
+  geom_vline(xintercept = -0.265, linetype=2, color = 'gray') + 
+  geom_path(aes(group = rep, color = rep)) + 
+  geom_point(data = df_swv_sig, aes(x = E_from_maxs , y = current_from_maxs , fill = rep), shape = 21,size = 2) 
+
+# Plot Styling
+plot_SWVraw_styled <- plot_SWVraw + 
+  annotate('text', x = -0.2, y = 3.5e-6,label = expression({E^0}[pyo]) )+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  scale_fill_viridis(guide = F) + 
+  scale_color_viridis(guide = F) + 
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[swv]~(n*A)), color = "Scan #") + 
+  theme(legend.position = c(0.15,0.75), legend.background = element_blank())
+
+plot_SWVraw_styled
+```
+
+## Inset
+
+convert to norm time??
+
+```{r}
+
+# Plot Layout
+plot_swv_sig <- ggplot(data = df_swv_sig, aes(x = rep, y = signal))+
+  geom_point(shape = 21, size = 1, aes(fill = rep))
+
+# Plot Styling
+plot_swv_sig_styled <- plot_swv_sig +
+  labs(x = 'Time (min)', y = expression(I[swv]~(nA)), fill = 'Time (min)') +
+  scale_fill_viridis(guide = F) +
+  scale_y_continuous(labels = nA_label)+
+  theme(axis.text = element_text(size = 6), axis.title = element_text(size = 8))
+
+plot_swv_sig_styled
+
+```
+
+# Fig. 6D
+
+need to mod
+```{r}
+# Plot Layout
+plot_GCraw2 <- ggplot() + 
+  geom_vline(xintercept = -0.265, linetype=2, color = 'gray') + 
+  geom_path(data=gc_r1_raw %>% filter(electrode=='i1'), 
+            aes(x = E , y = current , group = rep, color = rep)) + 
+  geom_path(data=gc_r1_raw %>% filter(electrode=='i2'), 
+            aes(x = E , y = current, group = rep, color = rep)) +
+  geom_point(data = gc_r1_signals, 
+             aes(x = E_from_maxs , y = -current_from_maxs , fill = rep), shape = 21, size = 2) 
+
+# Plot styling
+plot_GCraw_styled2 <- plot_GCraw2 +
+  annotate('text', x = -0.2, y = 3.5e-7,label = expression({E^0}[pyo]) )+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  scale_fill_viridis(guide=F) + 
+  scale_color_viridis(guide=F) + 
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)), color = "Scan #") + 
+  theme(legend.position = c(0.15,0.75), 
+        legend.background = element_blank())
+
+plot_GCraw_styled2
+```
+
+
+## Inset
+
+need to mod
+```{r}
+
+# Plot Layout
+plot_gcsignal <- ggplot(data = biofilm_signals_norm_2_3, aes(x = norm_time, y = signal_from_gc))+
+  geom_point(shape = 21, size = 1, aes(fill = norm_time))
+
+# Plot Styling
+plot_gcsignal_styled <- plot_gcsignal +
+  labs(x = 'Time (min)', y = expression(I[gc]~(nA)), fill = 'Time (min)') +
+  scale_fill_viridis(guide = F) +
+  scale_y_continuous(labels = nA_label) +
+  theme(axis.text = element_text(size = 6), axis.title = element_text(size = 8))
+
+plot_gcsignal_styled
+
+```
+
+# Fig. 6E
+
+need to mod
+```{r}
+
+# Plot Layout
+plot_swvGCsignal <- ggplot(biofilm_signals_norm_2_3 %>% filter(rep>0), 
+                           aes(x = signal_from_swv, y = signal_from_gc)) +
+  geom_smooth(method = 'lm', se = T, color = 'black', linetype = 2) +
+  geom_point(shape = 21, size = 2, aes(fill = norm_time))
+
+# Plot Styling
+plot_swvGCsignal_styled <- plot_swvGCsignal + 
+  scale_x_continuous(breaks=c(0,2.5e-7,5.0e-7, 7.5e-7, 1.0e-6), labels = nA_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x = expression(I[swv]~(nA)), y = expression(I[gc]~(nA))) +
+  scale_fill_viridis(guide=F)
+
+
+plot_swvGCsignal_styled
+```
+
+# Fig. 6F
+
+Need to do this analysis in supp figure notebook first.
+
+-----
+
+```{r}
+sessionInfo()
 ```
 
