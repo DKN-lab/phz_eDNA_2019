@@ -104,18 +104,18 @@ Let's look at the data frame we have generated:
 swv_data_1 %>% head() %>%  kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> reactor </th>
-   <th style="text-align:left;"> run </th>
-   <th style="text-align:left;"> echem </th>
-   <th style="text-align:right;"> rep </th>
-   <th style="text-align:right;"> minutes </th>
-   <th style="text-align:right;"> E </th>
-   <th style="text-align:left;"> electrode </th>
-   <th style="text-align:right;"> current </th>
-   <th style="text-align:right;"> exp </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> reactor </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> echem </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> rep </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> minutes </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> E </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> electrode </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> current </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
   </tr>
  </thead>
 <tbody>
@@ -327,23 +327,23 @@ swv_signals <- echem_signal(df = swv_data,
 swv_signals %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> reactor </th>
-   <th style="text-align:left;"> run </th>
-   <th style="text-align:left;"> echem </th>
-   <th style="text-align:right;"> rep </th>
-   <th style="text-align:right;"> minutes </th>
-   <th style="text-align:right;"> E_from_maxs </th>
-   <th style="text-align:left;"> electrode </th>
-   <th style="text-align:right;"> current_from_maxs </th>
-   <th style="text-align:right;"> exp </th>
-   <th style="text-align:right;"> max_current </th>
-   <th style="text-align:right;"> E_from_mins </th>
-   <th style="text-align:right;"> current_from_mins </th>
-   <th style="text-align:right;"> min_current </th>
-   <th style="text-align:right;"> signal </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> reactor </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> echem </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> rep </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> minutes </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> E_from_maxs </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> electrode </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> current_from_maxs </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> max_current </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> E_from_mins </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> current_from_mins </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> min_current </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> signal </th>
   </tr>
  </thead>
 <tbody>
@@ -3691,19 +3691,7 @@ ggplot(swv_data %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E
 
 <img src="IDA_processing_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
 
-The function we used above `echem_signal()` went ahead and quantified the difference between the max and min points. We called this value signal, and it effectively background subtracts the peak current from any persistent background current. Let's see how the signal decays over time:
-
-
-```r
-ggplot(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = rep, y = signal, color = factor(run), fill =factor(run) )) + 
-  geom_line() + 
-  geom_point(shape = 21, color = 'black') +
-  facet_wrap(~exp)
-```
-
-<img src="IDA_processing_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" />
-
-We also quantified the peak currents for the soak reactor, before the biofilms were transferred. Here we can plot those values on top:
+The function we used above `echem_signal()` went ahead and quantified the difference between the max and min points. We called this value signal, and it effectively background subtracts the peak current from any persistent background current. We also quantified the peak currents for the soak reactor, before the biofilms were transferred, so we will plot those values on top. Let's see how the signal decays over the acquired scans:
 
 
 ```r
@@ -3714,7 +3702,8 @@ ggplot(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'),
   facet_wrap(~exp)
 ```
 
-<img src="IDA_processing_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" />
+<img src="IDA_processing_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" />
+
 
 ## GC
 
@@ -3744,7 +3733,7 @@ ggplot(gc_data %>% filter(reactor == 'transfer')) +
   scale_x_reverse() + facet_wrap(exp~run)
 ```
 
-<img src="IDA_processing_files/figure-html/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" />
+<img src="IDA_processing_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" />
 
 Note we always quantify from the negative collector current. Now, let's look at the background subtracted GC peak currents over time:
 
@@ -3756,7 +3745,60 @@ ggplot(data = gc_signals %>% filter(reactor == 'transfer'), aes(x = rep, y = sig
   facet_wrap(~exp)
 ```
 
+<img src="IDA_processing_files/figure-html/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" />
+
+# Timing and matching SWV / GC
+
+The last thing we need to do is convert `rep` into a time. The function `echem_import_to_df()` actually read the first line of each file that contains a date and time stamp and converted it into `minutes`, which is a variable that we have carried through up to this point.
+
+We will simply find the minimum time within each run (e.g. technical replicate) and then subtract that value from all the `minutes` values. Let's vizualize the acquisition of the SWVs and GCs together:
+
+
+```r
+df_signals <- bind_rows(swv_signals %>% filter(electrode == 'i1'), gc_signals) %>% 
+  group_by(reactor, run, exp) %>% 
+  mutate(min_time = min(minutes)) %>% 
+  mutate(time = minutes - min_time + 0.5)
+  
+# add 30 seconds to account for transfer time
+
+ggplot(df_signals %>% filter(reactor == 'transfer'), 
+       aes(x = time, y = echem, color = time, fill = time, shape = echem)) + 
+  geom_line(aes(group = run))+geom_point(color = 'black') + 
+  facet_wrap(exp~run) +scale_shape_manual(values = c(21,22))
+```
+
 <img src="IDA_processing_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" />
+
+The timestamps are generated when each file is saved (immediately following acquisition), so the long diagonals in time are the relatively slow GC acquisitions (~3min) which are followed by almost vertical lines, because of the relatively short SWV acquisitions (~5 seconds). This pattern looks perfect as if it were generated by a computer, but these scans were actually taken manually. We can see this by looking at one acquisitions rep # vs. time:
+
+
+```r
+ggplot(df_signals %>% filter(reactor == 'transfer' & exp == 1 & run ==1), 
+       aes(x = rep, y =time, color = echem, group = run)) + 
+  geom_smooth(method = 'lm', se = F, color = 'black')+geom_point(shape =21, size = 4, stroke = 1 ) + facet_wrap(exp~run)
+```
+
+<img src="IDA_processing_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" />
+
+You can see that the blue SWV circles are always slightly above the orange GC dots in time, but there are very slight differences in the acquisition intervals. 
+
+Now that we can see the GC and SWV match very well in time by `rep`, we can go ahead and join the SWV and GC signals by `rep` so that we can actually plot those values against each other. This will be used in downstream analysis:
+
+
+```r
+df_swv_gc <- left_join(df_signals %>% filter(echem == 'SWV'), df_signals %>% filter(echem == 'GC'),
+                       by = c('reactor','exp','run','rep'), suffix = c('_SWV','_GC'))
+
+ggplot(data = df_swv_gc %>% filter(reactor == 'transfer' & rep >0), 
+       aes(x = signal_SWV, y = signal_GC, linetype = factor(run), fill = rep)) + 
+  geom_line() + geom_point(shape = 21, color = 'black') +
+  facet_wrap(~exp, scales = 'free')
+```
+
+<img src="IDA_processing_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" />
+
+<br>
 
 # Output
 
@@ -3764,9 +3806,9 @@ Let's write our swv and gc signal dataframes to csv files to be used for further
 
 
 ```r
-write_csv(swv_signals, "data/phz_eDNA_2019_swv_signals.csv")
+write_csv(df_signals, "data/phz_eDNA_2019_signals_long.csv")
 
-write_csv(gc_signals, "data/phz_eDNA_2019_gc_signals.csv")
+write_csv(df_swv_gc, "data/phz_eDNA_2019_swv_gc_signals.csv")
 ```
 
 Let's also write the raw data from the first biofilm, first technical replicate transfer to use as representative data in figure 6.
@@ -3787,7 +3829,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -3803,22 +3845,22 @@ sessionInfo()
 ## 
 ## other attached packages:
 ##  [1] lubridate_1.7.4   hms_0.4.2         viridis_0.5.1    
-##  [4] viridisLite_0.3.0 kableExtra_1.0.1  cowplot_0.9.4    
-##  [7] forcats_0.3.0     stringr_1.3.1     dplyr_0.8.1      
-## [10] purrr_0.2.5       readr_1.3.1       tidyr_0.8.2      
-## [13] tibble_2.1.3      ggplot2_3.2.0     tidyverse_1.2.1  
+##  [4] viridisLite_0.3.0 kableExtra_1.1.0  cowplot_0.9.4    
+##  [7] forcats_0.4.0     stringr_1.4.0     dplyr_0.8.1      
+## [10] purrr_0.3.2       readr_1.3.1       tidyr_0.8.3      
+## [13] tibble_2.1.3      ggplot2_3.2.1     tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
-## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       highr_0.7        broom_0.5.1      Rcpp_1.0.1      
-## [25] scales_1.0.0     backports_1.1.3  webshot_0.5.1    jsonlite_1.6    
-## [29] gridExtra_2.3    digest_0.6.18    stringi_1.2.4    grid_3.5.2      
-## [33] cli_1.1.0        tools_3.5.2      magrittr_1.5     lazyeval_0.2.1  
-## [37] crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0       assertthat_0.2.1
-## [41] rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0 R6_2.4.0        
-## [45] nlme_3.1-140     compiler_3.5.2
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
+##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
+## [13] modelr_0.1.4     readxl_1.3.1     munsell_0.5.0    gtable_0.3.0    
+## [17] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
+## [21] knitr_1.23       highr_0.8        broom_0.5.2      Rcpp_1.0.2      
+## [25] scales_1.0.0     backports_1.1.4  webshot_0.5.1    jsonlite_1.6    
+## [29] gridExtra_2.3    digest_0.6.21    stringi_1.4.3    grid_3.5.3      
+## [33] cli_1.1.0        tools_3.5.3      magrittr_1.5     lazyeval_0.2.2  
+## [37] crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.0       assertthat_0.2.1
+## [41] rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10  R6_2.4.0        
+## [45] nlme_3.1-137     compiler_3.5.3
 ```
