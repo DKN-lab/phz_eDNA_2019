@@ -1,0 +1,115 @@
+---
+title: "Figure S6"
+subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
+output:
+  html_document:
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+    toc: yes
+    keep_md: true
+---
+
+--------
+
+# Notes
+
+To see how we got from the raw electrochemical scans to the datasets used here, please see [the IDA processing notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_processing.html). This notebook underlies some of the data in main figure 6, particularly the final panel. 
+
+Panel A is a diagram.
+
+----
+
+Setup packages and plotting for the notebook:
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Load packages
+library(tidyverse)
+library(cowplot)
+library(kableExtra)
+
+# Code display options
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
+
+# Load plotting tools
+source("../../../tools/plotting_tools.R")
+
+
+#Modify the plot theme
+theme_1 <- function () {
+  theme_classic( ) %+replace%
+    theme(
+      axis.line = element_line(color = 'black', size = 0.25),
+      axis.ticks = element_line(color = 'black', size =0.25),
+      axis.text = element_text( size=6),
+      axis.title=element_text(size=6),
+      strip.text = element_text(size = 6),
+      strip.background = element_blank(),
+      legend.background = element_blank(),
+      legend.title=element_text(size=6),
+      legend.text=element_text(size=6),
+      legend.text.align=0,
+      panel.spacing = unit(0,'cm'),
+      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
+    )
+}
+
+theme_set(theme_1())
+```
+
+# Fig. S6A
+
+First, we will read in the paired SWV and GC signals that were generated from the processing notebook. Then we can plot the SWV vs. GC signals for both biofilms and technical replicates. Each dataset is fit with a linear model shaded with a 95% confidence interval.
+
+```{r}
+
+df_swv_gc <- read_csv("../../../processing/data/phz_eDNA_2019_swv_gc_signals.csv") %>% 
+  mutate(exp_id = ifelse(exp =='2', 'Biofilm 1', 'Biofilm 2')) %>% 
+  mutate(run_id = paste('Rep ',run))
+
+plot_swv_gc_all <- ggplot(df_swv_gc %>% filter(reactor == 'transfer' & rep>0), 
+       aes(x = signal_SWV, y = signal_GC)) + 
+  geom_smooth(method='lm', linetype = 2, color = 'black')+
+  geom_point(shape = 21) + 
+  facet_wrap(exp_id~run_id,scales='free')+
+  scale_color_viridis(discrete = T)
+
+plot_swv_gc_all_styled <- plot_swv_gc_all + 
+  scale_x_continuous(labels = nA_label) + 
+  scale_y_continuous(labels = nA_label) + 
+  labs(x = expression(I[swv]~(nA)), y = expression(I[gc]~(nA)))
+
+plot_swv_gc_all_styled
+
+```
+
+Above we generated the linear models on the fly for plotting, but let's actually generate those models so that we can look at the coefficients and the quality of each fit:
+
+```{r}
+mods_swv_gc <- df_swv_gc %>% 
+  filter(reactor == 'transfer' & rep>0) %>% 
+  group_by(exp_id, run_id) %>% 
+  do(fit = lm(signal_GC~signal_SWV,data = .))
+
+mods_swv_gc_tidy <- tidy(mods_swv_gc, fit, conf.int=T) %>% arrange(desc(term))
+
+mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px')
+```
+
+<br>
+
+Here are the R squared values from those models, which we will add to the respective panels in illustrator.
+
+```{r}
+mods_swv_gc_glance <- glance(mods_swv_gc, fit) %>% 
+  select(exp_id,run_id,r.squared,adj.r.squared, p.value)
+
+mods_swv_gc_glance %>% kable(digits = 20) %>%  kable_styling() %>% scroll_box(height = '300px')
+```
+
+<br>
+
+# Fig. 6B
+
+

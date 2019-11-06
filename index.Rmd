@@ -82,8 +82,20 @@ A model
 
 # Computational notebooks
 
-* [Figure 1. Description](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_1/phz2019_Fig_1_colony_retention.html)
+These are notebooks generated in R. They fully reproduce the figures in the paper from the underlying raw data. These links will bring you to rendered html versions of the notebooks, but you are free to download the data and code from the [github repository]() and run the notebooks on your own computer (given that you have R).
 
-* [Figure 2. ](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_2/phz2019_Fig_2_PYO_eDNA.html)
+## Main figures
 
-* [Figure 3. ](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_3/phz2019_Fig_3_phz_ET_invitro.html)
+* [Figure 1.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_1/phz2019_Fig_1_colony_retention.html) Description here ;laksdjf.
+
+* [Figure 2.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_2/phz2019_Fig_2_PYO_eDNA.html) Description here ;laksdjf.
+
+* [Figure 3.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_3/phz2019_Fig_3_phz_ET_invitro.html) Description here ;laksdjf.
+
+## Supplemental figures
+
+* [Figure S6.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/phz_eDNA_2019_Fig_S6.html)
+
+## Data processing
+
+* [IDA data](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_processing.html)

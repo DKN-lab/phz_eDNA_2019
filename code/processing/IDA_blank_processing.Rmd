@@ -1,0 +1,251 @@
+---
+title: "Processing: IDA blank data"
+subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
+output:
+  html_document:
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+    toc: yes
+    keep_md: true
+---
+
+--------
+
+# Notes
+
+This notebook shows how raw electrochemical data from a CH Instruments potentiostat was processed for data vizualization and downstream analysis.
+
+----
+
+Setup packages and plotting for the notebook:
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Load packages
+library(tidyverse)
+library(cowplot)
+library(kableExtra)
+
+# Code display options
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
+
+# Load plotting tools
+source("../tools/plotting_tools.R")
+
+#Modify the plot theme
+theme_1 <- function () {
+  theme_classic( ) %+replace%
+    theme(
+      strip.background = element_blank(),
+      legend.background = element_blank(),
+      axis.line = element_line(color = 'black'),
+      axis.ticks = element_line(color = 'black'),
+      axis.text = element_text(color = 'black')
+    )
+}
+
+
+theme_set(theme_1())
+```
+
+# Import
+
+In the folder `data/Electrochemistry/IDA/` there are the raw data output to text files from the CH Instruments potentiostat software. There are files from two different biofilms, each containing three technical replicates. 
+
+We will use a set of simple tools developed to quickly import these files into data frames with metadata that we can work with. Basically, we will specifify a directory, the structure of the file names and the structure of the underlying data, and a function will import the files (~180 files for this notebook). Please see the the `echem_processing_tools` in the folder `code/tools/` for details.
+
+```{r}
+# Load echem processing tools
+
+source("../tools/echem_processing_tools.R")
+```
+
+## SWV data
+
+First, let's import all of the SWV files for the first ∆phz* biofilm.
+
+```{r message = F, warning=F}
+
+# file names and paths
+swv_file_paths <-  dir(path='../../data/Electrochemistry/IDA/blank/', pattern = "[SWV]+.+[txt]$", recursive = T, full.names = T)
+
+swv_filenames <- basename(swv_file_paths)
+
+# data columns in each file
+swv_data_cols <-  c('E','i1','i2')
+
+# metadata in each file name
+filename_cols = c('PHZadded','PYO','reactor','echem','rep')
+
+# skip the header that contains detailed information from the potentiostat
+swv_skip_rows=18
+
+# Use the function `echem_import_to_df()` from the echem tools to import
+swv_data <- echem_import_to_df(filenames = swv_filenames, 
+                                       file_paths = swv_file_paths, 
+                                       data_cols = swv_data_cols, 
+                                       skip_rows = swv_skip_rows,
+                                       filename_cols = filename_cols,
+                                       rep = T, PHZadded = T) %>% 
+  mutate(rep=rep-1) 
+
+# Change the rep (acquisition number) for the SWVs because the first SWV should be 0.
+# This is used to match SWV and GC by number later on.
+# We also add an experimental id of 1.
+```
+
+
+```{r}
+
+ggplot(swv_data %>% filter(electrode == 'i1' & reactor == 'soak'), aes(x = E, y = current, color = PHZaddedInt, group = PHZadded)) + geom_path() + facet_wrap(~echem)
+       
+ggplot(swv_data %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E, y = current, color = rep, group = rep)) + geom_path() + facet_wrap(~PHZadded, scales = 'free') + scale_x_reverse()
+       
+```
+
+## GC data
+
+Now, we will repeat the import for the GC data. 
+
+```{r}
+
+gc_file_paths <-  dir(path='../../data/Electrochemistry/IDA/blank/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
+
+gc_filenames <- basename(gc_file_paths)
+
+gc_data_cols <-  c('E','i1','i2','t')
+
+filename_cols = c('PHZadded','PYO','reactor','echem','rep')
+
+gc_skip_rows=21
+  
+
+gc_data <- echem_import_to_df(filenames = gc_filenames, 
+                                       file_paths = gc_file_paths,
+                                       data_cols = gc_data_cols, 
+                                       skip_rows = gc_skip_rows,
+                                       filename_cols = filename_cols,
+                                       rep = T, PHZadded = T)
+
+```
+
+```{r}
+
+ggplot(gc_data, aes(x = E, y = current, color = PHZaddedInt)) + geom_path() + facet_wrap(~echem) + scale_x_reverse()
+
+```
+
+# Signal quantification
+
+Now that all of the files have been read into convenient data frames we can quantify the peak currents, which are the signals we will use for the analysis later on. 
+
+## SWV
+
+To do this we will use another function from the echem tools to find the min and max points within a specified potential window in each scan. Let's take a look at the output:
+
+```{r}
+
+unique_cols <- c('PHZadded','PYO','reactor','echem','minutes','PHZaddedInt','electrode','rep')
+
+swv_signals <- echem_signal(swv_data,
+                               unique_cols,                                     
+                               max_interval = c(-0.2,-0.3),
+                               min_interval=c(0.1,-0.2)) 
+
+ggplot(swv_data %>% filter(reactor == 'soak'),aes(x=E,y=current,color=PHZaddedInt, group = PHZadded)) + geom_path() +
+  geom_point(data=swv_signals %>% filter(reactor == 'soak'), aes(x = E_from_mins, y = min_current),fill='blue', shape = 21)+
+  geom_point(data=swv_signals %>% filter(reactor == 'soak'), aes(x = E_from_maxs, y = max_current),fill='red', shape = 21)+
+  scale_x_reverse()+
+  facet_wrap(~electrode)
+```
+
+```{r}
+ggplot(swv_signals %>% filter(reactor == 'soak' & electrode == 'i1'), aes(x = PHZaddedInt, y = signal)) + geom_point()
+```
+
+
+```{r}
+
+ggplot(swv_data %>% filter(reactor == 'transfer' & electrode == 'i1'), aes(x=E,y=current)) + geom_path(aes(color=rep, group = rep)) +
+  geom_point(data=swv_signals %>% filter(reactor == 'transfer'& electrode == 'i1'), aes(x = E_from_mins, y = min_current), fill='blue', shape = 21)+
+  geom_point(data=swv_signals %>% filter(reactor == 'transfer'& electrode == 'i1'), aes(x = E_from_maxs, y = max_current), fill='red', shape = 21)+
+  scale_x_reverse()+
+  facet_wrap(~PHZadded, scales = 'free')
+
+```
+
+```{r}
+
+ggplot(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = rep, y = signal, color = PHZadded, fill =PHZadded)) + 
+  geom_point(data = swv_signals %>% filter(electrode == 'i1' & reactor == 'soak'), size = 3)+
+  geom_line() + 
+  geom_point(shape = 21, color = 'black')
+```
+
+Add timing to SWV transfer:
+
+```{r}
+swv_tran_time <- swv_signals %>% 
+  filter(reactor == 'transfer' & electrode == 'i1') %>% 
+  group_by(PHZadded) %>% 
+  mutate(min_time = min(minutes)) %>% 
+  mutate(time = minutes - min_time + 0.5)
+
+ggplot(data = swv_tran_time, aes(x = time, y = signal, color = PHZadded, fill =PHZadded)) + 
+  geom_line() + 
+  geom_point(shape = 21, color = 'black')
+```
+
+
+## GC
+
+```{r}
+
+unique_id_cols = c('reactor','PHZadded','PHZaddedInt','echem','rep','minutes','PYO')
+
+gc_signals <- echem_signal(df = gc_data %>% filter(electrode == 'i2') %>% mutate(current = - current), 
+                            unique_id_cols = unique_id_cols,
+                            max_interval = c(-0.499,-0.499), 
+                            min_interval = c(0.0,-0.4))
+
+```
+
+Now we can plot the GC scans and the min / max points.
+
+```{r}
+
+ggplot(gc_data) + 
+  geom_path(data=. %>% filter(electrode=='i1'), aes(x = E, y = current, color = PHZaddedInt, group = rep)) + 
+  geom_path(data=. %>% filter(electrode=='i2'), aes(x = E, y = current, color = PHZaddedInt, group = rep)) +
+  geom_point(data = gc_signals, aes(x = E_from_mins, y = -current_from_mins), shape = 21, fill = 'light blue')+
+  geom_point(data = gc_signals, aes(x = E_from_maxs, y = -current_from_maxs), shape = 21, fill = 'red')+
+  scale_x_reverse()
+
+```
+
+```{r}
+ggplot(gc_signals, aes(x = PHZaddedInt, y = signal)) + geom_point()
+```
+
+## Join SWV and GC soak data
+
+```{r}
+swv_gc_soak <- left_join(swv_signals %>% filter(reactor == 'soak' & electrode == 'i1'), gc_signals, by = c('PHZadded','PYO','PHZaddedInt','reactor'), suffix = c('_SWV','_GC'))
+
+ggplot(swv_gc_soak, aes(x = signal_SWV, y = signal_GC)) + geom_point()
+```
+
+# Output
+
+```{r}
+write_csv(swv_gc_soak,"data/phz_eDNA_2019_swv_gc_soak_blank.csv")
+
+write_csv(swv_signals %>% filter(electrode == 'i1'), "data/phz_eDNA_2019_swv_transfer_blank.csv")
+```
+
+-------
+
+```{r}
+sessionInfo()
+```
