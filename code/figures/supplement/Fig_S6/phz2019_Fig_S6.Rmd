@@ -169,6 +169,8 @@ dphz_preds <- dphz_grid_coef %>%
   mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
   mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
 
+write_csv(dphz_preds, "phz2019_dPHZ_Dphys_preds.csv")
+
 # print simple results here
 dphz_preds %>% 
   select(reactor,exp, run, time, pred, pred_high, pred_low, estimate_b, 
@@ -248,6 +250,8 @@ blank_preds <- blank_grid_coef %>%
   mutate(pred = estimate_b * (time^-0.5) + estimate_a) %>% 
   mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
   mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
+
+write_csv(blank_preds, "phz2019_blank_Dphys_preds.csv")
 
 # print simple results here
 blank_preds %>% 
