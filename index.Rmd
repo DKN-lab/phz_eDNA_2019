@@ -15,6 +15,7 @@ output:
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE, echo = F, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
 
 library(tidyverse)
+library(knitr)
 ```
 
 <br>
@@ -40,13 +41,19 @@ Extracellular electron transfer (EET) enables metabolic activity by microorganis
 
 # Summary {.tabset}
 
+----
+
 We have found a few things merp derp:
 
 ## 1
 
-Colony biofilms retain certain phenazines
+Put simple explanatory figures here with short narratives. E.g. the phenazine biofilm cycle or other illustrator generated diagrams.
 
-[some data and narrative here]
+Colony biofilms retain certain phenazines. Some more text here. Test
+
+```{r}
+include_graphics("index_files/2019_11_04_fig_2.png")
+```
 
 ## 2
 
@@ -80,7 +87,12 @@ A model
 
 [merp]
 
+# {.toc-ignore}
+<br>
+
 # Computational notebooks
+
+----
 
 These are notebooks generated in R. They fully reproduce the figures in the paper from the underlying raw data. These links will bring you to rendered html versions of the notebooks, but you are free to download the data and code from the [github repository]() and run the notebooks on your own computer (given that you have R).
 

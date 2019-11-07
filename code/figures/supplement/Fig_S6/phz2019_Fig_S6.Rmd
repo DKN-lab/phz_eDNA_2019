@@ -28,7 +28,9 @@ Setup packages and plotting for the notebook:
 library(tidyverse)
 library(cowplot)
 library(kableExtra)
-
+library(broom)
+library(modelr)
+library(nls2)
 # Code display options
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
 
@@ -64,9 +66,9 @@ First, we will read in the paired SWV and GC signals that were generated from th
 
 ```{r}
 
-df_swv_gc <- read_csv("../../../processing/data/phz_eDNA_2019_swv_gc_signals.csv") %>% 
+df_swv_gc <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_gc_signals.csv") %>% 
   mutate(exp_id = ifelse(exp =='2', 'Biofilm 1', 'Biofilm 2')) %>% 
-  mutate(run_id = paste('Rep ',run))
+  mutate(run_id = paste('Rep ',run, sep = ''))
 
 plot_swv_gc_all <- ggplot(df_swv_gc %>% filter(reactor == 'transfer' & rep>0), 
        aes(x = signal_SWV, y = signal_GC)) + 
@@ -84,7 +86,7 @@ plot_swv_gc_all_styled
 
 ```
 
-Above we generated the linear models on the fly for plotting, but let's actually generate those models so that we can look at the coefficients and the quality of each fit:
+Above we generated the linear models on the fly for plotting, but let's actually generate those models so that we can look at the quality of each fit. These R squared values will be added to each panel in illustrator.
 
 ```{r}
 mods_swv_gc <- df_swv_gc %>% 
@@ -92,16 +94,6 @@ mods_swv_gc <- df_swv_gc %>%
   group_by(exp_id, run_id) %>% 
   do(fit = lm(signal_GC~signal_SWV,data = .))
 
-mods_swv_gc_tidy <- tidy(mods_swv_gc, fit, conf.int=T) %>% arrange(desc(term))
-
-mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px')
-```
-
-<br>
-
-Here are the R squared values from those models, which we will add to the respective panels in illustrator.
-
-```{r}
 mods_swv_gc_glance <- glance(mods_swv_gc, fit) %>% 
   select(exp_id,run_id,r.squared,adj.r.squared, p.value)
 
@@ -110,6 +102,188 @@ mods_swv_gc_glance %>% kable(digits = 20) %>%  kable_styling() %>% scroll_box(he
 
 <br>
 
-# Fig. 6B
+Here are the actual coefficients from those models, including 95% confidence intervals. We will use these coefficients to calculate Dap in Fig. 6. We will write this dataframe to a csv for later use.
+
+```{r}
+
+mods_swv_gc_tidy <- tidy(mods_swv_gc, fit, conf.int=T) %>% arrange(desc(term))
+
+write_csv(mods_swv_gc_tidy, "phz2019_dPHZ_Dap_lm_coefs.csv")
+
+mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px')
+```
+
+<br>
+
+# Fig. S6B
+
+First let's read in the data, which are the peak SWV current signals over time from the ∆phz* biofilms:
+
+```{r}
+df_dphz_swv <- read_csv("../../../processing/processed_data/phz_eDNA_2019_signals_long.csv") %>% 
+  filter(echem == 'SWV') %>% 
+  filter(electrode == 'i1' & reactor %in% c('transfer','soak'))
+
+ggplot(df_dphz_swv %>% filter(reactor == 'transfer'), aes(x = time, y = signal)) + 
+  geom_point(shape = 21) + facet_wrap(exp~run, scales = 'free')
+```
+
+Now we will fit each of these decays with the expression $y = b (x)^{-0.5} + a$ using a nonlinear least squares method, the `nls()` function. Here you can see the model coefficient estimates and confidence intervals for each data set. We will go ahead and save these coefficients as a csv, so that we can use them to calculate Dphys values in main figure 6.
+
+```{r}
+dphz_nls <- df_dphz_swv %>% filter(reactor == 'transfer') %>%
+  group_by(exp, run) %>% 
+  do(
+    tidy(
+      nls(data = ., formula =  signal ~ b * (time)^-0.5 + a, start = c(b = 0.1, a = 1e-07) ),
+      conf.int = T
+    )
+  ) %>% 
+  arrange(desc(term))
+
+# write results to csv for fig 6.
+write_csv(dphz_nls, "phz2019_dPHZ_Dphys_nls_coefs.csv")
+
+# print results here
+dphz_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
+
+```
+<br>
+
+Now we are going to take those coefficient estimates and predict datapoints that those values would generate at 1000 timepoints in the window our data is in. Essentially, we are going to generate the best fit line from those parameters and the 95% confidence interval so that we can plot it with the original datapoints.
+
+```{r}
+dphz_grid <- tibble(time = seq(0.4, max(df_dphz_swv$time), length.out = 1000))
+
+dphz_coefs <- left_join(dphz_nls %>% filter(term == 'b'),
+                      dphz_nls %>% filter(term == 'a'), 
+                      by = c('exp','run'), suffix = c('_b','_a'))
+
+dphz_grid <- left_join(df_dphz_swv %>% filter(reactor == 'transfer') %>% group_by(reactor, exp, run) %>% summarise(),
+                       dphz_grid %>% mutate(reactor = 'transfer'), by = c('reactor'))
+
+dphz_grid_coef <- left_join(dphz_grid, dphz_coefs, by  = c('exp','run'))
+
+dphz_preds <- dphz_grid_coef %>% 
+  mutate(pred = estimate_b * (time^-0.5) + estimate_a) %>% 
+  mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
+  mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
+
+# print simple results here
+dphz_preds %>% 
+  select(reactor,exp, run, time, pred, pred_high, pred_low, estimate_b, 
+         conf.low_b, conf.high_b, estimate_a, conf.low_a, conf.high_a) %>% 
+  head() %>% kable(digits = 7) %>% kable_styling()
+```
+<br>
+
+Now they we have those predictions we can plot everything together:
+
+```{r}
+ggplot(dphz_preds, aes(x = time, y = pred)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
+  geom_path(linetype = 2)+
+  geom_point(data =df_dphz_swv %>% filter(reactor == 'transfer'), aes(x = time, y = signal) , shape = 21)+
+  facet_wrap(exp~run, scale = 'free')
+
+ggplot(df_dphz_swv %>% filter(exp == 1 & run == 1 & reactor == 'transfer'), aes(x = time, y = signal)) + 
+  geom_vline(xintercept = 0.1)+
+  geom_smooth(method = "nls", 
+    formula = y ~ b * (x)^-0.5 + a, method.args = list(start = c(b = 0.1, 
+        a = 1e-07)), se = F)+
+  geom_point(shape = 21)+
+  facet_wrap(~exp, scales = 'free')
+```
 
 
+# Fig. S6C
+
+
+```{r}
+
+df_blank_swv <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_blank_tran_time_signals.csv") %>% 
+  filter(reactor == 'transfer' & PHZadded != '10uM') %>% 
+  mutate(PHZadded = fct_relevel(PHZadded, c('25uM','50uM','75uM','100uM') ))
+
+ggplot(df_blank_swv, aes(x = time, y = signal)) + 
+  geom_point(shape = 21) + facet_wrap(~PHZadded, scales = 'free')
+```
+
+Now we will fit each of these decays with the expression $y = b (x)^{-0.5} + a$ using a nonlinear least squares method, the `nls()` function. Here you can see the model coefficient estimates and confidence intervals for each data set. We will go ahead and save these coefficients as a csv, so that we can use them to calculate Dphys values in main figure 6.
+
+```{r}
+blank_nls <- df_blank_swv%>%
+  group_by(PHZadded) %>% 
+  do(
+    tidy(
+      nls(data = ., formula =  signal ~ b * (time)^-0.5 + a, start = c(b = 0.1, a = 1e-07) ),
+      conf.int = T
+    )
+  ) %>% 
+  arrange(desc(term))
+
+# write results to csv for fig 6.
+write_csv(blank_nls, "phz2019_blank_Dphys_nls_coefs.csv")
+
+# print results here
+blank_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
+
+```
+<br>
+
+Now we are going to take those coefficient estimates and predict datapoints that those values would generate at 1000 timepoints in the window our data is in. Essentially, we are going to generate the best fit line from those parameters and the 95% confidence interval so that we can plot it with the original datapoints.
+
+```{r}
+blank_grid <- tibble(time = seq(0.05, max(df_blank_swv$time), length.out = 1000))
+
+blank_coefs <- left_join(blank_nls %>% filter(term == 'b'),
+                      blank_nls %>% filter(term == 'a'), 
+                      by = c('PHZadded'), suffix = c('_b','_a'))
+
+blank_grid <- left_join(df_blank_swv %>% group_by(reactor, PHZadded) %>% summarise(),
+                       blank_grid %>% mutate(reactor = 'transfer'), by = c('reactor'))
+
+blank_grid_coef <- left_join(blank_grid, blank_coefs, by  = c('PHZadded'))
+
+blank_preds <- blank_grid_coef %>% 
+  mutate(pred = estimate_b * (time^-0.5) + estimate_a) %>% 
+  mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
+  mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
+
+# print simple results here
+blank_preds %>% 
+  select(reactor,PHZadded, time, pred, pred_high, pred_low, estimate_b, 
+         conf.low_b, conf.high_b, estimate_a, conf.low_a, conf.high_a) %>% 
+  head() %>% kable(digits = 7) %>% kable_styling()
+```
+<br>
+
+Now they we have those predictions we can plot everything together:
+
+```{r}
+ggplot(blank_preds, aes(x = time, y = pred)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
+  geom_path(linetype = 2)+
+  geom_point(data =df_blank_swv, aes(x = time, y = signal) , shape = 21)+
+  facet_wrap(~PHZadded, scale = 'free')
+
+ggplot(df_blank_swv, aes(x = time, y = signal)) + 
+  geom_smooth(method = "nls", 
+    formula = y ~ b * (x)^-0.5 + a, method.args = list(start = c(b = 0.1, 
+        a = 1e-07)), se = F)+
+  geom_point(shape = 21)+
+  facet_wrap(~PHZadded, scales = 'free')
+
+ggplot(df_blank_swv %>% filter(PHZadded == '75uM'), aes(x = time, y = signal)) + 
+  geom_vline(xintercept = 0.1)+
+  geom_smooth(method = "nls", 
+    formula = y ~ b * (x)^-0.5 + a, method.args = list(start = c(b = 0.1, 
+        a = 1e-07)), se = F)+
+  geom_point(shape = 21)+
+  facet_wrap(~PHZadded, scales = 'free')
+```
+
+
+-----
+
+```{r}
+sessionInfo()
+```

@@ -32,7 +32,7 @@ library(kableExtra)
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
 
 # Load plotting tools
-source("../tools/plotting_tools.R")
+source("../../tools/plotting_tools.R")
 
 #Modify the plot theme
 theme_1 <- function () {
@@ -60,7 +60,7 @@ We will use a set of simple tools developed to quickly import these files into d
 ```r
 # Load echem processing tools
 
-source("../tools/echem_processing_tools.R")
+source("../../tools/echem_processing_tools.R")
 ```
 
 ## SWV data
@@ -70,7 +70,7 @@ First, let's import all of the SWV files for the first ∆phz* biofilm.
 
 ```r
 # file names and paths
-swv_file_paths_1 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[SWV]+.+[txt]$", recursive = T, full.names = T)
+swv_file_paths_1 <-  dir(path='../../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[SWV]+.+[txt]$", recursive = T, full.names = T)
 
 swv_filenames_1 <- basename(swv_file_paths_1)
 
@@ -104,18 +104,18 @@ Let's look at the data frame we have generated:
 swv_data_1 %>% head() %>%  kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> reactor </th>
-   <th style="text-align:left;"> run </th>
-   <th style="text-align:left;"> echem </th>
-   <th style="text-align:right;"> rep </th>
-   <th style="text-align:right;"> minutes </th>
-   <th style="text-align:right;"> E </th>
-   <th style="text-align:left;"> electrode </th>
-   <th style="text-align:right;"> current </th>
-   <th style="text-align:right;"> exp </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> reactor </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> echem </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> rep </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> minutes </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> E </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> electrode </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> current </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
   </tr>
  </thead>
 <tbody>
@@ -204,7 +204,7 @@ Now let's read in the SWV data for the second biofilm.
 
 
 ```r
-swv_file_paths_2 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[SWV]+.+[txt]$",recursive = T,full.names = T)
+swv_file_paths_2 <-  dir(path='../../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[SWV]+.+[txt]$",recursive = T,full.names = T)
 
 swv_filenames_2 <- basename(swv_file_paths_2)
   
@@ -234,7 +234,7 @@ Now, we will repeat the import for the GC data.
 
 
 ```r
-gc_file_paths_1 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
+gc_file_paths_1 <-  dir(path='../../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
 
 gc_filenames_1 <- basename(gc_file_paths_1)
 
@@ -270,7 +270,7 @@ And now for the second biofilm.
 
 
 ```r
-gc_file_paths_2 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
+gc_file_paths_2 <-  dir(path='../../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
 
 gc_filenames_2 <- basename(gc_file_paths_2)
 
@@ -327,23 +327,23 @@ swv_signals <- echem_signal(df = swv_data,
 swv_signals %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> reactor </th>
-   <th style="text-align:left;"> run </th>
-   <th style="text-align:left;"> echem </th>
-   <th style="text-align:right;"> rep </th>
-   <th style="text-align:right;"> minutes </th>
-   <th style="text-align:right;"> E_from_maxs </th>
-   <th style="text-align:left;"> electrode </th>
-   <th style="text-align:right;"> current_from_maxs </th>
-   <th style="text-align:right;"> exp </th>
-   <th style="text-align:right;"> max_current </th>
-   <th style="text-align:right;"> E_from_mins </th>
-   <th style="text-align:right;"> current_from_mins </th>
-   <th style="text-align:right;"> min_current </th>
-   <th style="text-align:right;"> signal </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> reactor </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> echem </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> rep </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> minutes </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> E_from_maxs </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> electrode </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> current_from_maxs </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> max_current </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> E_from_mins </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> current_from_mins </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> min_current </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> signal </th>
   </tr>
  </thead>
 <tbody>
@@ -3806,18 +3806,18 @@ Let's write our swv and gc signal dataframes to csv files to be used for further
 
 
 ```r
-write_csv(df_signals, "data/phz_eDNA_2019_signals_long.csv")
+write_csv(df_signals, "../processed_data/phz_eDNA_2019_signals_long.csv")
 
-write_csv(df_swv_gc, "data/phz_eDNA_2019_swv_gc_signals.csv")
+write_csv(df_swv_gc, "../processed_data/phz_eDNA_2019_swv_gc_signals.csv")
 ```
 
 Let's also write the raw data from the first biofilm, first technical replicate transfer to use as representative data in figure 6.
 
 
 ```r
-write_csv(swv_data %>% filter(exp == 1, run ==1, reactor == 'transfer', electrode == 'i1'), "data/phz_eDNA_2019_swv_raw_1_1.csv")
+write_csv(swv_data %>% filter(exp == 1, run ==1, reactor == 'transfer', electrode == 'i1'), "../processed_data/phz_eDNA_2019_swv_raw_1_1.csv")
 
-write_csv(gc_data %>% filter(exp == 1, run ==1, reactor == 'transfer'), "data/phz_eDNA_2019_gc_raw_1_1.csv")
+write_csv(gc_data %>% filter(exp == 1, run ==1, reactor == 'transfer'), "../processed_data/phz_eDNA_2019_gc_raw_1_1.csv")
 ```
 
 
@@ -3829,7 +3829,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -3845,22 +3845,22 @@ sessionInfo()
 ## 
 ## other attached packages:
 ##  [1] lubridate_1.7.4   hms_0.4.2         viridis_0.5.1    
-##  [4] viridisLite_0.3.0 kableExtra_1.0.1  cowplot_0.9.4    
-##  [7] forcats_0.3.0     stringr_1.3.1     dplyr_0.8.1      
-## [10] purrr_0.2.5       readr_1.3.1       tidyr_0.8.2      
-## [13] tibble_2.1.3      ggplot2_3.2.0     tidyverse_1.2.1  
+##  [4] viridisLite_0.3.0 kableExtra_1.1.0  cowplot_0.9.4    
+##  [7] forcats_0.4.0     stringr_1.4.0     dplyr_0.8.1      
+## [10] purrr_0.3.2       readr_1.3.1       tidyr_0.8.3      
+## [13] tibble_2.1.3      ggplot2_3.2.1     tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
-## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       highr_0.7        broom_0.5.1      Rcpp_1.0.1      
-## [25] scales_1.0.0     backports_1.1.3  webshot_0.5.1    jsonlite_1.6    
-## [29] gridExtra_2.3    digest_0.6.18    stringi_1.2.4    grid_3.5.2      
-## [33] cli_1.1.0        tools_3.5.2      magrittr_1.5     lazyeval_0.2.1  
-## [37] crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0       assertthat_0.2.1
-## [41] rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0 R6_2.4.0        
-## [45] nlme_3.1-140     compiler_3.5.2
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
+##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
+## [13] modelr_0.1.4     readxl_1.3.1     munsell_0.5.0    gtable_0.3.0    
+## [17] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
+## [21] knitr_1.23       highr_0.8        broom_0.5.2      Rcpp_1.0.2      
+## [25] scales_1.0.0     backports_1.1.4  webshot_0.5.1    jsonlite_1.6    
+## [29] gridExtra_2.3    digest_0.6.21    stringi_1.4.3    grid_3.5.3      
+## [33] cli_1.1.0        tools_3.5.3      magrittr_1.5     lazyeval_0.2.2  
+## [37] crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.0       assertthat_0.2.1
+## [41] rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10  R6_2.4.0        
+## [45] nlme_3.1-137     compiler_3.5.3
 ```

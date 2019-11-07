@@ -1,0 +1,274 @@
+---
+title: "Figure S7"
+subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
+output:
+  html_document:
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+    toc: yes
+    keep_md: true
+---
+
+--------
+
+# Notes
+
+Links to IDA processing and to supp figure.
+
+Panel A is a diagram.
+
+----
+
+Setup packages and plotting for the notebook:
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Load packages
+library(tidyverse)
+library(cowplot)
+library(kableExtra)
+library(broom)
+
+# Code display options
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
+
+# Load plotting tools
+source("../../../tools/plotting_tools.R")
+
+
+#Modify the plot theme
+theme_1 <- function () {
+  theme_classic( ) %+replace%
+    theme(
+      axis.line = element_line(color = 'black', size = 0.25),
+      axis.ticks = element_line(color = 'black', size =0.25),
+      axis.text = element_text( size=6),
+      axis.title=element_text(size=6),
+      strip.text = element_text(size = 6),
+      strip.background = element_blank(),
+      legend.background = element_blank(),
+      legend.title=element_text(size=6),
+      legend.text=element_text(size=6),
+      legend.text.align=0,
+      panel.spacing = unit(0,'cm'),
+      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
+    )
+}
+
+theme_set(theme_1())
+```
+
+
+
+
+
+# Fig. S7A
+
+First we will import the blank IDA data that will be used for panels A-D. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
+
+Let's read in the data and convert the µM units to $mol / cm^3$, which will be important to calculate $D_{ap}$ in correct units.
+
+```{r}
+df_soak <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_gc_soak_blank.csv") %>% 
+  mutate(PHZaddedInt = case_when(
+    PHZadded == '100uM' ~ 100,
+    PHZadded == '10uM' ~ 10,
+    PHZadded == '25uM' ~ 25,
+    PHZadded == '50uM' ~ 50,
+    PHZadded == '75uM' ~ 75
+  )) %>% 
+  mutate(C_mol_cm3 = PHZaddedInt*(10^-9))
+```
+
+Here is the relationship between GC peak current and concentration:
+
+```{r}
+
+plot_GC <- ggplot(df_soak, aes(x = C_mol_cm3, y = signal_GC)) +    
+  geom_smooth(method='lm', linetype = 2, color = 'black') + geom_point(shape = 21)
+
+plot_GC_styled <- plot_GC+  
+  scale_x_continuous(labels = nA_label) + 
+  scale_y_continuous(labels = nA_label) + 
+  labs(x = expression(PYO~(mu*M)), y = expression(I[gc]~(nA)))
+  
+plot_GC_styled
+
+```
+
+$I_{GC}$ is simply $I = nFSDC$, so $D_{ap}$ is:
+
+$$D_{ap} = \frac{m}{n F S}$$
+
+We can define a simple function to calculate this $D_{ap}$ from the slope of the line in the above plot.
+
+```{r}
+dap_from_GC <- function(m){
+  
+  n=1.8
+  S <-  18.4 #cm
+  F_C = 96485.332
+  
+  d_ap <- m / (n * F_C * S)
+  
+  d_ap
+}
+```
+
+Fitting the linear model and calculating $D_{ap}$ gives these values: 
+
+```{r}
+lm_GC <- tidy(lm(signal_GC~C_mol_cm3, data = df_soak), conf.int = T) %>% 
+  filter(term=='C_mol_cm3') %>% 
+  mutate(dap=dap_from_GC(m = estimate)) %>% 
+  mutate(dap_high = dap_from_GC(m = conf.high)) %>% 
+  mutate(dap_low = dap_from_GC(m = conf.low)) %>% 
+  mutate(dataset = 'GC')
+
+lm_GC %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+<br>
+
+# Fig. S7B
+
+Now we will look at the relationship between concentration and peak SWV current.
+
+```{r}
+plot_SWV <- ggplot(df_soak, aes(x = C_mol_cm3, y = signal_SWV)) +
+    geom_smooth(method='lm', linetype = 2, color = 'black') + geom_point(shape = 21)
+
+plot_SWV_styled <- plot_SWV+  
+  scale_x_continuous(labels = nA_label) + 
+  scale_y_continuous(labels = nA_label) + 
+  labs(x = expression(PYO~(mu*M)), y = expression(I[swv]~(nA)))
+  
+plot_SWV_styled
+```
+
+For a plot of $I_{SWV}$ vs. $C$, the slope can be defined in terms of the parameters for $I_{SWV}$ other than concentration. This yields an expression for $D_{ap}$:
+
+$$D_{ap} = \pi t_p \left( \frac{m}{\psi n F A} \right) ^2 $$
+
+So we'll again define the function to calculate it:
+
+```{r}
+dap_from_SWV <- function(m, t_p=1/(2*300)){
+  
+  n=1.8
+  psi <-  0.7
+  A <-  0.025 #cm^2
+  F_C = 96485.332
+  
+  d_ap <- pi * t_p * (m / (psi * n * F_C * A))^2
+  
+  d_ap
+}
+```
+
+The linear model of this data gives the following:
+
+```{r}
+lm_SWV <- tidy(lm(signal_SWV~C_mol_cm3, data = df_soak), conf.int = T) %>% 
+  filter(term=='C_mol_cm3') %>% 
+  mutate(dap=dap_from_SWV(m = estimate)) %>% 
+  mutate(dap_high = dap_from_SWV(m = conf.high)) %>% 
+  mutate(dap_low = dap_from_SWV(m = conf.low)) %>% 
+  mutate(dataset = 'SWV')
+
+#glance(lm(signal_from_swv~C_mol_cm3, data = df_cal))
+
+lm_SWV %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+<br>
+
+# Fig. S7C
+
+Finally, we will examine the peak SWV current vs. the peak GC current, which is not dependent on the known PYO concentrations.
+
+```{r}
+plot_swvGC <- ggplot(df_soak, aes(x = signal_SWV, y = signal_GC)) + 
+  geom_smooth(method='lm', linetype = 2, color = 'black') + geom_point(shape = 21)
+
+plot_swvGC_styled <- plot_swvGC+  
+  scale_x_continuous(labels = nA_label) + 
+  scale_y_continuous(labels = nA_label) + 
+  labs(x = expression(I[swv]~(nA)), y = expression(I[gc]~(nA)))
+  
+plot_swvGC_styled
+```
+
+Recall that for this type of data:
+
+$$D_{ap} = \frac{1}{\pi t_p} \left( \frac{m A \psi}{S} \right) ^2$$  
+
+So, here's a function that will calculate $D_{ap}$ from the slope of this data:
+
+```{r}
+dap_from_swvGC <- function(m, t_p=1/(2*300)){
+  
+  psi <-  0.7
+  A <-  0.025 #cm^2
+  S <-  18.4 #cm
+  
+  d_ap <- (m*A*psi)^2 / (S^2 * pi * t_p)
+  
+  d_ap
+}
+```
+
+And now, we'll fit a linear model and calculate a $D_{ap}$. We'll go ahead and save a csv of this result for use in main figure 6F.
+
+```{r}
+output_lm_swv_gc <- tidy(lm(signal_GC~signal_SWV, data = df_soak), conf.int = T) %>% 
+  mutate(exp_id = 'Blank 1', run_id = 'Rep 1')
+
+write_csv(output_lm_swv_gc, "phz2019_blank_Dap_lm_coefs.csv")
+
+lm_swvGC <- tidy(lm(signal_GC~signal_SWV, data = df_soak), conf.int = T) %>% 
+  filter(term=='signal_SWV') %>% 
+  mutate(dap=dap_from_swvGC(m = estimate)) %>% 
+  mutate(dap_high = dap_from_swvGC(m = conf.high)) %>% 
+  mutate(dap_low = dap_from_swvGC(m = conf.low)) %>% 
+  mutate(dataset = 'SWVvsGC')
+
+lm_swvGC %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+<br>
+
+# Fig. S7D
+
+Now let's compare the estimates from each subset of the data:
+
+```{r}
+
+lms <- bind_rows(lm_swvGC,lm_SWV,lm_GC) %>% 
+  select(dataset, term, dap, dap_low, dap_high)
+
+plot_cal_dap <- ggplot(lms, aes(x = dataset, y = dap)) + 
+  geom_pointrange(aes(ymin = dap_low, ymax = dap_high)) + 
+  ylim(0, 1e-5)
+
+plot_cal_dap_styled <- plot_cal_dap+
+  labs(x = 'Dataset', y = expression(D[ap]~(cm^2 / sec)))+
+  scale_x_discrete(breaks = c('GC','SWV', 'SWVvsGC'), labels=c('GC vs.\n[PYO]', 'SWV vs.\n[PYO]', 'GC vs.\nSWV'))
+
+plot_cal_dap_styled
+```
+
+-----
+
+```{r}
+
+sessionInfo()
+
+```

@@ -31,7 +31,7 @@ library(kableExtra)
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
 
 # Load plotting tools
-source("../tools/plotting_tools.R")
+source("../../tools/plotting_tools.R")
 
 #Modify the plot theme
 theme_1 <- function () {
@@ -58,7 +58,7 @@ We will use a set of simple tools developed to quickly import these files into d
 ```{r}
 # Load echem processing tools
 
-source("../tools/echem_processing_tools.R")
+source("../../tools/echem_processing_tools.R")
 ```
 
 ## SWV data
@@ -68,7 +68,7 @@ First, let's import all of the SWV files for the first ∆phz* biofilm.
 ```{r message = F, warning=F}
 
 # file names and paths
-swv_file_paths_1 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[SWV]+.+[txt]$", recursive = T, full.names = T)
+swv_file_paths_1 <-  dir(path='../../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[SWV]+.+[txt]$", recursive = T, full.names = T)
 
 swv_filenames_1 <- basename(swv_file_paths_1)
 
@@ -113,7 +113,7 @@ ggplot(swv_data_1 %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x =
 Now let's read in the SWV data for the second biofilm.
 
 ```{r}
-swv_file_paths_2 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[SWV]+.+[txt]$",recursive = T,full.names = T)
+swv_file_paths_2 <-  dir(path='../../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[SWV]+.+[txt]$",recursive = T,full.names = T)
 
 swv_filenames_2 <- basename(swv_file_paths_2)
   
@@ -140,7 +140,7 @@ Now, we will repeat the import for the GC data.
 
 ```{r}
 
-gc_file_paths_1 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
+gc_file_paths_1 <-  dir(path='../../../data/Electrochemistry/IDA/dPHZ_biofilm_1/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
 
 gc_filenames_1 <- basename(gc_file_paths_1)
 
@@ -174,7 +174,7 @@ And now for the second biofilm.
 
 ```{r}
 
-gc_file_paths_2 <-  dir(path='../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
+gc_file_paths_2 <-  dir(path='../../../data/Electrochemistry/IDA/dPHZ_biofilm_2/', pattern = "[GC]+.+[txt]$",recursive = T,full.names = T)
 
 gc_filenames_2 <- basename(gc_file_paths_2)
 
@@ -342,9 +342,9 @@ Let's write our swv and gc signal dataframes to csv files to be used for further
 
 ```{r}
 
-write_csv(df_signals, "data/phz_eDNA_2019_signals_long.csv")
+write_csv(df_signals, "../processed_data/phz_eDNA_2019_signals_long.csv")
 
-write_csv(df_swv_gc, "data/phz_eDNA_2019_swv_gc_signals.csv")
+write_csv(df_swv_gc, "../processed_data/phz_eDNA_2019_swv_gc_signals.csv")
 
 ```
 
@@ -352,9 +352,9 @@ Let's also write the raw data from the first biofilm, first technical replicate 
 
 ```{r}
 
-write_csv(swv_data %>% filter(exp == 1, run ==1, reactor == 'transfer', electrode == 'i1'), "data/phz_eDNA_2019_swv_raw_1_1.csv")
+write_csv(swv_data %>% filter(exp == 1, run ==1, reactor == 'transfer', electrode == 'i1'), "../processed_data/phz_eDNA_2019_swv_raw_1_1.csv")
 
-write_csv(gc_data %>% filter(exp == 1, run ==1, reactor == 'transfer'), "data/phz_eDNA_2019_gc_raw_1_1.csv")
+write_csv(gc_data %>% filter(exp == 1, run ==1, reactor == 'transfer'), "../processed_data/phz_eDNA_2019_gc_raw_1_1.csv")
 
 ```
 
