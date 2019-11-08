@@ -37,25 +37,8 @@ source("../../tools/plotting_tools.R")
 
 
 #Modify the plot theme
-theme_1 <- function () {
-  theme_classic( ) %+replace%
-    theme(
-      axis.line = element_line(color = 'black', size = 0.25),
-      axis.ticks = element_line(color = 'black', size =0.25),
-      axis.text = element_text( size=6),
-      axis.title=element_text(size=6),
-      strip.text = element_text(size = 6),
-      strip.background = element_blank(),
-      legend.background = element_blank(),
-      legend.title=element_text(size=6),
-      legend.text=element_text(size=6),
-      legend.text.align=0,
-      panel.spacing = unit(0,'cm'),
-      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
-    )
-}
 
-theme_set(theme_1())
+theme_set(theme_notebook())
 ```
 
 # Fig. 6B
@@ -87,7 +70,6 @@ df_dphz_preds <- read_csv("../supplement/Fig_S6/phz2019_dPHZ_Dphys_preds.csv") %
          pred_high = pred_high - df_dphz_nls_1$estimate)%>% 
   mutate(IDA = 'biofilm')
 
-
 df_blank_preds <- read_csv("../supplement/Fig_S6/phz2019_blank_Dphys_preds.csv") %>% 
   filter(PHZadded == '75uM') %>% 
   select(time, pred, pred_low, pred_high) %>% 
@@ -100,9 +82,17 @@ df_preds <- bind_rows(df_dphz_preds, df_blank_preds)
 
 df_decays <- bind_rows(df_dphz_swv_decay, df_blank_decay)
 
-ggplot(df_preds, aes(x = time, y = pred, group = IDA, fill = time)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
+plot_blank_dphz_decay <- ggplot(df_preds, aes(x = time, y = pred, group = IDA, fill = time)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
   geom_path(linetype = 2)+
-  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21)
+  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21) + guides(fill = 'none')
+
+plot_blank_dphz_decay_styled <- plot_blank_dphz_decay+
+  labs(x = 'Time (min)', y = expression(I[swv]~(nA)), fill = 'Time (min)') +
+  scale_fill_viridis(guide = F) +
+  scale_y_continuous(labels = nA_label)
+
+
+plot_blank_dphz_decay_styled
 
 ```
 
@@ -353,7 +343,8 @@ ggplot(df_dphys, aes(x = IDA, y = dphys)) + geom_pointrange(aes(ymin = dphys_low
 
 df_plot_dap <- df_dphys %>% 
   select(exp, run, IDA, estimate = dap, estimate_high = dap_high, estimate_low = dap_low ) %>% 
-  mutate(coef = 'Dap')
+  mutate(coef = 'Dap') %>% 
+  distinct()
 
 df_plot_dphys <- df_dphys %>% 
   select(exp, run, IDA, estimate = dphys, estimate_high = dphys_high, estimate_low = dphys_low ) %>% 
@@ -361,21 +352,36 @@ df_plot_dphys <- df_dphys %>%
 
 df_plot_dap_dphys <- bind_rows(df_plot_dap, df_plot_dphys)
 
-ggplot(df_plot_dap_dphys, aes(x = coef, y = estimate)) + 
-  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high)) + facet_wrap(~IDA, scales = 'free') + 
+plot_dap_dphys <- ggplot(df_plot_dap_dphys, aes(x = coef, y = estimate, shape = factor(exp))) + 
+  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + facet_wrap(~IDA, scales = 'free') + 
   scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) 
+
+plot_dap_dphys_styled <- plot_dap_dphys +
+  labs(x = NULL, y = expression(D~(cm^2 / sec)))+ 
+  scale_shape_manual(values = c(21,22,23), guide = F)
+
+plot_dap_dphys_styled
 ```
 
 # Create figure
 
 ```{r}
+theme_set(theme_figure())
 
-fig_6_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, ncol = 2)
+fig_6_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, ncol = 2, rel_heights = c(1,2))
 
-fig_6 <- plot_grid(plot_swv_styled, plot_gc_styled, plot_swv_gc_styled, fig_6_insets, 
-                   ncol = 2, labels = 'AUTO', label_size = 12, scale = 0.95)
+fig_6 <- plot_grid(fig_6_insets, plot_blank_dphz_decay_styled, 
+                   plot_swv_styled, plot_gc_styled, 
+                   plot_swv_gc_styled, plot_dap_dphys_styled, 
+                   ncol = 2, labels = 'AUTO', label_size = 12, scale = 0.95, align = 'hv', axis = 'tblr')
 
-fig_6
+fig_6 <- plot_grid(fig_6_insets, plot_swv_styled, plot_gc_styled, 
+                   plot_swv_gc_styled, plot_blank_dphz_decay_styled, plot_dap_dphys_styled, 
+                   ncol = 3, labels = 'AUTO', label_size = 12, scale = 0.95, align = 'hv', axis = 'tblr')
+
+#fig_6
+
+save_plot("../../../figures/phz2019_Fig_6.pdf", fig_6, base_height = 4, base_width = 7)
 ```
 
 -----

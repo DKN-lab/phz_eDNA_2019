@@ -38,25 +38,8 @@ source("../../tools/plotting_tools.R")
 
 
 #Modify the plot theme
-theme_1 <- function () {
-  theme_classic( ) %+replace%
-    theme(
-      axis.line = element_line(color = 'black', size = 0.25),
-      axis.ticks = element_line(color = 'black', size =0.25),
-      axis.text = element_text( size=6),
-      axis.title=element_text(size=6),
-      strip.text = element_text(size = 6),
-      strip.background = element_blank(),
-      legend.background = element_blank(),
-      legend.title=element_text(size=6),
-      legend.text=element_text(size=6),
-      legend.text.align=0,
-      panel.spacing = unit(0,'cm'),
-      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
-    )
-}
 
-theme_set(theme_1())
+theme_set(theme_notebook())
 ```
 
 # Fig. 6B
@@ -89,7 +72,6 @@ df_dphz_preds <- read_csv("../supplement/Fig_S6/phz2019_dPHZ_Dphys_preds.csv") %
          pred_high = pred_high - df_dphz_nls_1$estimate)%>% 
   mutate(IDA = 'biofilm')
 
-
 df_blank_preds <- read_csv("../supplement/Fig_S6/phz2019_blank_Dphys_preds.csv") %>% 
   filter(PHZadded == '75uM') %>% 
   select(time, pred, pred_low, pred_high) %>% 
@@ -102,9 +84,17 @@ df_preds <- bind_rows(df_dphz_preds, df_blank_preds)
 
 df_decays <- bind_rows(df_dphz_swv_decay, df_blank_decay)
 
-ggplot(df_preds, aes(x = time, y = pred, group = IDA, fill = time)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
+plot_blank_dphz_decay <- ggplot(df_preds, aes(x = time, y = pred, group = IDA, fill = time)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
   geom_path(linetype = 2)+
-  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21)
+  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21) + guides(fill = 'none')
+
+plot_blank_dphz_decay_styled <- plot_blank_dphz_decay+
+  labs(x = 'Time (min)', y = expression(I[swv]~(nA)), fill = 'Time (min)') +
+  scale_fill_viridis(guide = F) +
+  scale_y_continuous(labels = nA_label)
+
+
+plot_blank_dphz_decay_styled
 ```
 
 <img src="phz2019_Fig_6_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" />
@@ -370,7 +360,8 @@ ggplot(df_dphys, aes(x = IDA, y = dphys)) + geom_pointrange(aes(ymin = dphys_low
 ```r
 df_plot_dap <- df_dphys %>% 
   select(exp, run, IDA, estimate = dap, estimate_high = dap_high, estimate_low = dap_low ) %>% 
-  mutate(coef = 'Dap')
+  mutate(coef = 'Dap') %>% 
+  distinct()
 
 df_plot_dphys <- df_dphys %>% 
   select(exp, run, IDA, estimate = dphys, estimate_high = dphys_high, estimate_low = dphys_low ) %>% 
@@ -378,9 +369,11 @@ df_plot_dphys <- df_dphys %>%
 
 df_plot_dap_dphys <- bind_rows(df_plot_dap, df_plot_dphys)
 
-ggplot(df_plot_dap_dphys, aes(x = coef, y = estimate)) + 
-  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high)) + facet_wrap(~IDA, scales = 'free') + 
-  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) 
+plot_dap_dphys <- ggplot(df_plot_dap_dphys, aes(x = coef, y = estimate, shape = factor(exp))) + 
+  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0)) + facet_wrap(~IDA, scales = 'free') + 
+  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) + scale_shape_manual(values = c(21,22,23))
+
+plot_dap_dphys
 ```
 
 <img src="phz2019_Fig_6_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
@@ -389,15 +382,25 @@ ggplot(df_plot_dap_dphys, aes(x = coef, y = estimate)) +
 
 
 ```r
-fig_6_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, ncol = 2)
+theme_set(theme_figure())
 
-fig_6 <- plot_grid(plot_swv_styled, plot_gc_styled, plot_swv_gc_styled, fig_6_insets, 
-                   ncol = 2, labels = 'AUTO', label_size = 12, scale = 0.95)
+plot_dap_dphys
+```
+
+<img src="phz2019_Fig_6_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" />
+
+```r
+fig_6_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, ncol = 2, rel_heights = c(1,2))
+
+fig_6 <- plot_grid(fig_6_insets, plot_blank_dphz_decay, 
+                   plot_swv_styled, plot_gc_styled, 
+                   plot_swv_gc_styled, plot_dap_dphys, 
+                   ncol = 2, labels = 'AUTO', label_size = 12, scale = 0.95, align = 'hv', axis = 'tblr')
 
 fig_6
 ```
 
-<img src="phz2019_Fig_6_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_6_files/figure-html/unnamed-chunk-13-2.png" width="672" style="display: block; margin: auto;" />
 
 -----
 
@@ -407,7 +410,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.3 (2019-03-11)
+## R version 3.5.2 (2018-12-20)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -422,24 +425,24 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.1.0 
-##  [4] cowplot_0.9.4     forcats_0.4.0     stringr_1.4.0    
-##  [7] dplyr_0.8.1       purrr_0.3.2       readr_1.3.1      
-## [10] tidyr_0.8.3       tibble_2.1.3      ggplot2_3.2.1    
+##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.0.1 
+##  [4] cowplot_0.9.4     forcats_0.3.0     stringr_1.3.1    
+##  [7] dplyr_0.8.1       purrr_0.2.5       readr_1.3.1      
+## [10] tidyr_0.8.2       tibble_2.1.3      ggplot2_3.2.0    
 ## [13] tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
-##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.4     readxl_1.3.1     munsell_0.5.0    gtable_0.3.0    
-## [17] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       broom_0.5.2      Rcpp_1.0.2       scales_1.0.0    
-## [25] backports_1.1.4  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
-## [29] hms_0.4.2        digest_0.6.21    stringi_1.4.3    grid_3.5.3      
-## [33] cli_1.1.0        tools_3.5.3      magrittr_1.5     lazyeval_0.2.2  
-## [37] crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.0       lubridate_1.7.4 
-## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10 
-## [45] R6_2.4.0         nlme_3.1-137     compiler_3.5.3
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
+##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
+## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
+## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
+## [21] knitr_1.23       broom_0.5.1      Rcpp_1.0.1       scales_1.0.0    
+## [25] backports_1.1.3  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
+## [29] hms_0.4.2        digest_0.6.18    stringi_1.2.4    grid_3.5.2      
+## [33] cli_1.1.0        tools_3.5.2      magrittr_1.5     lazyeval_0.2.1  
+## [37] crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4 
+## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0
+## [45] R6_2.4.0         nlme_3.1-140     compiler_3.5.2
 ```
 

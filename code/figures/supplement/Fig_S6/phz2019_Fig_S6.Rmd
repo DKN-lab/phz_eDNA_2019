@@ -30,7 +30,7 @@ library(cowplot)
 library(kableExtra)
 library(broom)
 library(modelr)
-library(nls2)
+
 # Code display options
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
 
@@ -39,25 +39,7 @@ source("../../../tools/plotting_tools.R")
 
 
 #Modify the plot theme
-theme_1 <- function () {
-  theme_classic( ) %+replace%
-    theme(
-      axis.line = element_line(color = 'black', size = 0.25),
-      axis.ticks = element_line(color = 'black', size =0.25),
-      axis.text = element_text( size=6),
-      axis.title=element_text(size=6),
-      strip.text = element_text(size = 6),
-      strip.background = element_blank(),
-      legend.background = element_blank(),
-      legend.title=element_text(size=6),
-      legend.text=element_text(size=6),
-      legend.text.align=0,
-      panel.spacing = unit(0,'cm'),
-      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
-    )
-}
-
-theme_set(theme_1())
+theme_set(theme_notebook())
 ```
 
 # Fig. S6A
@@ -285,6 +267,11 @@ ggplot(df_blank_swv %>% filter(PHZadded == '75uM'), aes(x = time, y = signal)) +
   facet_wrap(~PHZadded, scales = 'free')
 ```
 
+# Create figure
+
+```{r}
+theme_set(theme_figure())
+```
 
 -----
 

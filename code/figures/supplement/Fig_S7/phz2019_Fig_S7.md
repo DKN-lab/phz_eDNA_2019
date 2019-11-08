@@ -39,25 +39,7 @@ source("../../../tools/plotting_tools.R")
 
 
 #Modify the plot theme
-theme_1 <- function () {
-  theme_classic( ) %+replace%
-    theme(
-      axis.line = element_line(color = 'black', size = 0.25),
-      axis.ticks = element_line(color = 'black', size =0.25),
-      axis.text = element_text( size=6),
-      axis.title=element_text(size=6),
-      strip.text = element_text(size = 6),
-      strip.background = element_blank(),
-      legend.background = element_blank(),
-      legend.title=element_text(size=6),
-      legend.text=element_text(size=6),
-      legend.text.align=0,
-      panel.spacing = unit(0,'cm'),
-      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
-    )
-}
-
-theme_set(theme_1())
+theme_set(theme_notebook())
 ```
 
 
@@ -381,6 +363,13 @@ plot_cal_dap_styled
 
 <img src="phz2019_Fig_S7_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" />
 
+# Create figure
+
+
+```r
+theme_set(theme_figure())
+```
+
 -----
 
 
@@ -389,7 +378,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.3 (2019-03-11)
+## R version 3.5.2 (2018-12-20)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -404,23 +393,23 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 broom_0.5.2      
-##  [4] kableExtra_1.1.0  cowplot_0.9.4     forcats_0.4.0    
-##  [7] stringr_1.4.0     dplyr_0.8.1       purrr_0.3.2      
-## [10] readr_1.3.1       tidyr_0.8.3       tibble_2.1.3     
-## [13] ggplot2_3.2.1     tidyverse_1.2.1  
+##  [1] viridis_0.5.1     viridisLite_0.3.0 broom_0.5.1      
+##  [4] kableExtra_1.0.1  cowplot_0.9.4     forcats_0.3.0    
+##  [7] stringr_1.3.1     dplyr_0.8.1       purrr_0.2.5      
+## [10] readr_1.3.1       tidyr_0.8.2       tibble_2.1.3     
+## [13] ggplot2_3.2.0     tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
-##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.4     readxl_1.3.1     munsell_0.5.0    gtable_0.3.0    
-## [17] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       highr_0.8        Rcpp_1.0.2       scales_1.0.0    
-## [25] backports_1.1.4  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
-## [29] hms_0.4.2        digest_0.6.21    stringi_1.4.3    grid_3.5.3      
-## [33] cli_1.1.0        tools_3.5.3      magrittr_1.5     lazyeval_0.2.2  
-## [37] crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.0       lubridate_1.7.4 
-## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10 
-## [45] R6_2.4.0         nlme_3.1-137     compiler_3.5.3
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
+##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
+## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
+## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
+## [21] knitr_1.23       highr_0.7        Rcpp_1.0.1       scales_1.0.0    
+## [25] backports_1.1.3  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
+## [29] hms_0.4.2        digest_0.6.18    stringi_1.2.4    grid_3.5.2      
+## [33] cli_1.1.0        tools_3.5.2      magrittr_1.5     lazyeval_0.2.1  
+## [37] crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4 
+## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0
+## [45] R6_2.4.0         nlme_3.1-140     compiler_3.5.2
 ```

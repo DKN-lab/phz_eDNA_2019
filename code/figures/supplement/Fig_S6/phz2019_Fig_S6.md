@@ -30,6 +30,7 @@ library(tidyverse)
 library(cowplot)
 library(kableExtra)
 library(broom)
+library(modelr)
 
 # Code display options
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
@@ -39,25 +40,7 @@ source("../../../tools/plotting_tools.R")
 
 
 #Modify the plot theme
-theme_1 <- function () {
-  theme_classic( ) %+replace%
-    theme(
-      axis.line = element_line(color = 'black', size = 0.25),
-      axis.ticks = element_line(color = 'black', size =0.25),
-      axis.text = element_text( size=6),
-      axis.title=element_text(size=6),
-      strip.text = element_text(size = 6),
-      strip.background = element_blank(),
-      legend.background = element_blank(),
-      legend.title=element_text(size=6),
-      legend.text=element_text(size=6),
-      legend.text.align=0,
-      panel.spacing = unit(0,'cm'),
-      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
-    )
-}
-
-theme_set(theme_1())
+theme_set(theme_notebook())
 ```
 
 # Fig. S6A
@@ -68,7 +51,7 @@ First, we will read in the paired SWV and GC signals that were generated from th
 ```r
 df_swv_gc <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_gc_signals.csv") %>% 
   mutate(exp_id = ifelse(exp =='2', 'Biofilm 1', 'Biofilm 2')) %>% 
-  mutate(run_id = paste('Rep ',run))
+  mutate(run_id = paste('Rep ',run, sep = ''))
 
 plot_swv_gc_all <- ggplot(df_swv_gc %>% filter(reactor == 'transfer' & rep>0), 
        aes(x = signal_SWV, y = signal_GC)) + 
@@ -87,7 +70,7 @@ plot_swv_gc_all_styled
 
 <img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" />
 
-Above we generated the linear models on the fly for plotting, but let's actually generate those models so that we can look at the coefficients and the quality of each fit:
+Above we generated the linear models on the fly for plotting, but let's actually generate those models so that we can look at the quality of each fit. These R squared values will be added to each panel in illustrator.
 
 
 ```r
@@ -96,29 +79,99 @@ mods_swv_gc <- df_swv_gc %>%
   group_by(exp_id, run_id) %>% 
   do(fit = lm(signal_GC~signal_SWV,data = .))
 
-mods_swv_gc_tidy <- tidy(mods_swv_gc, fit, conf.int=T) %>% arrange(desc(term))
+mods_swv_gc_glance <- glance(mods_swv_gc, fit) %>% 
+  select(exp_id,run_id,r.squared,adj.r.squared, p.value)
 
-mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px')
+mods_swv_gc_glance %>% kable(digits = 20) %>%  kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp_id </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run_id </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> term </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> std.error </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> statistic </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high </th>
+   <th style="text-align:left;"> exp_id </th>
+   <th style="text-align:left;"> run_id </th>
+   <th style="text-align:right;"> r.squared </th>
+   <th style="text-align:right;"> adj.r.squared </th>
+   <th style="text-align:right;"> p.value </th>
   </tr>
  </thead>
 <tbody>
   <tr>
    <td style="text-align:left;"> Biofilm 1 </td>
-   <td style="text-align:left;"> Rep  1 </td>
+   <td style="text-align:left;"> Rep 1 </td>
+   <td style="text-align:right;"> 0.9910550 </td>
+   <td style="text-align:right;"> 0.9903669 </td>
+   <td style="text-align:right;"> 1.055808e-14 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Biofilm 1 </td>
+   <td style="text-align:left;"> Rep 2 </td>
+   <td style="text-align:right;"> 0.9857378 </td>
+   <td style="text-align:right;"> 0.9846407 </td>
+   <td style="text-align:right;"> 2.195505e-13 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Biofilm 1 </td>
+   <td style="text-align:left;"> Rep 3 </td>
+   <td style="text-align:right;"> 0.9468821 </td>
+   <td style="text-align:right;"> 0.9427961 </td>
+   <td style="text-align:right;"> 1.150624e-09 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Biofilm 2 </td>
+   <td style="text-align:left;"> Rep 1 </td>
+   <td style="text-align:right;"> 0.9977380 </td>
+   <td style="text-align:right;"> 0.9975640 </td>
+   <td style="text-align:right;"> 1.380000e-18 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Biofilm 2 </td>
+   <td style="text-align:left;"> Rep 2 </td>
+   <td style="text-align:right;"> 0.9831090 </td>
+   <td style="text-align:right;"> 0.9818097 </td>
+   <td style="text-align:right;"> 6.600651e-13 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Biofilm 2 </td>
+   <td style="text-align:left;"> Rep 3 </td>
+   <td style="text-align:right;"> 0.9846676 </td>
+   <td style="text-align:right;"> 0.9834882 </td>
+   <td style="text-align:right;"> 3.515615e-13 </td>
+  </tr>
+</tbody>
+</table></div>
+
+<br>
+
+Here are the actual coefficients from those models, including 95% confidence intervals. We will use these coefficients to calculate Dap in Fig. 6. We will write this dataframe to a csv for later use.
+
+
+```r
+mods_swv_gc_tidy <- tidy(mods_swv_gc, fit, conf.int=T) %>% arrange(desc(term))
+
+write_csv(mods_swv_gc_tidy, "phz2019_dPHZ_Dap_lm_coefs.csv")
+
+mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px')
+```
+
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> exp_id </th>
+   <th style="text-align:left;"> run_id </th>
+   <th style="text-align:left;"> term </th>
+   <th style="text-align:right;"> estimate </th>
+   <th style="text-align:right;"> std.error </th>
+   <th style="text-align:right;"> statistic </th>
+   <th style="text-align:right;"> p.value </th>
+   <th style="text-align:right;"> conf.low </th>
+   <th style="text-align:right;"> conf.high </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Biofilm 1 </td>
+   <td style="text-align:left;"> Rep 1 </td>
    <td style="text-align:left;"> signal_SWV </td>
    <td style="text-align:right;"> 0.1513328 </td>
    <td style="text-align:right;"> 0.0039875 </td>
@@ -129,7 +182,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 1 </td>
-   <td style="text-align:left;"> Rep  2 </td>
+   <td style="text-align:left;"> Rep 2 </td>
    <td style="text-align:left;"> signal_SWV </td>
    <td style="text-align:right;"> 0.1045085 </td>
    <td style="text-align:right;"> 0.0034865 </td>
@@ -140,7 +193,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 1 </td>
-   <td style="text-align:left;"> Rep  3 </td>
+   <td style="text-align:left;"> Rep 3 </td>
    <td style="text-align:left;"> signal_SWV </td>
    <td style="text-align:right;"> 0.1203080 </td>
    <td style="text-align:right;"> 0.0079031 </td>
@@ -151,7 +204,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 2 </td>
-   <td style="text-align:left;"> Rep  1 </td>
+   <td style="text-align:left;"> Rep 1 </td>
    <td style="text-align:left;"> signal_SWV </td>
    <td style="text-align:right;"> 0.2791415 </td>
    <td style="text-align:right;"> 0.0036863 </td>
@@ -162,7 +215,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 2 </td>
-   <td style="text-align:left;"> Rep  2 </td>
+   <td style="text-align:left;"> Rep 2 </td>
    <td style="text-align:left;"> signal_SWV </td>
    <td style="text-align:right;"> 0.2125194 </td>
    <td style="text-align:right;"> 0.0077260 </td>
@@ -173,7 +226,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 2 </td>
-   <td style="text-align:left;"> Rep  3 </td>
+   <td style="text-align:left;"> Rep 3 </td>
    <td style="text-align:left;"> signal_SWV </td>
    <td style="text-align:right;"> 0.2230086 </td>
    <td style="text-align:right;"> 0.0077181 </td>
@@ -184,7 +237,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 1 </td>
-   <td style="text-align:left;"> Rep  1 </td>
+   <td style="text-align:left;"> Rep 1 </td>
    <td style="text-align:left;"> (Intercept) </td>
    <td style="text-align:right;"> 0.0000000 </td>
    <td style="text-align:right;"> 0.0000000 </td>
@@ -195,7 +248,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 1 </td>
-   <td style="text-align:left;"> Rep  2 </td>
+   <td style="text-align:left;"> Rep 2 </td>
    <td style="text-align:left;"> (Intercept) </td>
    <td style="text-align:right;"> 0.0000000 </td>
    <td style="text-align:right;"> 0.0000000 </td>
@@ -206,7 +259,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 1 </td>
-   <td style="text-align:left;"> Rep  3 </td>
+   <td style="text-align:left;"> Rep 3 </td>
    <td style="text-align:left;"> (Intercept) </td>
    <td style="text-align:right;"> -0.0000001 </td>
    <td style="text-align:right;"> 0.0000000 </td>
@@ -217,7 +270,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 2 </td>
-   <td style="text-align:left;"> Rep  1 </td>
+   <td style="text-align:left;"> Rep 1 </td>
    <td style="text-align:left;"> (Intercept) </td>
    <td style="text-align:right;"> 0.0000000 </td>
    <td style="text-align:right;"> 0.0000000 </td>
@@ -228,7 +281,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 2 </td>
-   <td style="text-align:left;"> Rep  2 </td>
+   <td style="text-align:left;"> Rep 2 </td>
    <td style="text-align:left;"> (Intercept) </td>
    <td style="text-align:right;"> 0.0000000 </td>
    <td style="text-align:right;"> 0.0000000 </td>
@@ -239,7 +292,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
   </tr>
   <tr>
    <td style="text-align:left;"> Biofilm 2 </td>
-   <td style="text-align:left;"> Rep  3 </td>
+   <td style="text-align:left;"> Rep 3 </td>
    <td style="text-align:left;"> (Intercept) </td>
    <td style="text-align:right;"> 0.0000000 </td>
    <td style="text-align:right;"> 0.0000000 </td>
@@ -253,75 +306,671 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
 
 <br>
 
-Here are the R squared values from those models, which we will add to the respective panels in illustrator.
+# Fig. S6B
+
+First let's read in the data, which are the peak SWV current signals over time from the ∆phz* biofilms:
 
 
 ```r
-mods_swv_gc_glance <- glance(mods_swv_gc, fit) %>% 
-  select(exp_id,run_id,r.squared,adj.r.squared, p.value)
+df_dphz_swv <- read_csv("../../../processing/processed_data/phz_eDNA_2019_signals_long.csv") %>% 
+  filter(echem == 'SWV') %>% 
+  filter(electrode == 'i1' & reactor %in% c('transfer','soak'))
 
-mods_swv_gc_glance %>% kable(digits = 20) %>%  kable_styling() %>% scroll_box(height = '300px')
+ggplot(df_dphz_swv %>% filter(reactor == 'transfer'), aes(x = time, y = signal)) + 
+  geom_point(shape = 21) + facet_wrap(exp~run, scales = 'free')
 ```
 
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
+
+Now we will fit each of these decays with the expression $y = b (x)^{-0.5} + a$ using a nonlinear least squares method, the `nls()` function. Here you can see the model coefficient estimates and confidence intervals for each data set. We will go ahead and save these coefficients as a csv, so that we can use them to calculate Dphys values in main figure 6.
+
+
+```r
+dphz_nls <- df_dphz_swv %>% filter(reactor == 'transfer') %>%
+  group_by(exp, run) %>% 
+  do(
+    tidy(
+      nls(data = ., formula =  signal ~ b * (time)^-0.5 + a, start = c(b = 0.1, a = 1e-07) ),
+      conf.int = T
+    )
+  ) %>% 
+  arrange(desc(term))
+
+# write results to csv for fig 6.
+write_csv(dphz_nls, "phz2019_dPHZ_Dphys_nls_coefs.csv")
+
+# print results here
+dphz_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
+```
+
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp_id </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run_id </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> r.squared </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> adj.r.squared </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
+   <th style="text-align:right;"> exp </th>
+   <th style="text-align:left;"> run </th>
+   <th style="text-align:left;"> term </th>
+   <th style="text-align:right;"> estimate </th>
+   <th style="text-align:right;"> std.error </th>
+   <th style="text-align:right;"> statistic </th>
+   <th style="text-align:right;"> p.value </th>
+   <th style="text-align:right;"> conf.low </th>
+   <th style="text-align:right;"> conf.high </th>
   </tr>
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> Biofilm 1 </td>
-   <td style="text-align:left;"> Rep  1 </td>
-   <td style="text-align:right;"> 0.9910550 </td>
-   <td style="text-align:right;"> 0.9903669 </td>
-   <td style="text-align:right;"> 1.055808e-14 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 2.8459e-06 </td>
+   <td style="text-align:right;"> 3.730e-08 </td>
+   <td style="text-align:right;"> 76.37392 </td>
+   <td style="text-align:right;"> 0.0000e+00 </td>
+   <td style="text-align:right;"> 2.7660e-06 </td>
+   <td style="text-align:right;"> 2.9259e-06 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Biofilm 1 </td>
-   <td style="text-align:left;"> Rep  2 </td>
-   <td style="text-align:right;"> 0.9857378 </td>
-   <td style="text-align:right;"> 0.9846407 </td>
-   <td style="text-align:right;"> 2.195505e-13 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 1.8397e-06 </td>
+   <td style="text-align:right;"> 3.440e-08 </td>
+   <td style="text-align:right;"> 53.54277 </td>
+   <td style="text-align:right;"> 0.0000e+00 </td>
+   <td style="text-align:right;"> 1.7660e-06 </td>
+   <td style="text-align:right;"> 1.9134e-06 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Biofilm 1 </td>
-   <td style="text-align:left;"> Rep  3 </td>
-   <td style="text-align:right;"> 0.9468821 </td>
-   <td style="text-align:right;"> 0.9427961 </td>
-   <td style="text-align:right;"> 1.150624e-09 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 2.0603e-06 </td>
+   <td style="text-align:right;"> 3.320e-08 </td>
+   <td style="text-align:right;"> 62.03742 </td>
+   <td style="text-align:right;"> 0.0000e+00 </td>
+   <td style="text-align:right;"> 1.9891e-06 </td>
+   <td style="text-align:right;"> 2.1316e-06 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Biofilm 2 </td>
-   <td style="text-align:left;"> Rep  1 </td>
-   <td style="text-align:right;"> 0.9977380 </td>
-   <td style="text-align:right;"> 0.9975640 </td>
-   <td style="text-align:right;"> 1.380000e-18 </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 2.1195e-06 </td>
+   <td style="text-align:right;"> 1.800e-08 </td>
+   <td style="text-align:right;"> 117.66825 </td>
+   <td style="text-align:right;"> 0.0000e+00 </td>
+   <td style="text-align:right;"> 2.0808e-06 </td>
+   <td style="text-align:right;"> 2.1581e-06 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Biofilm 2 </td>
-   <td style="text-align:left;"> Rep  2 </td>
-   <td style="text-align:right;"> 0.9831090 </td>
-   <td style="text-align:right;"> 0.9818097 </td>
-   <td style="text-align:right;"> 6.600651e-13 </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 4.3024e-06 </td>
+   <td style="text-align:right;"> 1.032e-07 </td>
+   <td style="text-align:right;"> 41.68772 </td>
+   <td style="text-align:right;"> 0.0000e+00 </td>
+   <td style="text-align:right;"> 4.0810e-06 </td>
+   <td style="text-align:right;"> 4.5238e-06 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Biofilm 2 </td>
-   <td style="text-align:left;"> Rep  3 </td>
-   <td style="text-align:right;"> 0.9846676 </td>
-   <td style="text-align:right;"> 0.9834882 </td>
-   <td style="text-align:right;"> 3.515615e-13 </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 2.2664e-06 </td>
+   <td style="text-align:right;"> 3.250e-08 </td>
+   <td style="text-align:right;"> 69.81429 </td>
+   <td style="text-align:right;"> 0.0000e+00 </td>
+   <td style="text-align:right;"> 2.1968e-06 </td>
+   <td style="text-align:right;"> 2.3360e-06 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> -3.8110e-07 </td>
+   <td style="text-align:right;"> 1.640e-08 </td>
+   <td style="text-align:right;"> -23.30704 </td>
+   <td style="text-align:right;"> 0.0000e+00 </td>
+   <td style="text-align:right;"> -4.1620e-07 </td>
+   <td style="text-align:right;"> -3.4600e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> -2.3510e-07 </td>
+   <td style="text-align:right;"> 1.510e-08 </td>
+   <td style="text-align:right;"> -15.58687 </td>
+   <td style="text-align:right;"> 3.0000e-10 </td>
+   <td style="text-align:right;"> -2.6750e-07 </td>
+   <td style="text-align:right;"> -2.0280e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> -2.0100e-07 </td>
+   <td style="text-align:right;"> 1.460e-08 </td>
+   <td style="text-align:right;"> -13.76958 </td>
+   <td style="text-align:right;"> 1.6000e-09 </td>
+   <td style="text-align:right;"> -2.3230e-07 </td>
+   <td style="text-align:right;"> -1.6970e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> -8.3000e-08 </td>
+   <td style="text-align:right;"> 7.900e-09 </td>
+   <td style="text-align:right;"> -10.51260 </td>
+   <td style="text-align:right;"> 5.0100e-08 </td>
+   <td style="text-align:right;"> -9.9900e-08 </td>
+   <td style="text-align:right;"> -6.6100e-08 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> -5.9640e-07 </td>
+   <td style="text-align:right;"> 4.500e-08 </td>
+   <td style="text-align:right;"> -13.24111 </td>
+   <td style="text-align:right;"> 2.6000e-09 </td>
+   <td style="text-align:right;"> -6.9300e-07 </td>
+   <td style="text-align:right;"> -4.9980e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> 7.8100e-08 </td>
+   <td style="text-align:right;"> 1.420e-08 </td>
+   <td style="text-align:right;"> 5.48665 </td>
+   <td style="text-align:right;"> 8.0121e-05 </td>
+   <td style="text-align:right;"> 4.7600e-08 </td>
+   <td style="text-align:right;"> 1.0860e-07 </td>
   </tr>
 </tbody>
 </table></div>
-
 <br>
 
-# Fig. 6B
+Now we are going to take those coefficient estimates and predict datapoints that those values would generate at 1000 timepoints in the window our data is in. Essentially, we are going to generate the best fit line from those parameters and the 95% confidence interval so that we can plot it with the original datapoints.
+
+
+```r
+dphz_grid <- tibble(time = seq(0.4, max(df_dphz_swv$time), length.out = 1000))
+
+dphz_coefs <- left_join(dphz_nls %>% filter(term == 'b'),
+                      dphz_nls %>% filter(term == 'a'), 
+                      by = c('exp','run'), suffix = c('_b','_a'))
+
+dphz_grid <- left_join(df_dphz_swv %>% filter(reactor == 'transfer') %>% group_by(reactor, exp, run) %>% summarise(),
+                       dphz_grid %>% mutate(reactor = 'transfer'), by = c('reactor'))
+
+dphz_grid_coef <- left_join(dphz_grid, dphz_coefs, by  = c('exp','run'))
+
+dphz_preds <- dphz_grid_coef %>% 
+  mutate(pred = estimate_b * (time^-0.5) + estimate_a) %>% 
+  mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
+  mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
+
+write_csv(dphz_preds, "phz2019_dPHZ_Dphys_preds.csv")
+
+# print simple results here
+dphz_preds %>% 
+  select(reactor,exp, run, time, pred, pred_high, pred_low, estimate_b, 
+         conf.low_b, conf.high_b, estimate_a, conf.low_a, conf.high_a) %>% 
+  head() %>% kable(digits = 7) %>% kable_styling()
+```
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> reactor </th>
+   <th style="text-align:right;"> exp </th>
+   <th style="text-align:left;"> run </th>
+   <th style="text-align:right;"> time </th>
+   <th style="text-align:right;"> pred </th>
+   <th style="text-align:right;"> pred_high </th>
+   <th style="text-align:right;"> pred_low </th>
+   <th style="text-align:right;"> estimate_b </th>
+   <th style="text-align:right;"> conf.low_b </th>
+   <th style="text-align:right;"> conf.high_b </th>
+   <th style="text-align:right;"> estimate_a </th>
+   <th style="text-align:right;"> conf.low_a </th>
+   <th style="text-align:right;"> conf.high_a </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:right;"> 0.4000000 </td>
+   <td style="text-align:right;"> 4.1e-06 </td>
+   <td style="text-align:right;"> 4.3e-06 </td>
+   <td style="text-align:right;"> 4.0e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.9e-06 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -3e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:right;"> 0.4429596 </td>
+   <td style="text-align:right;"> 3.9e-06 </td>
+   <td style="text-align:right;"> 4.1e-06 </td>
+   <td style="text-align:right;"> 3.7e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.9e-06 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -3e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:right;"> 0.4859193 </td>
+   <td style="text-align:right;"> 3.7e-06 </td>
+   <td style="text-align:right;"> 3.9e-06 </td>
+   <td style="text-align:right;"> 3.6e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.9e-06 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -3e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:right;"> 0.5288789 </td>
+   <td style="text-align:right;"> 3.5e-06 </td>
+   <td style="text-align:right;"> 3.7e-06 </td>
+   <td style="text-align:right;"> 3.4e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.9e-06 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -3e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:right;"> 0.5718385 </td>
+   <td style="text-align:right;"> 3.4e-06 </td>
+   <td style="text-align:right;"> 3.5e-06 </td>
+   <td style="text-align:right;"> 3.2e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.9e-06 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -3e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:right;"> 0.6147981 </td>
+   <td style="text-align:right;"> 3.2e-06 </td>
+   <td style="text-align:right;"> 3.4e-06 </td>
+   <td style="text-align:right;"> 3.1e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.8e-06 </td>
+   <td style="text-align:right;"> 2.9e-06 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -4e-07 </td>
+   <td style="text-align:right;"> -3e-07 </td>
+  </tr>
+</tbody>
+</table>
+<br>
+
+Now they we have those predictions we can plot everything together:
+
+
+```r
+ggplot(dphz_preds, aes(x = time, y = pred)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
+  geom_path(linetype = 2)+
+  geom_point(data =df_dphz_swv %>% filter(reactor == 'transfer'), aes(x = time, y = signal) , shape = 21)+
+  facet_wrap(exp~run, scale = 'free')
+```
+
+<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" />
+
+```r
+ggplot(df_dphz_swv %>% filter(exp == 1 & run == 1 & reactor == 'transfer'), aes(x = time, y = signal)) + 
+  geom_vline(xintercept = 0.1)+
+  geom_smooth(method = "nls", 
+    formula = y ~ b * (x)^-0.5 + a, method.args = list(start = c(b = 0.1, 
+        a = 1e-07)), se = F)+
+  geom_point(shape = 21)+
+  facet_wrap(~exp, scales = 'free')
+```
+
+<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" />
+
+
+# Fig. S6C
+
+
+
+```r
+df_blank_swv <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_blank_tran_time_signals.csv") %>% 
+  filter(reactor == 'transfer' & PHZadded != '10uM') %>% 
+  mutate(PHZadded = fct_relevel(PHZadded, c('25uM','50uM','75uM','100uM') ))
+
+ggplot(df_blank_swv, aes(x = time, y = signal)) + 
+  geom_point(shape = 21) + facet_wrap(~PHZadded, scales = 'free')
+```
+
+<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" />
+
+Now we will fit each of these decays with the expression $y = b (x)^{-0.5} + a$ using a nonlinear least squares method, the `nls()` function. Here you can see the model coefficient estimates and confidence intervals for each data set. We will go ahead and save these coefficients as a csv, so that we can use them to calculate Dphys values in main figure 6.
+
+
+```r
+blank_nls <- df_blank_swv%>%
+  group_by(PHZadded) %>% 
+  do(
+    tidy(
+      nls(data = ., formula =  signal ~ b * (time)^-0.5 + a, start = c(b = 0.1, a = 1e-07) ),
+      conf.int = T
+    )
+  ) %>% 
+  arrange(desc(term))
+
+# write results to csv for fig 6.
+write_csv(blank_nls, "phz2019_blank_Dphys_nls_coefs.csv")
+
+# print results here
+blank_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
+```
+
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> PHZadded </th>
+   <th style="text-align:left;"> term </th>
+   <th style="text-align:right;"> estimate </th>
+   <th style="text-align:right;"> std.error </th>
+   <th style="text-align:right;"> statistic </th>
+   <th style="text-align:right;"> p.value </th>
+   <th style="text-align:right;"> conf.low </th>
+   <th style="text-align:right;"> conf.high </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> 25uM </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 2.5820e-07 </td>
+   <td style="text-align:right;"> 6.40e-09 </td>
+   <td style="text-align:right;"> 40.21524 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 2.4530e-07 </td>
+   <td style="text-align:right;"> 2.7110e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 50uM </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 6.8810e-07 </td>
+   <td style="text-align:right;"> 1.72e-08 </td>
+   <td style="text-align:right;"> 39.94904 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 6.5350e-07 </td>
+   <td style="text-align:right;"> 7.2280e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 75uM </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 7.1070e-07 </td>
+   <td style="text-align:right;"> 1.29e-08 </td>
+   <td style="text-align:right;"> 54.90900 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 6.8470e-07 </td>
+   <td style="text-align:right;"> 7.3670e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 100uM </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 1.2004e-06 </td>
+   <td style="text-align:right;"> 3.57e-08 </td>
+   <td style="text-align:right;"> 33.60837 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 1.1286e-06 </td>
+   <td style="text-align:right;"> 1.2722e-06 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 25uM </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> 5.7510e-07 </td>
+   <td style="text-align:right;"> 5.50e-09 </td>
+   <td style="text-align:right;"> 105.50380 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 5.6410e-07 </td>
+   <td style="text-align:right;"> 5.8600e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 50uM </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> 4.6600e-07 </td>
+   <td style="text-align:right;"> 1.45e-08 </td>
+   <td style="text-align:right;"> 32.10654 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 4.3690e-07 </td>
+   <td style="text-align:right;"> 4.9520e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 75uM </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> 5.1180e-07 </td>
+   <td style="text-align:right;"> 1.10e-08 </td>
+   <td style="text-align:right;"> 46.57613 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 4.8970e-07 </td>
+   <td style="text-align:right;"> 5.3390e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 100uM </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> 3.0720e-07 </td>
+   <td style="text-align:right;"> 3.02e-08 </td>
+   <td style="text-align:right;"> 10.18376 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 2.4660e-07 </td>
+   <td style="text-align:right;"> 3.6790e-07 </td>
+  </tr>
+</tbody>
+</table></div>
+<br>
+
+Now we are going to take those coefficient estimates and predict datapoints that those values would generate at 1000 timepoints in the window our data is in. Essentially, we are going to generate the best fit line from those parameters and the 95% confidence interval so that we can plot it with the original datapoints.
+
+
+```r
+blank_grid <- tibble(time = seq(0.05, max(df_blank_swv$time), length.out = 1000))
+
+blank_coefs <- left_join(blank_nls %>% filter(term == 'b'),
+                      blank_nls %>% filter(term == 'a'), 
+                      by = c('PHZadded'), suffix = c('_b','_a'))
+
+blank_grid <- left_join(df_blank_swv %>% group_by(reactor, PHZadded) %>% summarise(),
+                       blank_grid %>% mutate(reactor = 'transfer'), by = c('reactor'))
+
+blank_grid_coef <- left_join(blank_grid, blank_coefs, by  = c('PHZadded'))
+
+blank_preds <- blank_grid_coef %>% 
+  mutate(pred = estimate_b * (time^-0.5) + estimate_a) %>% 
+  mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
+  mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
+
+write_csv(blank_preds, "phz2019_blank_Dphys_preds.csv")
+
+# print simple results here
+blank_preds %>% 
+  select(reactor,PHZadded, time, pred, pred_high, pred_low, estimate_b, 
+         conf.low_b, conf.high_b, estimate_a, conf.low_a, conf.high_a) %>% 
+  head() %>% kable(digits = 7) %>% kable_styling()
+```
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> reactor </th>
+   <th style="text-align:left;"> PHZadded </th>
+   <th style="text-align:right;"> time </th>
+   <th style="text-align:right;"> pred </th>
+   <th style="text-align:right;"> pred_high </th>
+   <th style="text-align:right;"> pred_low </th>
+   <th style="text-align:right;"> estimate_b </th>
+   <th style="text-align:right;"> conf.low_b </th>
+   <th style="text-align:right;"> conf.high_b </th>
+   <th style="text-align:right;"> estimate_a </th>
+   <th style="text-align:right;"> conf.low_a </th>
+   <th style="text-align:right;"> conf.high_a </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:left;"> 25uM </td>
+   <td style="text-align:right;"> 0.0500000 </td>
+   <td style="text-align:right;"> 1.7e-06 </td>
+   <td style="text-align:right;"> 1.8e-06 </td>
+   <td style="text-align:right;"> 1.7e-06 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 2e-07 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:left;"> 25uM </td>
+   <td style="text-align:right;"> 0.0571238 </td>
+   <td style="text-align:right;"> 1.7e-06 </td>
+   <td style="text-align:right;"> 1.7e-06 </td>
+   <td style="text-align:right;"> 1.6e-06 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 2e-07 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:left;"> 25uM </td>
+   <td style="text-align:right;"> 0.0642476 </td>
+   <td style="text-align:right;"> 1.6e-06 </td>
+   <td style="text-align:right;"> 1.7e-06 </td>
+   <td style="text-align:right;"> 1.5e-06 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 2e-07 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:left;"> 25uM </td>
+   <td style="text-align:right;"> 0.0713714 </td>
+   <td style="text-align:right;"> 1.5e-06 </td>
+   <td style="text-align:right;"> 1.6e-06 </td>
+   <td style="text-align:right;"> 1.5e-06 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 2e-07 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:left;"> 25uM </td>
+   <td style="text-align:right;"> 0.0784952 </td>
+   <td style="text-align:right;"> 1.5e-06 </td>
+   <td style="text-align:right;"> 1.6e-06 </td>
+   <td style="text-align:right;"> 1.4e-06 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 2e-07 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> transfer </td>
+   <td style="text-align:left;"> 25uM </td>
+   <td style="text-align:right;"> 0.0856190 </td>
+   <td style="text-align:right;"> 1.5e-06 </td>
+   <td style="text-align:right;"> 1.5e-06 </td>
+   <td style="text-align:right;"> 1.4e-06 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 2e-07 </td>
+   <td style="text-align:right;"> 3e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+   <td style="text-align:right;"> 6e-07 </td>
+  </tr>
+</tbody>
+</table>
+<br>
+
+Now they we have those predictions we can plot everything together:
+
+
+```r
+ggplot(blank_preds, aes(x = time, y = pred)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
+  geom_path(linetype = 2)+
+  geom_point(data =df_blank_swv, aes(x = time, y = signal) , shape = 21)+
+  facet_wrap(~PHZadded, scale = 'free')
+```
+
+<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" />
+
+```r
+ggplot(df_blank_swv, aes(x = time, y = signal)) + 
+  geom_smooth(method = "nls", 
+    formula = y ~ b * (x)^-0.5 + a, method.args = list(start = c(b = 0.1, 
+        a = 1e-07)), se = F)+
+  geom_point(shape = 21)+
+  facet_wrap(~PHZadded, scales = 'free')
+```
+
+<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" />
+
+```r
+ggplot(df_blank_swv %>% filter(PHZadded == '75uM'), aes(x = time, y = signal)) + 
+  geom_vline(xintercept = 0.1)+
+  geom_smooth(method = "nls", 
+    formula = y ~ b * (x)^-0.5 + a, method.args = list(start = c(b = 0.1, 
+        a = 1e-07)), se = F)+
+  geom_point(shape = 21)+
+  facet_wrap(~PHZadded, scales = 'free')
+```
+
+<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-11-3.png" width="672" style="display: block; margin: auto;" />
+
+# Create figure
+
+
+```r
+theme_set(theme_figure())
+```
 
 -----
 
@@ -331,7 +980,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.3 (2019-03-11)
+## R version 3.5.2 (2018-12-20)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -346,23 +995,23 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 broom_0.5.2      
-##  [4] kableExtra_1.1.0  cowplot_0.9.4     forcats_0.4.0    
-##  [7] stringr_1.4.0     dplyr_0.8.1       purrr_0.3.2      
-## [10] readr_1.3.1       tidyr_0.8.3       tibble_2.1.3     
-## [13] ggplot2_3.2.1     tidyverse_1.2.1  
+##  [1] viridis_0.5.1     viridisLite_0.3.0 modelr_0.1.2     
+##  [4] broom_0.5.1       kableExtra_1.0.1  cowplot_0.9.4    
+##  [7] forcats_0.3.0     stringr_1.3.1     dplyr_0.8.1      
+## [10] purrr_0.2.5       readr_1.3.1       tidyr_0.8.2      
+## [13] tibble_2.1.3      ggplot2_3.2.0     tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
-##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.4     readxl_1.3.1     munsell_0.5.0    gtable_0.3.0    
-## [17] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       highr_0.8        Rcpp_1.0.2       scales_1.0.0    
-## [25] backports_1.1.4  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
-## [29] hms_0.4.2        digest_0.6.21    stringi_1.4.3    grid_3.5.3      
-## [33] cli_1.1.0        tools_3.5.3      magrittr_1.5     lazyeval_0.2.2  
-## [37] crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.0       lubridate_1.7.4 
-## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10 
-## [45] R6_2.4.0         nlme_3.1-137     compiler_3.5.3
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
+##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
+## [13] readxl_1.2.0     munsell_0.5.0    gtable_0.2.0     cellranger_1.1.0
+## [17] rvest_0.3.2      evaluate_0.14    labeling_0.3     knitr_1.23      
+## [21] highr_0.7        Rcpp_1.0.1       scales_1.0.0     backports_1.1.3 
+## [25] webshot_0.5.1    jsonlite_1.6     gridExtra_2.3    hms_0.4.2       
+## [29] digest_0.6.18    stringi_1.2.4    grid_3.5.2       cli_1.1.0       
+## [33] tools_3.5.2      magrittr_1.5     lazyeval_0.2.1   crayon_1.3.4    
+## [37] pkgconfig_2.0.2  MASS_7.3-51.1    xml2_1.2.0       lubridate_1.7.4 
+## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0
+## [45] R6_2.4.0         nlme_3.1-140     compiler_3.5.2
 ```

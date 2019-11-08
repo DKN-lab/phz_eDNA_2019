@@ -34,25 +34,7 @@ knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, m
 source("../../tools/plotting_tools.R")
 
 # Modify the plot theme 
-theme_1 <- function () { 
-  theme_classic( ) %+replace% 
-    theme(
-      axis.line = element_line(color = 'black', size = 0.25),
-      axis.ticks = element_line(color = 'black', size = 0.25),
-      axis.text = element_text( size=6),
-      axis.title=element_text(size=6),
-      strip.text = element_text(size = 6),
-      strip.background = element_blank(),
-      legend.background = element_blank(),
-      legend.title=element_text(size=6),
-      legend.text=element_text(size=6),
-      legend.text.align=0,
-      panel.spacing = unit(0,'cm'),
-      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
-    )
-}
-
-theme_set(theme_1())
+theme_set(theme_notebook())
 ```
 
 
@@ -304,6 +286,9 @@ plot_dphz_etbr
 
 
 ```{r}
+
+theme_set(theme_figure())
+
 #l_plots <- align_plots(plot_redox + labs(title = NULL), plot_pel_styled, align = 'v', axis = 'l')
 
 #top_panel <- plot_grid(l_plots[[1]], plot_toto, dnase_plot_styled, ncol = 3, rel_widths = c(0.5, 0.5, 1), align = 'h', axis = 'tb', labels = c('B','C','D'), scale = 0.95, label_size = 12)

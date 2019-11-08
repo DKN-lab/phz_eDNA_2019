@@ -34,25 +34,8 @@ knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, m
 # Load plotting tools
 source("../../tools/plotting_tools.R")
 
-# Modify the plot theme 
-theme_1 <- function () { 
-  theme_classic( ) %+replace% 
-    theme(
-      axis.ticks = element_line(color = 'black'),
-      axis.text = element_text( size=6),
-      axis.title=element_text(size=6),
-      strip.text = element_text(size = 6),
-      strip.background = element_blank(),
-      legend.background = element_blank(),
-      legend.title=element_text(size=6),
-      legend.text=element_text(size=6),
-      legend.text.align=0,
-      panel.spacing = unit(0,'cm'),
-      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
-    )
-}
-
-theme_set(theme_1())
+#Modify the plot theme
+theme_set(theme_notebook())
 ```
 
 -----
@@ -73,17 +56,17 @@ wt_extracts <- read_csv('../../../data/LC-MS/HPLC_data_colonies_02_16_18.csv')
 wt_extracts %>% kable() %>% kable_styling() %>% scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Name </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> strain </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> material </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> replicate </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> RT </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Area </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Channel Name </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Amount </th>
+   <th style="text-align:left;"> Name </th>
+   <th style="text-align:left;"> strain </th>
+   <th style="text-align:left;"> material </th>
+   <th style="text-align:right;"> replicate </th>
+   <th style="text-align:right;"> RT </th>
+   <th style="text-align:right;"> Area </th>
+   <th style="text-align:left;"> Channel Name </th>
+   <th style="text-align:right;"> Amount </th>
   </tr>
  </thead>
 <tbody>
@@ -298,7 +281,7 @@ plot_wt_fixed <- ggplot(wt_conc_means, aes(x = material, fill = material)) +
 #Plot styling
 plot_wt_fixed +
   labs(x = NULL, y = expression("Phenazine concentration" ~ ( mu*M ))) + 
-  theme(axis.title.x = element_text(size = 14)) 
+  theme(axis.title.x = element_text(size = 14), line = element_line(color = 'black', size = 0.25)) 
 ```
 
 <img src="phz2019_Fig_1_colony_retention_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" />
@@ -381,21 +364,21 @@ dphz_extracts %>%
   scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> measured_phenazine </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> strain </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> amount_added </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> added_phenazine </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> material </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> replicate </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> RT </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Area </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Channel Name </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Amount </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> calcConc </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> added_phz_num </th>
+   <th style="text-align:left;"> measured_phenazine </th>
+   <th style="text-align:left;"> strain </th>
+   <th style="text-align:left;"> amount_added </th>
+   <th style="text-align:left;"> added_phenazine </th>
+   <th style="text-align:left;"> material </th>
+   <th style="text-align:right;"> replicate </th>
+   <th style="text-align:right;"> RT </th>
+   <th style="text-align:right;"> Area </th>
+   <th style="text-align:left;"> Channel Name </th>
+   <th style="text-align:right;"> Amount </th>
+   <th style="text-align:right;"> calcConc </th>
+   <th style="text-align:right;"> added_phz_num </th>
   </tr>
  </thead>
 <tbody>
@@ -2581,7 +2564,7 @@ dphz_extracts_means <- dphz_extracts %>%
 
 # Plot layout
 plot_dphz_binding <- ggplot(dphz_extracts_means, aes(x=added_phz_num,y=calcConc))+
-  geom_line(size=1, aes(y=mean,color=measured_phenazine))+
+  geom_line(size=0.5, aes(y=mean,color=measured_phenazine))+
   geom_point(size=1, shape = 21, aes(fill=measured_phenazine))
 
 plot_dphz_binding <- ggplot(dphz_extracts_means, aes(x=added_phz_num,y=calcConc))+
@@ -2663,6 +2646,8 @@ pdaMan_indPhz_plot_styled
 
 
 ```r
+theme_set(theme_figure())
+
 top_panel <- plot_grid(NULL, wt_ret_ratio_styled, ncol = 2, rel_widths = c(2.5,1), scale = 1.0, labels = c('',"E"))
 
 bottom_panel <- plot_grid(plot_wt_free_styled, plot_dphz_binding_styled, 
@@ -2680,9 +2665,9 @@ fig_1
 
 
 ```r
-top_panel <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, ncol = 2, rel_widths = c(1.5,1), scale = 0.95, labels = c('D',"E"), align = 'hv', axis = 'tblr')
+top_panel <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, ncol = 2, rel_widths = c(1.5,1), scale = 0.95, labels = c('E',"F"), align = 'hv', axis = 'tblr',label_size = 12)
 
-bottom_panel <- plot_grid(plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('F',"G"), align = 'hv', axis = 'tblr')
+bottom_panel <- plot_grid(plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('G',"H"), align = 'hv', axis = 'tblr',label_size = 12)
 
 fig_1 <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_heights = c(1,1), rel_widths = c(1,1), align = 'hv', axis = 'tblr')
 
@@ -2709,7 +2694,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.3 (2019-03-11)
+## R version 3.5.2 (2018-12-20)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -2724,23 +2709,23 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.1.0 
-##  [4] cowplot_0.9.4     forcats_0.4.0     stringr_1.4.0    
-##  [7] dplyr_0.8.1       purrr_0.3.2       readr_1.3.1      
-## [10] tidyr_0.8.3       tibble_2.1.3      ggplot2_3.2.1    
+##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.0.1 
+##  [4] cowplot_0.9.4     forcats_0.3.0     stringr_1.3.1    
+##  [7] dplyr_0.8.1       purrr_0.2.5       readr_1.3.1      
+## [10] tidyr_0.8.2       tibble_2.1.3      ggplot2_3.2.0    
 ## [13] tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
-##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.4     readxl_1.3.1     munsell_0.5.0    gtable_0.3.0    
-## [17] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       highr_0.8        broom_0.5.2      Rcpp_1.0.2      
-## [25] scales_1.0.0     backports_1.1.4  webshot_0.5.1    jsonlite_1.6    
-## [29] gridExtra_2.3    hms_0.4.2        digest_0.6.21    stringi_1.4.3   
-## [33] grid_3.5.3       cli_1.1.0        tools_3.5.3      magrittr_1.5    
-## [37] lazyeval_0.2.2   crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.0      
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
+##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
+## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
+## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
+## [21] knitr_1.23       highr_0.7        broom_0.5.1      Rcpp_1.0.1      
+## [25] scales_1.0.0     backports_1.1.3  webshot_0.5.1    jsonlite_1.6    
+## [29] gridExtra_2.3    hms_0.4.2        digest_0.6.18    stringi_1.2.4   
+## [33] grid_3.5.2       cli_1.1.0        tools_3.5.2      magrittr_1.5    
+## [37] lazyeval_0.2.1   crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0      
 ## [41] lubridate_1.7.4  assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0      
-## [45] rstudioapi_0.10  R6_2.4.0         nlme_3.1-137     compiler_3.5.3
+## [45] rstudioapi_0.9.0 R6_2.4.0         nlme_3.1-140     compiler_3.5.2
 ```

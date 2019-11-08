@@ -3,6 +3,8 @@
 library(hms)
 library(lubridate)
 
+#################################################################################################
+
 extract_minutes <- function(filename,line=1) {
   #Reads first line of a file into a lubridate time object
   #Date format is month-day-year_hour_minute_second
@@ -18,8 +20,12 @@ extract_minutes <- function(filename,line=1) {
   minutes
 }
 
+#################################################################################################
 
 echem_min <- function(df,unique_id_cols,max_E=0.1,min_E=-0.5,reduce=T){
+  
+  #Finds the minimum value within a potential range within a dataset
+  #Dataset is determined by grouping by unique id columns
   
   df_mins <- df %>% 
     filter(E<=max_E & E>=min_E) %>% 
@@ -34,9 +40,12 @@ echem_min <- function(df,unique_id_cols,max_E=0.1,min_E=-0.5,reduce=T){
   df_mins
 }
 
+#################################################################################################
+
 echem_max <- function(df,unique_id_cols,max_E=0.1,min_E=-0.5,reduce=T){
   
-  #unique_group <- quos(...)
+  #Finds the maximum value within a potential range within a dataset
+  #Dataset is determined by grouping by unique id columns
   
   df_maxs <- df %>% 
     filter(E<=max_E & E>=min_E) %>% 
@@ -51,7 +60,12 @@ echem_max <- function(df,unique_id_cols,max_E=0.1,min_E=-0.5,reduce=T){
   df_maxs
 }
 
+#################################################################################################
+
 echem_signal <- function(df,unique_id_cols,max_interval=c(0.1,-0.5),min_interval=c(0.1,-0.5)){
+  
+  #Function uses echem_max() and echem_min() to find min and max points in each scan
+  #Returns 'signal' which is max - min current
   
   df_maxs <- echem_max(df,max_E=max_interval[1],min_E=max_interval[2],unique_id_cols)
   df_mins <- echem_min(df,max_E=min_interval[1],min_E=min_interval[2],unique_id_cols)
@@ -63,7 +77,7 @@ echem_signal <- function(df,unique_id_cols,max_interval=c(0.1,-0.5),min_interval
   
 }
 
-
+#################################################################################################
 
 echem_import <- function(filenames, file_paths, data_cols = c('E', 'i1', 'i2', 't'), skip_rows=18) {
   
@@ -77,6 +91,8 @@ echem_import <- function(filenames, file_paths, data_cols = c('E', 'i1', 'i2', '
   
   files_df
 }
+
+#################################################################################################
 
 echem_unnest_df <- function(df, filename_cols,rep=F, PHZadded = T) {
   
@@ -103,6 +119,8 @@ df_unnested
 
 }
 
+#################################################################################################
+
 echem_import_to_df <- function(filenames, 
   file_paths, 
   data_cols = c('E', 'i1', 'i2', 't'), 
@@ -118,9 +136,4 @@ echem_import_to_df <- function(filenames,
   
   df_unnested
   
-}
-
-echem_ggplot_test <- function(df){
-  p <- ggplot(df,aes(PHZaddedInt,signal))+geom_point()
-  print(p)
 }

@@ -35,26 +35,8 @@ knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, m
 # Load plotting tools
 source("../../tools/plotting_tools.R")
 
-# Modify the plot theme 
-theme_1 <- function () { 
-  theme_classic( ) %+replace% 
-    theme(
-      axis.line = element_line(color = 'black', size = 0.25),
-      axis.ticks = element_line(color = 'black', size = 0.25),
-      axis.text = element_text( size=6),
-      axis.title=element_text(size=6),
-      strip.text = element_text(size = 6),
-      strip.background = element_blank(),
-      legend.background = element_blank(),
-      legend.title=element_text(size=6),
-      legend.text=element_text(size=6),
-      legend.text.align=0,
-      panel.spacing = unit(0,'cm'),
-      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm')
-    )
-}
-
-theme_set(theme_1())
+# Modify the plot theme
+theme_set(theme_notebook())
 ```
 
 # Results
@@ -157,6 +139,8 @@ ggplot(df_kin_meta, aes(x = min, y = intensity, color = DNA)) + geom_point() + f
 Ok, the intensity trends we observed with the spectra looks the same here. There are no obvious differences in slope, so I still don't think we can say anything about reaction rates...they all proceed too fast.
 
 ```{r}
+
+theme_set(theme_figure())
 
 fig_3 <- plot_grid(NULL, plot_ctDNA_690, ncol = 2, scale = 0.95, labels = 'AUTO', label_size = 12, rel_widths = c(1,1.5))
 
