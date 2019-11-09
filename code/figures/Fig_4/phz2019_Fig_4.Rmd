@@ -26,6 +26,8 @@ Setup packages and plotting for the notebook:
 library(tidyverse)
 library(cowplot)
 library(kableExtra)
+library(modelr)
+library(broom)
 
 # Code display options
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)

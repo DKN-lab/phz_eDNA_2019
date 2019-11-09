@@ -15,9 +15,11 @@ output:
 
 # Notes
 
-Links to IDA processing and to supp figure.
+To see how we got from the raw electrochemical scans to the datasets used here, please see the following notebooks:
 
-Panel A is a diagram.
+* [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
+
+This supplemental figure and notebook underlies some of the data in main figure 6, particularly the final panel. Specifically the model coefficients for the blank $D_{ap}$ Fig. S7C. These data are saved as .csv files in the directory containing this notebook.
 
 ----
 
@@ -42,12 +44,9 @@ theme_set(theme_notebook())
 ```
 
 
-
-
-
 # Fig. S7A
 
-First we will import the blank IDA data that will be used for panels A-D. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
+First we will import the blank IDA data that will be used for panels A-D. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
 
 Let's read in the data and convert the µM units to $mol / cm^3$, which will be important to calculate $D_{ap}$ in correct units.
 
@@ -251,6 +250,15 @@ plot_cal_dap_styled
 
 ```{r}
 theme_set(theme_figure())
+
+
+fig_s7 <- plot_grid(plot_GC_styled, plot_SWV_styled, 
+          plot_swvGC_styled, plot_cal_dap_styled, 
+          align = 'hv', axis = 'tblr',scale = 0.95, labels = 'AUTO', label_size = 12)
+
+fig_s7
+
+save_plot("../../../../figures/supplement/phz2019_Fig_S7.pdf", fig_s7, base_height = 4, base_width = 5)
 ```
 
 -----

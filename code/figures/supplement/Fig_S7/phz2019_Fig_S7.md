@@ -15,9 +15,11 @@ output:
 
 # Notes
 
-Links to IDA processing and to supp figure.
+To see how we got from the raw electrochemical scans to the datasets used here, please see the following notebooks:
 
-Panel A is a diagram.
+* [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
+
+This supplemental figure and notebook underlies some of the data in main figure 6, particularly the final panel. Specifically the model coefficients for the blank $D_{ap}$ Fig. S7C. These data are saved as .csv files in the directory containing this notebook.
 
 ----
 
@@ -43,12 +45,9 @@ theme_set(theme_notebook())
 ```
 
 
-
-
-
 # Fig. S7A
 
-First we will import the blank IDA data that will be used for panels A-D. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
+First we will import the blank IDA data that will be used for panels A-D. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
 
 Let's read in the data and convert the µM units to $mol / cm^3$, which will be important to calculate $D_{ap}$ in correct units.
 
@@ -368,6 +367,19 @@ plot_cal_dap_styled
 
 ```r
 theme_set(theme_figure())
+
+
+fig_s7 <- plot_grid(plot_GC_styled, plot_SWV_styled, 
+          plot_swvGC_styled, plot_cal_dap_styled, 
+          align = 'hv', axis = 'tblr',scale = 0.95, labels = 'AUTO', label_size = 12)
+
+fig_s7
+```
+
+<img src="phz2019_Fig_S7_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
+
+```r
+save_plot("../../../../figures/supplement/phz2019_Fig_S7.pdf", fig_s7, base_height = 4, base_width = 5)
 ```
 
 -----
@@ -378,7 +390,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -393,23 +405,23 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 broom_0.5.1      
-##  [4] kableExtra_1.0.1  cowplot_0.9.4     forcats_0.3.0    
-##  [7] stringr_1.3.1     dplyr_0.8.1       purrr_0.2.5      
-## [10] readr_1.3.1       tidyr_0.8.2       tibble_2.1.3     
-## [13] ggplot2_3.2.0     tidyverse_1.2.1  
+##  [1] viridis_0.5.1     viridisLite_0.3.0 broom_0.5.2      
+##  [4] kableExtra_1.1.0  cowplot_0.9.4     forcats_0.4.0    
+##  [7] stringr_1.4.0     dplyr_0.8.1       purrr_0.3.2      
+## [10] readr_1.3.1       tidyr_0.8.3       tibble_2.1.3     
+## [13] ggplot2_3.2.1     tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
-## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       highr_0.7        Rcpp_1.0.1       scales_1.0.0    
-## [25] backports_1.1.3  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
-## [29] hms_0.4.2        digest_0.6.18    stringi_1.2.4    grid_3.5.2      
-## [33] cli_1.1.0        tools_3.5.2      magrittr_1.5     lazyeval_0.2.1  
-## [37] crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4 
-## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0
-## [45] R6_2.4.0         nlme_3.1-140     compiler_3.5.2
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
+##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
+## [13] modelr_0.1.4     readxl_1.3.1     munsell_0.5.0    gtable_0.3.0    
+## [17] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
+## [21] knitr_1.23       highr_0.8        Rcpp_1.0.2       scales_1.0.0    
+## [25] backports_1.1.4  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
+## [29] hms_0.4.2        digest_0.6.21    stringi_1.4.3    grid_3.5.3      
+## [33] cli_1.1.0        tools_3.5.3      magrittr_1.5     lazyeval_0.2.2  
+## [37] crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.0       lubridate_1.7.4 
+## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10 
+## [45] R6_2.4.0         nlme_3.1-137     compiler_3.5.3
 ```

@@ -217,7 +217,7 @@ To do this we will use another function from the echem tools to find the min and
 swv_data <- bind_rows(swv_data_1, swv_data_2) 
 
 # ID columns for function below
-unique_id_cols = c('reactor','run','echem','rep','rep','minutes','electrode', 'exp')
+unique_id_cols = c('reactor','run','echem','rep','minutes','electrode', 'exp')
 
 # Use `echem_signal()` from echem tools to find min/max points in each scan
 swv_signals <- echem_signal(df = swv_data, 
@@ -257,7 +257,7 @@ Let's repeat a similar process for the GC data. First we will quantify using `ec
 
 gc_data <- bind_rows(gc_data_1, gc_data_2)  
 
-unique_id_cols = c('reactor','run','echem','rep','rep','minutes','electrode', 'exp')
+unique_id_cols = c('reactor','run','echem','rep','minutes','electrode', 'exp')
 
 gc_signals <- echem_signal(df = gc_data %>% filter(electrode == 'i2') %>% mutate(current = - current), 
                             unique_id_cols = unique_id_cols,
