@@ -15,9 +15,20 @@ output:
 
 # Notes
 
-Links to IDA processing and to supp figure.
-
 Panel A is a diagram.
+
+To see how we got from the raw electrochemical scans to the datasets used here, please see the following processing notebooks:
+
+* [IDA ∆phz biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
+* [IDA WT biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
+* [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
+
+Then see how those data were analyzed in these notebooks for supplemental figures S6 and S7:
+
+* [Fig. S6](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html)
+* [Fig. S7](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html)
+
+These supplemental figure notebooks produced model coefficients that are used in this notebook.
 
 ----
 
@@ -370,10 +381,14 @@ df_plot_dphys <- df_dphys %>%
 df_plot_dap_dphys <- bind_rows(df_plot_dap, df_plot_dphys)
 
 plot_dap_dphys <- ggplot(df_plot_dap_dphys, aes(x = coef, y = estimate, shape = factor(exp))) + 
-  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0)) + facet_wrap(~IDA, scales = 'free') + 
-  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) + scale_shape_manual(values = c(21,22,23))
+  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + facet_wrap(~IDA, scales = 'free') + 
+  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) 
 
-plot_dap_dphys
+plot_dap_dphys_styled <- plot_dap_dphys +
+  labs(x = NULL, y = expression(D~(cm^2 / sec)))+ 
+  scale_shape_manual(values = c(21,22,23), guide = F)
+
+plot_dap_dphys_styled
 ```
 
 <img src="phz2019_Fig_6_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
@@ -384,23 +399,21 @@ plot_dap_dphys
 ```r
 theme_set(theme_figure())
 
-plot_dap_dphys
-```
-
-<img src="phz2019_Fig_6_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" />
-
-```r
 fig_6_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, ncol = 2, rel_heights = c(1,2))
 
-fig_6 <- plot_grid(fig_6_insets, plot_blank_dphz_decay, 
+fig_6 <- plot_grid(fig_6_insets, plot_blank_dphz_decay_styled, 
                    plot_swv_styled, plot_gc_styled, 
-                   plot_swv_gc_styled, plot_dap_dphys, 
+                   plot_swv_gc_styled, plot_dap_dphys_styled, 
                    ncol = 2, labels = 'AUTO', label_size = 12, scale = 0.95, align = 'hv', axis = 'tblr')
 
-fig_6
-```
+fig_6 <- plot_grid(fig_6_insets, plot_swv_styled, plot_gc_styled, 
+                   plot_swv_gc_styled, plot_blank_dphz_decay_styled, plot_dap_dphys_styled, 
+                   ncol = 3, labels = 'AUTO', label_size = 12, scale = 0.95, align = 'hv', axis = 'tblr')
 
-<img src="phz2019_Fig_6_files/figure-html/unnamed-chunk-13-2.png" width="672" style="display: block; margin: auto;" />
+#fig_6
+
+save_plot("../../../figures/phz2019_Fig_6.pdf", fig_6, base_height = 4, base_width = 7)
+```
 
 -----
 
@@ -410,7 +423,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -425,24 +438,24 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.0.1 
-##  [4] cowplot_0.9.4     forcats_0.3.0     stringr_1.3.1    
-##  [7] dplyr_0.8.1       purrr_0.2.5       readr_1.3.1      
-## [10] tidyr_0.8.2       tibble_2.1.3      ggplot2_3.2.0    
+##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.1.0 
+##  [4] cowplot_0.9.4     forcats_0.4.0     stringr_1.4.0    
+##  [7] dplyr_0.8.1       purrr_0.3.2       readr_1.3.1      
+## [10] tidyr_0.8.3       tibble_2.1.3      ggplot2_3.2.1    
 ## [13] tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
-## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       broom_0.5.1      Rcpp_1.0.1       scales_1.0.0    
-## [25] backports_1.1.3  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
-## [29] hms_0.4.2        digest_0.6.18    stringi_1.2.4    grid_3.5.2      
-## [33] cli_1.1.0        tools_3.5.2      magrittr_1.5     lazyeval_0.2.1  
-## [37] crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4 
-## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0
-## [45] R6_2.4.0         nlme_3.1-140     compiler_3.5.2
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
+##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
+## [13] modelr_0.1.4     readxl_1.3.1     munsell_0.5.0    gtable_0.3.0    
+## [17] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
+## [21] knitr_1.23       broom_0.5.2      Rcpp_1.0.2       scales_1.0.0    
+## [25] backports_1.1.4  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
+## [29] hms_0.4.2        digest_0.6.21    stringi_1.4.3    grid_3.5.3      
+## [33] cli_1.1.0        tools_3.5.3      magrittr_1.5     lazyeval_0.2.2  
+## [37] crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.0       lubridate_1.7.4 
+## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10 
+## [45] R6_2.4.0         nlme_3.1-137     compiler_3.5.3
 ```
 

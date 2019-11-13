@@ -15,9 +15,20 @@ output:
 
 # Notes
 
-Links to IDA processing and to supp figure.
-
 Panel A is a diagram.
+
+To see how we got from the raw electrochemical scans to the datasets used here, please see the following processing notebooks:
+
+* [IDA ∆phz biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
+* [IDA WT biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
+* [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
+
+Then see how those data were analyzed in these notebooks for supplemental figures S6 and S7:
+
+* [Fig. S6](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html)
+* [Fig. S7](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html)
+
+These supplemental figure notebooks produced model coefficients that are used in this notebook.
 
 ----
 

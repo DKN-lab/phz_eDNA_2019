@@ -42,3 +42,105 @@ theme_set(theme_notebook())
 ```
 
 # Fig. 5
+
+```{r}
+wt_ca <- read_csv("../../../data/Electrochemistry/IDA/08_31_18_fernanda_wt_CA.csv") %>% mutate(strain = 'WT')
+dPHZ_ca <- read_csv("../../../data/Electrochemistry/IDA/08_31_18_fernanda_dPHZpyo_CA.csv") %>% mutate(strain = 'dPHZ')
+
+df_ca <- bind_rows(wt_ca[seq(1,nrow(wt_ca), 100),],dPHZ_ca[seq(1,nrow(wt_ca), 100),])
+
+ggplot(wt_ca[seq(1,nrow(wt_ca), 100),], aes(x = Time_h, y = I_nA)) + geom_point()
+
+ggplot(dPHZ_ca[seq(1,nrow(wt_ca), 100),], aes(x = Time_h, y = I_nA)) + geom_point()
+
+# Plot Layout
+plot_ca <- ggplot(df_ca, aes(x = Time_h, y = I_nA, color = strain)) + geom_path(size = 1)
+
+plot_ca_2 <- ggplot(df_ca %>% filter(Time_h<65), aes(x = Time_h, y = I_nA, color = strain)) + 
+  geom_path(size = 1) + 
+  ylim(0, 3)
+
+# Plot Styling
+plot_ca_styled <- plot_ca+
+  scale_color_manual(breaks = c('WT','dPHZ'), labels = c('WT', expression(Delta*phz)), values = c("#FFCC66","#66CCFF")) +
+  labs(x = 'Time (hr)', y = expression(I[ca]~(nA)), color = NULL)+
+  theme(legend.position = c(0.2,0.75), legend.background = element_blank()) 
+
+plot_ca_styled
+
+plot_ca_2_styled <- plot_ca_2+
+  scale_color_manual(breaks = c('WT','dPHZ'), 
+                     labels = c('WT', expression(Delta*phz)), 
+                     values = c("#FFCC66","#66CCFF"),
+                     guide = F) +
+  labs(x = 'Time (hr)', y = expression(I~(nA)), color = NULL)+
+  theme(legend.position = c(0.2,0.75), legend.background = element_blank()) 
+
+plot_ca_2_styled
+```
+
+Updated - 03/11/19 dPHZ biofilms +/- PYO chronoamperometry
+
+```{r}
+ca_data <- read_csv("../../../data/Electrochemistry/IDA/dPHZ_metabolic_current.csv", comment = "#") %>% 
+  mutate(Strain = ifelse(Rep==1 & PYO=="+","WT","dPHZ")) %>% 
+  mutate(id = paste(Strain,PYO, Rep, sep = " "))
+
+ggplot(ca_data[seq(1,nrow(ca_data), 100),] %>% filter(time_h<90), 
+       aes(x = time_h, y = I_nA)) + 
+  geom_path(aes(color = id, group = id), size = 1) + 
+  ylim(0,3.5)
+
+plot_ca_3 <- ggplot(ca_data[seq(1,nrow(ca_data), 100),] %>% filter(time_h<90) %>% filter(id %in% c("dPHZ - 2", "WT + 1", "dPHZ + 2")), 
+       aes(x = time_h, y = I_nA)) + 
+  geom_path(aes(color = id, group = id), size = 1) + 
+  ylim(0,3.5)
+
+plot_ca_3_styled <- plot_ca_3+
+  scale_color_manual(breaks = c("dPHZ - 2", "WT + 1", "dPHZ + 2"),
+                     values = c("#FFCC66","gray","#66CCFF"),
+                     labels = c('dPHZ - PYO', 'WT','dPHZ + PYO'),
+                     guide = F) +
+  labs(x = 'Time (hr)', y = expression(I~(nA)), color = NULL)
+  
+plot_ca_3_styled
+```
+1 nA * 75 hrs = 2.7e-4 C = 270uC
+
+assume 2 electrons per PYO = 135u
+
+```{r}
+wt_gc <- read_csv("../../../data/Electrochemistry/IDA/WT_newMedia_postEquil_GC.txt", skip = 21,col_names =c('E', 'i1', 'i2', 't')) %>% mutate(strain='WT')
+dphz_gc <- read_csv("../../../data/Electrochemistry/IDA/dPHZ_d3_newMedia_GC_3mVs.txt", skip = 0,col_names =c('E', 'i1', 'i2', 't') ) %>% mutate(strain = 'dPHZ')
+dphz_pyo_gc <- read_csv("../../../data/Electrochemistry/IDA/A_75uM_PYO_GC_2.txt",skip = 21,col_names =c('E', 'i1', 'i2', 't')) %>% mutate(strain = 'dPHZ_PYO')
+
+basic_gc <- bind_rows(wt_gc,dphz_gc,dphz_pyo_gc) %>% 
+  group_by(strain,E) %>% 
+  mutate(max_i1 = max(i1)) %>% 
+  mutate(min_i2 = min(i2)) 
+
+basic_gc$strain = fct_relevel(basic_gc$strain, c("dPHZ","WT","dPHZ_PYO"))
+
+# Plot Layout
+plot_gcBasic <- ggplot(basic_gc %>% filter(E<=0), aes(x = E , y = min_i2 , color = strain)) + 
+  geom_vline(xintercept = -0.265, linetype=2, color = 'gray') + 
+  geom_path( size = 1) + 
+  geom_path(aes(y = max_i1), size = 1)
+
+# Plot Styling
+plot_gcBasic_styled <- plot_gcBasic +
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  scale_color_manual(breaks = c("WT","dPHZ","dPHZ_PYO"), 
+                     labels = c('WT', expression(Delta*phz), expression(Delta*phz + PYO)), 
+                     values = c( "#FFCC66","#66CCFF","gray")) + 
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)), color = NULL) +
+  theme(legend.position = c(0.2,0.8), legend.background = element_blank()) +
+  annotate('text', x = -0.2, y = -2e-8, label = 'Collector', size = 5) +
+  annotate('text', x = -0.2, y = 3e-8, label = 'Generator', size = 5)+
+  annotate('text', x = -0.3, y = 4e-8,label = expression({E^0}[pyo]) )
+
+
+
+plot_gcBasic_styled
+```
