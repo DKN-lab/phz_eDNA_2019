@@ -93,7 +93,7 @@ ggplot(ca_data[seq(1,nrow(ca_data), 100),] %>% filter(time_h<90),
 
 plot_ca_3 <- ggplot(ca_data[seq(1,nrow(ca_data), 100),] %>% filter(time_h<90) %>% filter(id %in% c("dPHZ - 2", "WT + 1", "dPHZ + 2")), 
        aes(x = time_h, y = I_nA)) + 
-  geom_path(aes(color = id, group = id), size = 1) + 
+  geom_path(aes(color = id, group = id), size = 0.5) + 
   ylim(0,3.5)
 
 plot_ca_3_styled <- plot_ca_3+
@@ -123,9 +123,9 @@ basic_gc$strain = fct_relevel(basic_gc$strain, c("dPHZ","WT","dPHZ_PYO"))
 
 # Plot Layout
 plot_gcBasic <- ggplot(basic_gc %>% filter(E<=0), aes(x = E , y = min_i2 , color = strain)) + 
-  geom_vline(xintercept = -0.265, linetype=2, color = 'gray') + 
-  geom_path( size = 1) + 
-  geom_path(aes(y = max_i1), size = 1)
+  geom_vline(xintercept = -0.265, linetype=2, color = 'gray', size = 0.5) + 
+  geom_path( size = 0.5) + 
+  geom_path(aes(y = max_i1), size = 0.5)
 
 # Plot Styling
 plot_gcBasic_styled <- plot_gcBasic +
@@ -136,11 +136,20 @@ plot_gcBasic_styled <- plot_gcBasic +
                      values = c( "#FFCC66","#66CCFF","gray")) + 
   labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)), color = NULL) +
   theme(legend.position = c(0.2,0.8), legend.background = element_blank()) +
-  annotate('text', x = -0.2, y = -2e-8, label = 'Collector', size = 5) +
-  annotate('text', x = -0.2, y = 3e-8, label = 'Generator', size = 5)+
-  annotate('text', x = -0.3, y = 4e-8,label = expression({E^0}[pyo]) )
+  annotate('text', x = -0.2, y = -2e-8, label = 'Collector', size = 2) +
+  annotate('text', x = -0.2, y = 3e-8, label = 'Generator', size = 2)+
+  annotate('text', x = -0.3, y = 4e-8,label = expression({E^0}[pyo]), size = 2 )
 
 
 
 plot_gcBasic_styled
+```
+
+```{r}
+theme_set(theme_figure())
+
+fig_4 <- plot_grid(plot_ca_3_styled,plot_ca_3_styled, plot_gcBasic_styled,plot_gcBasic_styled, 
+                   align = 'hv', axis = 'tblr', rel_widths = c(1.25,2,1.25,2), ncol = 4, scale = 0.95, labels = c('F','G','H','I'), label_size = 12)
+
+save_plot("../../../figures/phz2019_Fig_4.pdf", fig_4, base_width = 7, base_height = 1.5)
 ```

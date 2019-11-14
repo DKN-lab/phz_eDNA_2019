@@ -102,12 +102,12 @@ labels = labels = c('PBS + PYO[ox]','PYO[red] + PBS','PCA[red] + PYO[ox]','PCN[r
 
 plot_ctDNA_690 <- ggplot(df_690, aes(x = red_ox, y = mean, color = DNA)) +  
   geom_hline(yintercept = 0.033, linetype = 2, color = 'light gray')+
-  geom_jitter(aes(y = intensity), shape = 21, position = position_jitterdodge(dodge.width = 0.4, jitter.width = 0.1, jitter.height = 0))+
-  geom_pointrange(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.4), size = 0.5, fatten = 0.75) + 
+  geom_jitter(aes(y = intensity, shape = DNA),color = 'black', size = 0.5, stroke = 0.2, position = position_jitterdodge(dodge.width = 0.4, jitter.width = 0.1, jitter.height = 0))+
+  geom_pointrange(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.4),size = 0.5, fatten = 0.5) + 
   scale_x_discrete(limits = c('PBS_PYO','PYO_PBS','PCA_PYO','PCN_PYO'), labels = parse(text = labels )) + 
   scale_color_manual(breaks = c(F,T), labels = c('-DNA','+DNA'), values = colorblind_palette)+
   labs(x = NULL, y = 'Absorbance at 690nm', color = NULL) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.5,1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.5,1)) + scale_shape_manual(values = c(21,22))
 
 plot_ctDNA_690
 ```
@@ -377,7 +377,7 @@ fig_4 <- plot_grid(plot_ctDNA_690, plot_ctDNA_690, plot_ctDNA_690,
           plot_fac, plot_fac, plot_bg_spec, 
           ncol = 3, scale = 0.95, align = 'hv', axis = 'tlr', labels = 'AUTO', label_size = 12)
 
-fig_4
+#fig_4
 
 save_plot("../../../figures/phz2019_Fig_3combo.pdf", fig_4, base_height = 6, base_width = 7)
 ```
