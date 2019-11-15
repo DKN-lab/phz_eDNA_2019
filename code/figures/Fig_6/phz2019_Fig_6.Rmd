@@ -94,8 +94,8 @@ df_preds <- bind_rows(df_dphz_preds, df_blank_preds)
 df_decays <- bind_rows(df_dphz_swv_decay, df_blank_decay)
 
 plot_blank_dphz_decay <- ggplot(df_preds, aes(x = time, y = pred, group = IDA, fill = time)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
-  geom_path(linetype = 2)+
-  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21) + guides(fill = 'none')
+  geom_path(linetype = 2, size = 0.5)+
+  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21, size = 1) + guides(fill = 'none')
 
 plot_blank_dphz_decay_styled <- plot_blank_dphz_decay+
   labs(x = 'Time (min)', y = expression(I[swv]~(nA)), fill = 'Time (min)') +
@@ -121,13 +121,13 @@ df_swv_sig <- read_csv("../../processing/processed_data/phz_eDNA_2019_signals_lo
 
 # Plot Layout
 plot_swv <- ggplot(df_swv %>% filter(E<=0), aes(x = E , y = current )) +
-  geom_vline(xintercept = -0.265, linetype=2, color = 'gray') + 
-  geom_path(aes(group = rep, color = rep)) + 
-  geom_point(data = df_swv_sig, aes(x = E_from_maxs , y = current_from_maxs , fill = rep), shape = 21,size = 2) 
+  geom_vline(xintercept = -0.265, linetype=2, color = 'gray', size = 0.5) + 
+  geom_path(aes(group = rep, color = rep), size = 0.5) + 
+  geom_point(data = df_swv_sig, aes(x = E_from_maxs , y = current_from_maxs , fill = rep), shape = 21,size = 1) 
 
 # Plot Styling
 plot_swv_styled <- plot_swv + 
-  annotate('text', x = -0.2, y = 3.5e-6,label = expression({E^0}[pyo]) )+
+  annotate('text', x = -0.2, y = 3.5e-6,label = expression({E^0}[pyo]), size = 2 )+
   scale_x_reverse(labels = mV_label)+
   scale_y_continuous(labels = nA_label)+
   scale_fill_viridis(guide = F) + 
@@ -146,13 +146,13 @@ convert to norm time??
 
 # Plot Layout
 plot_swv_sig <- ggplot(data = df_swv_sig, aes(x = time, y = signal))+
-  geom_point(shape = 21, size = 1, aes(fill = time))
+  geom_point(shape = 21, size = 0.75, aes(fill = time))
 
 # Plot Styling
 plot_swv_sig_styled <- plot_swv_sig +
-  labs(x = 'Time (min)', y = expression(I[swv]~(nA)), fill = 'Time (min)') +
+  labs(x = 'Time (min)', y = NULL, fill = 'Time (min)') +
   scale_fill_viridis(guide = F) +
-  scale_y_continuous(labels = nA_label)
+  scale_y_continuous(labels = nA_label)+ xlim(0,NA)
 
 plot_swv_sig_styled
 
@@ -170,17 +170,17 @@ df_gc_sig <- read_csv("../../processing/processed_data/phz_eDNA_2019_signals_lon
 
 # Plot Layout
 plot_gc <- ggplot() + 
-  geom_vline(xintercept = -0.265, linetype=2, color = 'gray') + 
+  geom_vline(xintercept = -0.265, linetype=2, color = 'gray', size = 0.5) + 
   geom_path(data=df_gc %>% filter(electrode=='i1'), 
-            aes(x = E , y = current , group = rep, color = rep)) + 
+            aes(x = E , y = current , group = rep, color = rep), size = 0.5) + 
   geom_path(data=df_gc %>% filter(electrode=='i2'), 
-            aes(x = E , y = current, group = rep, color = rep)) +
+            aes(x = E , y = current, group = rep, color = rep), size = 0.5) +
   geom_point(data = df_gc_sig, 
-             aes(x = E_from_maxs , y = -current_from_maxs , fill = rep), shape = 21, size = 2) 
+             aes(x = E_from_maxs , y = -current_from_maxs , fill = rep), shape = 21, size = 1) 
 
 # Plot styling
 plot_gc_styled <- plot_gc +
-  annotate('text', x = -0.2, y = 3.5e-7,label = expression({E^0}[pyo]) )+
+  annotate('text', x = -0.2, y = 3.5e-7,label = expression({E^0}[pyo]),, size = 2 )+
   scale_x_reverse(labels = mV_label)+
   scale_y_continuous(labels = nA_label)+
   scale_fill_viridis(guide=F) + 
@@ -200,13 +200,13 @@ need to mod
 
 # Plot Layout
 plot_gc_sig <- ggplot(data = df_gc_sig, aes(x = time, y = signal))+
-  geom_point(shape = 21, size = 1, aes(fill = time))
+  geom_point(shape = 21, size = 0.75, aes(fill = time))
 
 # Plot Styling
 plot_gc_sig_styled <- plot_gc_sig +
-  labs(x = 'Time (min)', y = expression(I[gc]~(nA)), fill = 'Time (min)') +
+  labs(x = 'Time (min)', y = NULL, fill = 'Time (min)') +
   scale_fill_viridis(guide = F) +
-  scale_y_continuous(labels = nA_label)
+  scale_y_continuous(labels = nA_label) + xlim(0,NA)
 
 plot_gc_sig_styled
 
@@ -222,8 +222,8 @@ df_swv_gc_sig <- read_csv("../../processing/processed_data/phz_eDNA_2019_swv_gc_
 # Plot Layout
 plot_swv_gc <- ggplot(df_swv_gc_sig %>% filter(rep>0), 
                            aes(x = signal_SWV, y = signal_GC)) +
-  geom_smooth(method = 'lm', se = T, color = 'black', linetype = 2) +
-  geom_point(shape = 21, size = 2, aes(fill = time_SWV))
+  geom_smooth(method = 'lm', se = T, color = 'black', linetype = 2, size = 0.5) +
+  geom_point(shape = 21, size = 1, aes(fill = time_SWV))
 
 # Plot Styling
 plot_swv_gc_styled <- plot_swv_gc + 
@@ -238,11 +238,15 @@ plot_swv_gc_styled
 
 # Fig. 6F
 
-1. Take biofilm linear models from fig. S6 and convert into Dap.
-2. Take blank linear model from Fig. S7 and convert into Dap
-3. Take nonlinear models from fig. S6 and join with Dap data. Then calculate Dphys from nonlinear fit coefficient and Dap.
+In order to construct figure 5F we must do a few analysis steps using data analysed for Figs S6 and S7. This is somewhat complicated, because to calculate $D_{loss}$ we need the $D_{ap}$ value and the SWV soak value (I0) for each run. Therefore we will do the following:
+
+1. Take biofilm linear models (SWV vs. GC) from fig. S6 and calculate $D_{ap}$.
+2. Take blank linear model (SWV vs. GC) from Fig. S7 and calculate $D_{ap}$.
+3. Take nonlinear models from fig. S6 and join with $D_{ap}$ values and initial current I0, which is taken to be the peak current from the soak reactors before each run. Then calculate $D_{loss}$ from nonlinear fit coefficient, $D_{ap}$ and I0.
 
 ## $D_{ap}$
+
+First let's read in the linear model coefficients from Figs S6 and S7. Recall that this linear model was used to fit the SWV vs. GC data plots and that the slope is proportional to $\sqrt{D_{ap}}$. 
 
 ```{r}
 
@@ -251,13 +255,22 @@ df_dphz_lm <- read_csv("../supplement/Fig_S6/phz2019_dPHZ_Dap_lm_coefs.csv") %>%
 df_blank_lm <- read_csv("../supplement/Fig_S7/phz2019_blank_Dap_lm_coefs.csv") %>% mutate(IDA = 'blank')
 
 df_all_lm <- bind_rows(df_dphz_lm, df_blank_lm)
+
+df_all_lm %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-Let's redefine the function we used in [Fig. S7]() to calculate $D_{ap}$ from the slope of the SWV vs. GC line.
+<br>
+
+So you can see we have estimated the slopes for each dataset (term 'signal_SWV' 'estimate'), including confidence intervals. Now let's redefine the function we used in [Fig. S7]() to calculate $D_{ap}$ from the slope of the SWV vs. GC line.
+
+Recall that for this type of data:
+
+$$D_{ap} = \frac{1}{\pi t_p} \left( \frac{m A \psi}{S} \right) ^2$$  
 
 ```{r}
-dap_from_swvGC <- function(m, t_p=1/(2*300)){
+dap_from_swvGC <- function(m){
   
+  t_p <- 1/(2*300)
   psi <-  0.7
   A <-  0.025 #cm^2
   S <-  18.4 #cm
@@ -268,7 +281,7 @@ dap_from_swvGC <- function(m, t_p=1/(2*300)){
 }
 ```
 
-Now we'll convert slope into $D_{ap}$ estimates (with confidence intervals).
+Now we'll convert slope into $D_{ap}$ estimates (with confidence intervals) using our function `dap_from_swvGC()`, and we will go ahead and plot the biofilm and blank values:
 
 ```{r}
 
@@ -277,6 +290,7 @@ df_all_dap <- df_all_lm %>%
   mutate(dap=dap_from_swvGC(m = estimate)) %>% 
   mutate(dap_high = dap_from_swvGC(m = conf.high)) %>% 
   mutate(dap_low = dap_from_swvGC(m = conf.low)) %>% 
+  
 # Add back id variables for matching below  
   mutate(run = case_when(
     run_id == 'Rep 1' ~ 1,
@@ -291,28 +305,36 @@ df_all_dap <- df_all_lm %>%
   mutate(run = ifelse(exp_id == 'Blank 1',4,run))
 
 
-ggplot(df_all_dap, aes(x = exp_id, y = dap)) + geom_pointrange(aes(ymin = dap_low, ymax = dap_high))
+ggplot(df_all_dap, aes(x = exp_id, y = dap)) + 
+  geom_pointrange(aes(ymin = dap_low, ymax = dap_high), position = position_jitter(width = 0.1, height = 0)) + 
+  ylim(2e-7,2e-5)
 ```
 
-## $D_{phys}$
+## $D_{loss}$
 
-Combine nls fits for blank and dphz. Add Dap estimates for each. Add I0 estimates for each. Define Dphys calculator function then apply. 
+Now we will calculate $D_{loss}$, so we first need the model coefficients from the SWV decay signals from Fig S6. We also need the peak SWV current from each scan in the soak reactor before it was transferred - this will serve as our value for initial current I0. Lastly, we also need the $D_{ap}$ values calculated above. Below we will read in those data and put them all together in one data frame that we can work with.
 
 ```{r}
+# Biofilm SWV decay fits and soak I0's
+
 df_dphz_nls <- read_csv("../supplement/Fig_S6/phz2019_dPHZ_Dphys_nls_coefs.csv")
 df_dphz_i0 <- read_csv("../../processing/processed_data/phz_eDNA_2019_swv_signals.csv") %>% 
   filter(reactor == 'soak' & electrode == 'i1') %>% 
   mutate(run = as.double(run)) %>% 
   select(exp, run, i0 = signal)
 
+# Join all biofilm data together
+
 df_dphz_nls_i0 <- left_join(df_dphz_nls, df_dphz_i0, by = c('exp','run')) %>% mutate(IDA = 'biofilm')
 
-
+# Blank SWV decay fits and soak I0's
 
 df_blank_nls <- read_csv("../supplement/Fig_S6/phz2019_blank_Dphys_nls_coefs.csv")
 df_blank_i0 <- read_csv("../../processing/processed_data/phz_eDNA_2019_swv_blank_signals.csv") %>% 
   filter(reactor == 'soak') %>% 
   select(PHZadded, i0 = signal)
+
+# Join all blank data together
 
 df_blank_nls_i0 <- left_join(df_blank_nls, df_blank_i0, by = c('PHZadded')) %>% 
   mutate(exp = 3, IDA = 'blank') %>% 
@@ -325,54 +347,159 @@ df_blank_nls_i0 <- left_join(df_blank_nls, df_blank_i0, by = c('PHZadded')) %>%
     PHZadded == '100uM' ~ 4
   ))
 
+# Join the biofilm and blank data
+
 df_all_nls_i0 <- bind_rows(df_dphz_nls_i0, df_blank_nls_i0) %>% filter(term == 'b') %>% 
   select(exp, run,b_estimate = estimate, b_low = conf.low, b_high = conf.high, i0, IDA, PHZadded)
 
+# Add the Dap values for the biofilm and blank data
+
 df_all_dap_i0 <- left_join(df_all_nls_i0, df_all_dap %>% select(exp, run, IDA, dap, dap_high, dap_low),
                            by = c('exp','run','IDA'))
+
+df_all_dap_i0 %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
 ```
+<br>
+
+Recall that each of the decays with the expression: 
+
+$$y = b (x)^{-0.5} + a$$ 
+
+So the variable `b` is the model coefficient we will use here. 
+
+As defined in the supplementary text, we can define $D_{loss}$ as follows:
+
+$$D_{loss} = \frac{I_0^2 D_{ap} t_s}{\pi b^2}$$
+
+Now that we have all the required values, we can define a function to calculate $D_{loss}$:
 
 ```{r}
 
-dphys_from_nls <- function(estimate, i0, dap, t_s=0.1){
+dloss_from_nls <- function(estimate, i0, dap, t_s=0.1){
   
-  dphys <- ( i0^2 * dap * t_s ) / (pi* estimate^2)
+  dloss <- ( i0^2 * dap * t_s ) / (pi* estimate^2)
   
-  dphys
+  dloss
 }
 
-df_dphys <- df_all_dap_i0 %>% 
-  mutate(dphys = dphys_from_nls(estimate = b_estimate, i0 = i0, dap = dap, t_s = 0.02)) %>% 
-  mutate(dphys_high = dphys_from_nls(estimate = b_high, i0=i0, dap = dap_high, t_s = 0.02)) %>%
-  mutate(dphys_low = dphys_from_nls(estimate = b_low, i0=i0, dap = dap_low, t_s = 0.02))
-
-ggplot(df_dphys, aes(x = IDA, y = dphys)) + geom_pointrange(aes(ymin = dphys_low, ymax = dphys_high, shape = factor(exp))) + scale_y_log10()
 ```
 
+We will calculate $D_{loss}$ using a reasonable guess for the scan time parameter $t_s$, 6ms. The scan time is not a known parameter, so there is uncertainty in this guess.
 
 ```{r}
+df_dloss <- df_all_dap_i0 %>% 
+  mutate(dloss = dloss_from_nls(estimate = b_estimate, i0 = i0, dap = dap, t_s = 0.006)) %>% 
+  mutate(dloss_high = dloss_from_nls(estimate = b_high, i0=i0, dap = dap_high, t_s = 0.006)) %>%
+  mutate(dloss_low = dloss_from_nls(estimate = b_low, i0=i0, dap = dap_low, t_s = 0.006))
 
-df_plot_dap <- df_dphys %>% 
+
+
+ggplot(df_dloss, aes(x = IDA, y = dloss)) + 
+  geom_pointrange(aes(ymin = dloss_low, ymax = dloss_high, shape = factor(exp)), position = position_jitter(width = 0.1, height = 0)) + 
+  scale_y_log10() + scale_shape_manual(values = c(21,22,23), guide = F)
+```
+
+Now we can compare $D_{loss}$ and $D_{ap}$ graphically:
+
+```{r}
+df_plot_dap <- df_dloss %>% 
   select(exp, run, IDA, estimate = dap, estimate_high = dap_high, estimate_low = dap_low ) %>% 
   mutate(coef = 'Dap') %>% 
   distinct()
 
-df_plot_dphys <- df_dphys %>% 
-  select(exp, run, IDA, estimate = dphys, estimate_high = dphys_high, estimate_low = dphys_low ) %>% 
-  mutate(coef = 'Dphys')
+df_plot_dloss <- df_dloss %>% 
+  select(exp, run, IDA, estimate = dloss, estimate_high = dloss_high, estimate_low = dloss_low ) %>% 
+  mutate(coef = 'Dloss')
 
-df_plot_dap_dphys <- bind_rows(df_plot_dap, df_plot_dphys)
+df_plot_dap_dloss <- bind_rows(df_plot_dap, df_plot_dloss)
 
-plot_dap_dphys <- ggplot(df_plot_dap_dphys, aes(x = coef, y = estimate, shape = factor(exp))) + 
+plot_dap_dloss <- ggplot(df_plot_dap_dloss, aes(x = coef, y = estimate, shape = factor(exp))) + 
+  geom_hline(yintercept = 7e-6, linetype = 2, color = 'light gray', size= 0.5)+
   geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + facet_wrap(~IDA, scales = 'free') + 
   scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) 
 
-plot_dap_dphys_styled <- plot_dap_dphys +
+plot_dap_dloss_styled <- plot_dap_dloss +
   labs(x = NULL, y = expression(D~(cm^2 / sec)))+ 
-  scale_shape_manual(values = c(21,22,23), guide = F)
+  scale_shape_manual(values = c(21,22,23), guide = F) + 
+  scale_x_discrete(breaks = c('Dap','Dloss'), labels=c(expression(D[ap]),expression(D[loss])))
 
-plot_dap_dphys_styled
+plot_dap_dloss_styled
 ```
+
+Let's go ahead and calculate the mean values for $D_{loss}$ and $D_{ap}$ in the biofilm and the blank:
+
+```{r}
+df_dloss %>% group_by(IDA) %>% summarise(mean_dap = mean(dap), mean_dloss = mean(dloss))
+
+```
+
+Overall, this seems reasonable, but you can see that the blank $D_{loss}$ is lower than the blank $D_{ap}$. We aimed to obtain a conservative estimate of biofilm $D_{loss}$, so given the uncertainty in the scan time, we decided to choose a value that made the blank $D_{loss}$ equal to the blank $D_{ap}$.
+
+Redoing the above analysis with a value of $t_s = 21ms$ yields the following results:
+
+```{r}
+df_dloss <- df_all_dap_i0 %>% 
+  mutate(dloss = dloss_from_nls(estimate = b_estimate, i0 = i0, dap = dap, t_s = 0.021)) %>% 
+  mutate(dloss_high = dloss_from_nls(estimate = b_high, i0=i0, dap = dap_high, t_s = 0.021)) %>%
+  mutate(dloss_low = dloss_from_nls(estimate = b_low, i0=i0, dap = dap_low, t_s = 0.021))
+
+ggplot(df_dloss, aes(x = IDA, y = dloss)) + 
+  geom_pointrange(aes(ymin = dloss_low, ymax = dloss_high, shape = factor(exp)), position = position_jitter(width = 0.1, height = 0)) +
+  scale_y_log10()+ scale_shape_manual(values = c(21,22,23), guide = F)
+```
+
+And comparing $D_{loss}$ and $D_{ap}$ now yields the plot for figure 5F:
+
+```{r}
+
+df_plot_dap <- df_dloss %>% 
+  select(exp, run, IDA, estimate = dap, estimate_high = dap_high, estimate_low = dap_low ) %>% 
+  mutate(coef = 'Dap') %>% 
+  distinct()
+
+df_plot_dloss <- df_dloss %>% 
+  select(exp, run, IDA, estimate = dloss, estimate_high = dloss_high, estimate_low = dloss_low ) %>% 
+  mutate(coef = 'Dloss')
+
+df_plot_dap_dloss <- bind_rows(df_plot_dap, df_plot_dloss)
+
+plot_dap_dloss <- ggplot(df_plot_dap_dloss, aes(x = coef, y = estimate, shape = factor(exp))) + 
+  geom_hline(yintercept = 7e-6, linetype = 2, color = 'light gray', size= 0.5)+
+  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + facet_wrap(~IDA, scales = 'free') + 
+  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) 
+
+plot_dap_dloss_styled <- plot_dap_dloss +
+  labs(x = NULL, y = expression(D~(cm^2 / sec)))+ 
+  scale_shape_manual(values = c(21,22,23), guide = F) + 
+  scale_x_discrete(breaks = c('Dap','Dloss'), labels=c(expression(D[ap]),expression(D[loss])))
+
+plot_dap_dloss_styled
+```
+
+We can calculate the mean $D_{ap}$ and $D_{loss}$ values:
+
+```{r}
+df_dloss %>% group_by(IDA) %>% summarise(mean_dap = mean(dap), mean_dloss = mean(dloss))
+
+```
+
+And we can see that there is a statistically significant difference between the biofilm $D_{ap}$ and $D_{loss}$ whether we pool all the technical replicates: 
+
+```{r}
+df_dloss %>% group_by(IDA) %>% summarise(conf_int_low = t.test(dap, dloss,  alternative = 'greater')$conf.int[1],
+            conf_int_high = t.test(dap,dloss, alternative = 'greater')$conf.int[2],
+            p_value = t.test( dap,dloss, alternative = 'greater')$p.value)
+```
+
+Or by comparing $D_{ap}$ and $D_{loss}$ within each biological replicate: 
+
+```{r}
+df_dloss %>% group_by(exp, IDA) %>%
+  summarise(conf_int_low = t.test(dap, dloss,  alternative = 'greater')$conf.int[1],
+            conf_int_high = t.test(dap,dloss, alternative = 'greater')$conf.int[2],
+            p_value = t.test( dap,dloss, alternative = 'greater')$p.value)
+```
+
 
 # Create figure
 
@@ -383,16 +510,16 @@ fig_6_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, nc
 
 fig_6 <- plot_grid(fig_6_insets, plot_blank_dphz_decay_styled, 
                    plot_swv_styled, plot_gc_styled, 
-                   plot_swv_gc_styled, plot_dap_dphys_styled, 
+                   plot_swv_gc_styled, plot_dap_dloss_styled, 
                    ncol = 2, labels = 'AUTO', label_size = 12, scale = 0.95, align = 'hv', axis = 'tblr')
 
 fig_6 <- plot_grid(fig_6_insets, plot_swv_styled, plot_gc_styled, 
-                   plot_swv_gc_styled, plot_blank_dphz_decay_styled, plot_dap_dphys_styled, 
+                   plot_swv_gc_styled, plot_blank_dphz_decay_styled, plot_dap_dloss_styled, 
                    ncol = 3, labels = 'AUTO', label_size = 12, scale = 0.95, align = 'hv', axis = 'tblr')
 
-#fig_6
+fig_6
 
-save_plot("../../../figures/phz2019_Fig_6.pdf", fig_6, base_height = 4, base_width = 7)
+save_plot("../../../figures/phz2019_Fig_5.pdf", fig_6, base_height = 4, base_width = 7)
 ```
 
 -----
