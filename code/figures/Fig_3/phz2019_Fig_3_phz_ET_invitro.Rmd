@@ -150,6 +150,58 @@ fig_3
 save_plot("../../../figures/phz2019_Fig_3.pdf", fig_3, base_height = 2, base_width = 3.4)
 ```
 
+```{r}
+
+source("../../tools/text_file_import.R")
+```
+
+Now let's setup the filenames, data columns etc, and we can go ahead and import and view the dataframe:
+
+```{r}
+
+#divide swv into rep and subrep and then subtract 1 from rep to match with GC
+paths <-  dir(path='../../../data/Spectroscopy/phz_ET_vs_o2/', pattern = ".+[csv]$",recursive = T,full.names = T)
+
+filenames <- basename(paths)
+
+data_cols <-  c('t','blank','abs690')
+
+filename_cols = c('year','month','day','PHZox','ox','PHZred','red','rep')
+
+skip_rows=48 # or 48
+n_max = 61
+  
+
+df <- import_to_df(filenames = filenames, 
+                                       file_paths = paths, 
+                                       data_cols = data_cols, 
+                                       skip_rows = skip_rows, n_max = n_max,
+                                       filename_cols = filename_cols,
+                                       rep = T, PHZadded = F) %>% 
+  mutate(phz_redox = paste(PHZox, ox, ' + ', PHZred, red, sep = ''))
+
+df %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
+
+```
+<br>
+
+```{r}
+
+ggplot(df, aes(x = t, y = abs690)) + geom_point(shape = 21) + facet_wrap(~phz_redox)
+
+```
+
+```{r}
+
+plot_phzET_o2 <- ggplot(df %>% filter(abs690>-0.01), aes(x = t, y = abs690, color = phz_redox)) + 
+  geom_point(shape = 21, alpha = 0.5, size = 0.5) + 
+  geom_smooth(data = . %>% filter(abs690>0.01 & abs690<0.4), size = 0.5) + 
+  labs(x = 'Time (sec)',y = 'Absorbance at 690nm') + scale_color_manual(values = c('light gray', 'light gray', 'light gray',"#E69F00", "#56B4E9", "#000000")) +   theme(legend.position = c(0.5, 0.8))
+
+plot_phzET_o2
+```
+
+
 ------
 
 # Adding DNA CT to same figure
@@ -372,12 +424,12 @@ save_plot("../../../figures/phz2019_Fig_4.pdf", fig_4, base_height = 4, base_wid
 ```
 
 ```{r}
-fig_4 <- plot_grid(plot_ctDNA_690, plot_ctDNA_690, plot_ctDNA_690,
+fig_4 <- plot_grid(plot_ctDNA_690, plot_ctDNA_690, plot_phzET_o2,
                    plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
           plot_fac, plot_fac, plot_bg_spec, 
           ncol = 3, scale = 0.95, align = 'hv', axis = 'tlr', labels = 'AUTO', label_size = 12)
 
-#fig_4
+fig_4
 
 save_plot("../../../figures/phz2019_Fig_3combo.pdf", fig_4, base_height = 6, base_width = 7)
 ```
