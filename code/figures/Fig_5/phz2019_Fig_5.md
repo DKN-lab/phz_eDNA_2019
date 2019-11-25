@@ -23,7 +23,8 @@ Panel A is a diagram.
 
 Setup packages and plotting for the notebook:
 
-```{r setup, echo=T, message=FALSE, warning=FALSE}
+
+```r
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -43,16 +44,25 @@ theme_set(theme_notebook())
 
 # Fig. 5
 
-```{r}
+
+```r
 wt_ca <- read_csv("../../../data/Electrochemistry/IDA/08_31_18_fernanda_wt_CA.csv") %>% mutate(strain = 'WT')
 dPHZ_ca <- read_csv("../../../data/Electrochemistry/IDA/08_31_18_fernanda_dPHZpyo_CA.csv") %>% mutate(strain = 'dPHZ')
 
 df_ca <- bind_rows(wt_ca[seq(1,nrow(wt_ca), 100),],dPHZ_ca[seq(1,nrow(wt_ca), 100),])
 
 ggplot(wt_ca[seq(1,nrow(wt_ca), 100),], aes(x = Time_h, y = I_nA)) + geom_point()
+```
 
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" />
+
+```r
 ggplot(dPHZ_ca[seq(1,nrow(wt_ca), 100),], aes(x = Time_h, y = I_nA)) + geom_point()
+```
 
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-1-2.png" width="672" style="display: block; margin: auto;" />
+
+```r
 # Plot Layout
 plot_ca <- ggplot(df_ca, aes(x = Time_h, y = I_nA, color = strain)) + geom_path(size = 1)
 
@@ -67,7 +77,11 @@ plot_ca_styled <- plot_ca+
   theme(legend.position = c(0.2,0.75), legend.background = element_blank()) 
 
 plot_ca_styled
+```
 
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-1-3.png" width="672" style="display: block; margin: auto;" />
+
+```r
 plot_ca_2_styled <- plot_ca_2+
   scale_color_manual(breaks = c('WT','dPHZ'), 
                      labels = c('WT', expression(Delta*phz)), 
@@ -79,9 +93,12 @@ plot_ca_2_styled <- plot_ca_2+
 plot_ca_2_styled
 ```
 
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-1-4.png" width="672" style="display: block; margin: auto;" />
+
 Updated - 03/11/19 dPHZ biofilms +/- PYO chronoamperometry
 
-```{r}
+
+```r
 ca_data <- read_csv("../../../data/Electrochemistry/IDA/dPHZ_metabolic_current.csv", comment = "#") %>% 
   mutate(Strain = ifelse(Rep==1 & PYO=="+","WT","dPHZ")) %>% 
   mutate(id = paste(Strain,PYO, Rep, sep = " "))
@@ -90,7 +107,11 @@ ggplot(ca_data[seq(1,nrow(ca_data), 100),] %>% filter(time_h<90),
        aes(x = time_h, y = I_nA)) + 
   geom_path(aes(color = id, group = id), size = 1) + 
   ylim(0,3.5)
+```
 
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" />
+
+```r
 plot_ca_3 <- ggplot(ca_data[seq(1,nrow(ca_data), 100),] %>% filter(time_h<90) %>% filter(id %in% c("dPHZ - 2", "WT + 1", "dPHZ + 2")), 
        aes(x = time_h, y = I_nA)) + 
   geom_path(aes(color = id, group = id), size = 0.5) + 
@@ -105,11 +126,14 @@ plot_ca_3_styled <- plot_ca_3+
   
 plot_ca_3_styled
 ```
+
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-2-2.png" width="672" style="display: block; margin: auto;" />
 1 nA * 75 hrs = 2.7e-4 C = 270uC
 
 assume 2 electrons per PYO = 135u
 
-```{r}
+
+```r
 wt_gc <- read_csv("../../../data/Electrochemistry/IDA/WT_newMedia_postEquil_GC.txt", skip = 21,col_names =c('E', 'i1', 'i2', 't')) %>% mutate(strain='WT')
 dphz_gc <- read_csv("../../../data/Electrochemistry/IDA/dPHZ_d3_newMedia_GC_3mVs.txt", skip = 0,col_names =c('E', 'i1', 'i2', 't') ) %>% mutate(strain = 'dPHZ')
 dphz_pyo_gc <- read_csv("../../../data/Electrochemistry/IDA/A_75uM_PYO_GC_2.txt",skip = 21,col_names =c('E', 'i1', 'i2', 't')) %>% mutate(strain = 'dPHZ_PYO')
@@ -145,13 +169,20 @@ plot_gcBasic_styled <- plot_gcBasic +
 plot_gcBasic_styled
 ```
 
-```{r}
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" />
+
+
+```r
 theme_set(theme_figure())
 
 fig_4 <- plot_grid(plot_ca_3_styled,plot_ca_3_styled, plot_gcBasic_styled,plot_gcBasic_styled, 
                    align = 'hv', axis = 'tblr', rel_widths = c(1.25,2,1.25,2), ncol = 4, scale = 0.95, labels = c('F','G','H','I'), label_size = 12)
 
 fig_4
+```
 
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
+
+```r
 save_plot("../../../figures/phz2019_Fig_4.pdf", fig_4, base_width = 7, base_height = 1.5)
 ```
