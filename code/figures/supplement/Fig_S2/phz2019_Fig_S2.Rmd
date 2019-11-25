@@ -1,0 +1,83 @@
+---
+title: "Figure S2"
+subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
+output:
+  html_document:
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+    toc: yes
+    keep_md: true
+---
+
+--------
+
+# Notes
+
+Fig S1A is a set of images.
+
+----
+
+Setup packages and plotting for the notebook:
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Load packages
+library(tidyverse)
+library(cowplot)
+library(kableExtra)
+library(broom)
+library(modelr)
+
+# Code display options
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
+
+# Load plotting tools
+source("../../../tools/plotting_tools.R")
+
+
+#Modify the plot theme
+theme_set(theme_notebook())
+```
+
+# Fig. S1B
+
+```{r}
+pRdata <- read_csv('../../../../data/Spectroscopy/TOTO_DAPI_extracts.csv') %>% rename(TOTO=`1uM_TOTO_avg_(535nm)`,DAPI=`1uM_DAPI_avg_(445nm)`) %>%  
+  gather(key='dye',value='fluor',TOTO, DAPI) %>% 
+  separate(X1,sep=' ',c('added','Treatment','Replicate')) %>% 
+  mutate(id=paste(added,Treatment,dye,sep = " ")) %>% 
+  group_by(id) %>% 
+  mutate(mean = ifelse(Replicate=='1',mean(fluor),NA))
+
+# Plot layout
+toto_plot <- ggplot(pRdata %>% filter(dye=='TOTO') %>% filter(id!="with ctDNA TOTO"),aes(x=id,y=fluor))+
+  geom_col(aes(y=mean), fill = "light gray") +
+  geom_jitter(height=0,width=0.1,shape =21, size = 1)
+
+# Plot styling 
+toto_plot_styled <- toto_plot +
+  labs(x = NULL, y = 'TOTO-1 Fluorescence (A.U.)') + 
+  scale_x_discrete(breaks = c('no ctDNA TOTO','no DNase TOTO','with DNase TOTO'), 
+                   labels=c("-","+ buffer", "+ buffer\n+ DNase"))
+    
+toto_plot_styled     
+```
+
+# Create Figure
+
+```{r}
+theme_set(theme_figure())
+
+fig_s2 <- plot_grid(NULL, toto_plot_styled, scale = 0.95, rel_widths = c(1.5,1))
+
+fig_s2
+
+save_plot("../../../../figures/supplement/phz2019_Fig_S2.pdf", fig_s2, base_width = 7, base_height = 2)
+```
+
+----
+
+```{r}
+sessionInfo()
+```

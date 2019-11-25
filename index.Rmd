@@ -104,10 +104,14 @@ These are notebooks generated in R. They fully reproduce the figures in the pape
 
 * [Figure 3.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_3/phz2019_Fig_3_phz_ET_invitro.html) Description here ;laksdjf.
 
+* [Figure 4.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_4/phz2019_Fig_4.html) Description here ;laksdjf.
+
+* [Figure 5.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_6/phz2019_Fig_6.html) description here
+
 ## Supplemental figures
 
 * [Figure S6.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/phz_eDNA_2019_Fig_S6.html)
 
 ## Data processing
 
-* [IDA data](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_processing.html)
+* [IDA data](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html) description here

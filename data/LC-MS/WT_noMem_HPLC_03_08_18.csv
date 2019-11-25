@@ -1,0 +1,19 @@
+Name,Strain,Condition,Day,Material,Replicate,RT,Area,Channel Name,Amount
+PYO,WT,noMem,,biofilm,1,5.934,356091,313.0nm,15.265
+PCA,WT,noMem,,biofilm,1,3.348,65470,364.0nm,4.293
+PCN,WT,noMem,,biofilm,1,8.781,494310,364.0nm,33.574
+PYO,WT,noMem,,biofilm,2,5.948,328124,313.0nm,14.066
+PCA,WT,noMem,,biofilm,2,3.287,55791,364.0nm,3.659
+PCN,WT,noMem,,biofilm,2,8.798,445816,364.0nm,30.281
+PYO,WT,noMem,,biofilm,3,5.948,313759,313.0nm,13.45
+PCA,WT,noMem,,biofilm,3,3.321,54201,364.0nm,3.554
+PCN,WT,noMem,,biofilm,3,8.793,416542,364.0nm,28.292
+PYO,WT,noMem,,agar,1,5.949,266655,313.0nm,11.431
+PCA,WT,noMem,,agar,1,3.144,658697,364.0nm,43.195
+PCN,WT,noMem,,agar,1,8.788,1407265,364.0nm,95.584
+PYO,WT,noMem,,agar,2,5.963,245092,313.0nm,10.507
+PCA,WT,noMem,,agar,2,3.185,629711,364.0nm,41.295
+PCN,WT,noMem,,agar,2,8.799,1635559,364.0nm,111.09
+PYO,WT,noMem,,agar,3,5.957,274840,313.0nm,11.782
+PCA,WT,noMem,,agar,3,3.201,659266,364.0nm,43.233
+PCN,WT,noMem,,agar,3,8.793,1637283,364.0nm,111.207

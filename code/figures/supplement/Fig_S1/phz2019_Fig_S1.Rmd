@@ -1,0 +1,121 @@
+---
+title: "Figure S1"
+subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
+output:
+  html_document:
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+    toc: yes
+    keep_md: true
+---
+
+--------
+
+# Notes
+
+Fig S1A is a set of images.
+
+----
+
+Setup packages and plotting for the notebook:
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Load packages
+library(tidyverse)
+library(cowplot)
+library(kableExtra)
+library(broom)
+library(modelr)
+
+# Code display options
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=FALSE, echo = TRUE, message=FALSE, warning=FALSE, fig.align="center", fig.retina = 2)
+
+# Load plotting tools
+source("../../../tools/plotting_tools.R")
+
+
+#Modify the plot theme
+theme_set(theme_notebook())
+```
+
+# Fig. S1B
+
+```{r}
+df <- read_csv('../../../../data/LC-MS/WT_noMem_HPLC_03_08_18.csv')
+
+#assumes colonies were ~200uL in size, resuspended in 3mL. 
+df_corrected <- df %>% 
+  mutate(phzConc=ifelse(Material=='biofilm',Amount * (3000 / 200), Amount * (8 / 5))) %>% 
+  group_by(Material, Name) %>% 
+  mutate(mean = ifelse(Replicate==1,mean(phzConc),NA))
+
+noMem_plot <- ggplot(df_corrected,aes(x=Material,y=phzConc))+
+  geom_col(aes(y = mean, fill = Material)) + 
+  geom_jitter(height = 0, width = 0.1, shape = 21, size =1) +
+  facet_wrap(~Name, scales = 'free')
+
+#Plot styling
+noMem_plot_styled <- noMem_plot +
+  labs(x = NULL, y = expression("Phenazine concentration" ~ ( mu*M )), title = 'WT: no membrane') + 
+  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66"))
+    
+noMem_plot_styled     
+```
+
+# Fig. S1C
+
+```{r}
+wtSon_pdaMan <- read_csv("../../../../data/LC-MS/WTsonication_PDAmanual_08_29_18.csv") %>% 
+  mutate(calcConc = Amount*2*(800 / 62)) %>% #Dilution factor
+  group_by(measured_phenazine, Condition) %>% 
+  mutate(mean = ifelse(Rep==1,mean(calcConc),NA))
+
+# Plot layout
+wtSon_pdaMan_plot <- ggplot(wtSon_pdaMan, aes(x = Condition, y = calcConc)) +
+  geom_col(aes(y = mean), fill = 'light gray')+
+  geom_jitter(shape = 21, height = 1, width = 0.1, size =1) + 
+  facet_wrap(~measured_phenazine, scales = 'free') + 
+  ylim(0,NA)
+
+#Plot styling
+wtSon_pdaMan_plot_styled <- wtSon_pdaMan_plot +
+  labs(x = 'Sonication', y = expression("Biofilm concentration" ~ ( mu*M )), title = 'WT: sonication') + 
+  scale_x_discrete(breaks = c('noSon','withSon'), 
+                   labels=c("-","+"))
+    
+wtSon_pdaMan_plot_styled     
+```
+
+
+```{r}
+wtSon_pdaMan %>% 
+  spread(Condition,calcConc) %>% 
+  group_by(measured_phenazine) %>% 
+  summarise(conf_int_low = t.test(noSon, withSon,  alternative = 'less')$conf.int[1],
+            conf_int_high = t.test(noSon,withSon, alternative = 'less')$conf.int[2],
+            p_value = t.test( noSon,withSon, alternative = 'less')$p.value)
+```
+
+
+
+
+# Create figure
+
+```{r}
+theme_set(theme_figure())
+
+fig_s1 <- plot_grid(noMem_plot_styled, wtSon_pdaMan_plot_styled, labels = c('B','C'), label_size = 12, align = 'hv', axis = 'tblr', scale = 0.95)
+
+fig_s1
+
+save_plot("../../../../figures/supplement/phz2019_Fig_S1.pdf", fig_s1,base_width = 4.5, base_height = 2)
+
+```
+
+-------
+
+```{r}
+sessionInfo()
+```

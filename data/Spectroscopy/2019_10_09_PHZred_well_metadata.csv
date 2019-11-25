@@ -1,0 +1,9 @@
+﻿row,1,2,3,4,5,6,7,8,9,10,11,12
+A,test_PCA,test_PCN,test_PYO,empty,empty,empty,PCN,PCN,PCN,PCN,PCN,PCN
+B,PCA,PCA,PCA,PCA,PCA,PCA,PCN,PCN,PCN,PCN,PCN,PCN
+C,PCA,PCA,PCA,PCA,PCA,PCA,PCN,PCN,PCN,PCN,PCN,PCN
+D,PCA,PCA,PCA,PCA,PCA,PCA,empty,empty,empty,empty,empty,empty
+E,control,control,control,control,control,control,empty,empty,empty,empty,empty,empty
+F,PYO,PYO,PYO,PYO,PYO,PYO,PBS,PBS,PBS,PBS,PBS,PBS
+G,PYO,PYO,PYO,PYO,PYO,PYO,PBS,PBS,PBS,PBS,PBS,PBS
+H,PYO,PYO,PYO,PYO,PYO,PYO,PBS,PBS,PBS,PBS,PBS,PBS

@@ -317,7 +317,7 @@ theme_set(theme_figure())
 top_panel <- plot_grid(plot_dap_combo_styled + guides(fill = F), plot_decay_combo_styled + guides(fill = F, color= F))
 
 fig_s6 <- plot_grid(top_panel,plot_swv_gc_dphz_styled, plot_decays_dphz_styled, plot_decays_blank_styled, 
-                    ncol = 1, rel_heights = c(0.5, 1,1,1))
+                    ncol = 1, rel_heights = c(0.5, 1,1,1), labels = 'AUTO', label_size = 12, scale = 0.95)
 
 fig_s6
 

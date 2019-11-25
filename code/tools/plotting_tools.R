@@ -26,8 +26,8 @@ theme_figure <- function () {
       axis.line = element_line(color = 'black', size = 0.25),
       axis.ticks = element_line(color = 'black', size =0.25),
       axis.text = element_text(color = 'black', size=6),
-      axis.title=element_text(color = 'black',size=6),
-      strip.text = element_text(color = 'black',size = 6),
+      axis.title=element_text(color = 'black', size=6),
+      strip.text = element_text(color = 'black', size = 6),
       strip.background = element_blank(),
       legend.background = element_blank(),
       legend.title=element_text(color = 'black',size=6),
@@ -35,7 +35,7 @@ theme_figure <- function () {
       legend.text.align=0,
       panel.spacing = unit(0,'cm'),
       plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm'),
-      plot.title = element_text(hjust = 0.5)
+      plot.title = element_text(hjust = 0.5, color = 'black', size = 8)
     )
 }
 
