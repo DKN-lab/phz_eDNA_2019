@@ -48,49 +48,53 @@ Extracellular electron transfer (EET), the process whereby cells access electron
 
 ----
 
-We have found a few things merp derp:
+[Motivation statement here]
 
 ## 1
 
-Put simple explanatory figures here with short narratives. E.g. the phenazine biofilm cycle or other illustrator generated diagrams.
+### *Pseudomonas aeruginosa* and phenazines
 
-Colony biofilms retain certain phenazines. Some more text here. Test
+*Pseudomonas aeruginosa* is a bacterium that makes special redox active metabolites (electron carriers), called phenazines. These phenazines come in a few different forms that are shown below (PCA, PCN, PYO). This organism tends to live as "biofilms", dense groups of cells attached to surfaces. These structures are so dense that the cells on the outside of the biofilm consume oxygen faster than it can diffuse to the inside of the group. These cells respire oxygen (use as a terminal electron acceptor), just like animals do, so the cells in the interior of the biofilm could suffocate without oxygen. However, these interior cells are able to actually use their phenazine molecules to transport electrons to the oxygen at the edge of the biofilm. This is an amazing strategy, but many aspects of this phenazine metabolism remain poorly understood. Specifically, we set out to answer X, Y, Z.
 
-```{r}
-include_graphics("index_files/2019_11_04_fig_2.png")
+
+```{r out.width='75%'}
+include_graphics("index_files/fig_1AB.png")
 ```
 
 ## 2
 
-Phenazines bind extracellular DNA
+### Colony biofilms retain certain phenazines
 
-[some more data]
+
+
+```{r out.width='75%'}
+include_graphics("index_files/fig_1CD.png")
+```
 
 ## 3
 
-Electron transfer can occur in three ways
+### PYO binds extracellular DNA in the biofilm
 
-1. Solution ET
-2. Self-exchange
-3. DNA mediated self-exchange
+[image of eDNA in biofilm]
 
 ## 4
 
-Growing biofilms on electrodes
+### Phenazines support electron transfer in vitro
 
-[some more data]
+[inter phz diagram] 
+[DNA CT diagram]
 
 ## 5
 
-Electron transfer mechanisms in vivo
+### Biofilms grow on electrodes and support phenazine electron transfer
 
-[merp]
+[IDA image / diagrams]
 
 ## 6
 
-A model
+### An updated picture of phenazine ET
 
-[merp]
+[fig 6 diagram]
 
 # {.toc-ignore}
 <br>
@@ -103,24 +107,24 @@ These are notebooks generated in R. They fully reproduce the figures in the pape
 
 ## Main figures
 
-* [Figure 1.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_1/phz2019_Fig_1_colony_retention.html) Description here ;laksdjf.
+* [Figure 1.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_1/phz2019_Fig_1_colony_retention.html) Colony biofilms retain PYO and PCN, but not PCA.
 
-* [Figure 2.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_2/phz2019_Fig_2_PYO_eDNA.html) Description here ;laksdjf.
+* [Figure 2.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_2/phz2019_Fig_2_PYO_eDNA.html) Phenazines bind extracellular DNA in vitro and in vivo.
 
-* [Figure 3.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_3/phz2019_Fig_3_phz_ET_invitro.html) Description here ;laksdjf.
+* [Figure 3.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_3/phz2019_Fig_3_phz_ET_invitro.html) Constraints on phenazine electron transfer in vitro.
 
-* [Figure 4.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_5/phz2019_Fig_5.html) Description here ;laksdjf.
+* [Figure 4.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_5/phz2019_Fig_5.html) Electrode grown biofilms exhibit PYO dependent electron transfer.
 
-* [Figure 5.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_6/phz2019_Fig_6.html) description here
+* [Figure 5.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_6/phz2019_Fig_6.html) PYO mediated electron transfer is faster than PYO loss from the biofilm.
 
 
 ## Supplemental figures
 
-* [Figure S1.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S1/phz2019_Fig_S1.html)
+* [Figure S1.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S1/phz2019_Fig_S1.html) Colony biofilm images and controls.
 
-* [Figure S6.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html)
+* [Figure S6.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html) IDA Dap and Dloss measurements.
 
-* [Figure S7.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html)
+* [Figure S7.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html) Estimation of Dap for solution PYO at blank IDA with known PYO concentrations. 
 
 ## Data processing
 
