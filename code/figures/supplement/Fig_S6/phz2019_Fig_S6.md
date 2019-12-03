@@ -135,14 +135,14 @@ mods_swv_gc_glance <- glance(mods_swv_gc, fit) %>%
 mods_swv_gc_glance %>% kable(digits = 20) %>%  kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp_id </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run_id </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> r.squared </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> adj.r.squared </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
+   <th style="text-align:left;"> exp_id </th>
+   <th style="text-align:left;"> run_id </th>
+   <th style="text-align:right;"> r.squared </th>
+   <th style="text-align:right;"> adj.r.squared </th>
+   <th style="text-align:right;"> p.value </th>
   </tr>
  </thead>
 <tbody>
@@ -204,18 +204,18 @@ write_csv(mods_swv_gc_tidy, "phz2019_dPHZ_Dap_lm_coefs.csv")
 mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp_id </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run_id </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> term </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> std.error </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> statistic </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high </th>
+   <th style="text-align:left;"> exp_id </th>
+   <th style="text-align:left;"> run_id </th>
+   <th style="text-align:left;"> term </th>
+   <th style="text-align:right;"> estimate </th>
+   <th style="text-align:right;"> std.error </th>
+   <th style="text-align:right;"> statistic </th>
+   <th style="text-align:right;"> p.value </th>
+   <th style="text-align:right;"> conf.low </th>
+   <th style="text-align:right;"> conf.high </th>
   </tr>
  </thead>
 <tbody>
@@ -398,18 +398,18 @@ write_csv(dphz_nls, "phz2019_dPHZ_Dphys_nls_coefs.csv")
 dphz_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> term </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> std.error </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> statistic </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high </th>
+   <th style="text-align:right;"> exp </th>
+   <th style="text-align:left;"> run </th>
+   <th style="text-align:left;"> term </th>
+   <th style="text-align:right;"> estimate </th>
+   <th style="text-align:right;"> std.error </th>
+   <th style="text-align:right;"> statistic </th>
+   <th style="text-align:right;"> p.value </th>
+   <th style="text-align:right;"> conf.low </th>
+   <th style="text-align:right;"> conf.high </th>
   </tr>
  </thead>
 <tbody>
@@ -578,23 +578,23 @@ dphz_preds %>%
   head() %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp_id </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> reactor </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> time </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred_high </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred_low </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate_b </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low_b </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high_b </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate_a </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low_a </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high_a </th>
+   <th style="text-align:left;"> exp_id </th>
+   <th style="text-align:left;"> reactor </th>
+   <th style="text-align:right;"> exp </th>
+   <th style="text-align:left;"> run </th>
+   <th style="text-align:right;"> time </th>
+   <th style="text-align:right;"> pred </th>
+   <th style="text-align:right;"> pred_high </th>
+   <th style="text-align:right;"> pred_low </th>
+   <th style="text-align:right;"> estimate_b </th>
+   <th style="text-align:right;"> conf.low_b </th>
+   <th style="text-align:right;"> conf.high_b </th>
+   <th style="text-align:right;"> estimate_a </th>
+   <th style="text-align:right;"> conf.low_a </th>
+   <th style="text-align:right;"> conf.high_a </th>
   </tr>
  </thead>
 <tbody>
@@ -718,294 +718,6 @@ plot_decays_dphz_styled
 <img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" />
 
 
-# Fig. S6D
-
-Now let's plot the SWV peak current decays for the blank IDA. This data comes from the blank IDA processing notebook.
-
-
-```r
-df_blank_swv <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_blank_tran_time_signals.csv") %>% 
-  filter(reactor == 'transfer' & PHZadded != '10uM') %>% 
-  mutate(PHZadded = fct_relevel(PHZadded, c('25uM','50uM','75uM','100uM') ))
-
-ggplot(df_blank_swv, aes(x = time, y = signal)) + 
-  geom_point(shape = 21) + facet_wrap(~PHZadded, scales = 'free')
-```
-
-<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" />
-
-Now we will fit each of these decays. We will go ahead and save these coefficients as a csv, so that we can use them to calculate Dphys values in main figure 6.
-
-
-```r
-blank_nls <- df_blank_swv%>%
-  group_by(PHZadded) %>% 
-  do(
-    tidy(
-      nls(data = ., formula =  signal ~ b * (time)^-0.5 + a, start = c(b = 0.1, a = 1e-07) ),
-      conf.int = T
-    )
-  ) %>% 
-  arrange(desc(term))
-
-# write results to csv for fig 6.
-write_csv(blank_nls, "phz2019_blank_Dphys_nls_coefs.csv")
-
-# print results here
-blank_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
-```
-
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
- <thead>
-  <tr>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> PHZadded </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> term </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> std.error </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> statistic </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> 25uM </td>
-   <td style="text-align:left;"> b </td>
-   <td style="text-align:right;"> 2.5820e-07 </td>
-   <td style="text-align:right;"> 6.40e-09 </td>
-   <td style="text-align:right;"> 40.21524 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 2.4530e-07 </td>
-   <td style="text-align:right;"> 2.7110e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 50uM </td>
-   <td style="text-align:left;"> b </td>
-   <td style="text-align:right;"> 6.8810e-07 </td>
-   <td style="text-align:right;"> 1.72e-08 </td>
-   <td style="text-align:right;"> 39.94904 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 6.5350e-07 </td>
-   <td style="text-align:right;"> 7.2280e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 75uM </td>
-   <td style="text-align:left;"> b </td>
-   <td style="text-align:right;"> 7.1070e-07 </td>
-   <td style="text-align:right;"> 1.29e-08 </td>
-   <td style="text-align:right;"> 54.90900 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 6.8470e-07 </td>
-   <td style="text-align:right;"> 7.3670e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 100uM </td>
-   <td style="text-align:left;"> b </td>
-   <td style="text-align:right;"> 1.2004e-06 </td>
-   <td style="text-align:right;"> 3.57e-08 </td>
-   <td style="text-align:right;"> 33.60837 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1.1286e-06 </td>
-   <td style="text-align:right;"> 1.2722e-06 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 25uM </td>
-   <td style="text-align:left;"> a </td>
-   <td style="text-align:right;"> 5.7510e-07 </td>
-   <td style="text-align:right;"> 5.50e-09 </td>
-   <td style="text-align:right;"> 105.50380 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 5.6410e-07 </td>
-   <td style="text-align:right;"> 5.8600e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 50uM </td>
-   <td style="text-align:left;"> a </td>
-   <td style="text-align:right;"> 4.6600e-07 </td>
-   <td style="text-align:right;"> 1.45e-08 </td>
-   <td style="text-align:right;"> 32.10654 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4.3690e-07 </td>
-   <td style="text-align:right;"> 4.9520e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 75uM </td>
-   <td style="text-align:left;"> a </td>
-   <td style="text-align:right;"> 5.1180e-07 </td>
-   <td style="text-align:right;"> 1.10e-08 </td>
-   <td style="text-align:right;"> 46.57613 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4.8970e-07 </td>
-   <td style="text-align:right;"> 5.3390e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 100uM </td>
-   <td style="text-align:left;"> a </td>
-   <td style="text-align:right;"> 3.0720e-07 </td>
-   <td style="text-align:right;"> 3.02e-08 </td>
-   <td style="text-align:right;"> 10.18376 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 2.4660e-07 </td>
-   <td style="text-align:right;"> 3.6790e-07 </td>
-  </tr>
-</tbody>
-</table></div>
-<br>
-
-Now we are going to take those coefficient estimates and predict datapoints that those values would generate at 1000 timepoints in the window our data is in. Essentially, we are going to generate the best fit line from those parameters and the 95% confidence interval so that we can plot it with the original datapoints.
-
-
-```r
-blank_grid <- tibble(time = seq(0.05, max(df_blank_swv$time), length.out = 1000))
-
-blank_coefs <- left_join(blank_nls %>% filter(term == 'b'),
-                      blank_nls %>% filter(term == 'a'), 
-                      by = c('PHZadded'), suffix = c('_b','_a'))
-
-blank_grid <- left_join(df_blank_swv %>% group_by(reactor, PHZadded) %>% summarise(),
-                       blank_grid %>% mutate(reactor = 'transfer'), by = c('reactor'))
-
-blank_grid_coef <- left_join(blank_grid, blank_coefs, by  = c('PHZadded'))
-
-blank_preds <- blank_grid_coef %>% 
-  mutate(pred = estimate_b * (time^-0.5) + estimate_a) %>% 
-  mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
-  mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
-
-write_csv(blank_preds, "phz2019_blank_Dphys_preds.csv")
-
-# print simple results here
-blank_preds %>% 
-  select(reactor,PHZadded, time, pred, pred_high, pred_low, estimate_b, 
-         conf.low_b, conf.high_b, estimate_a, conf.low_a, conf.high_a) %>% 
-  head() %>% kable(digits = 7) %>% kable_styling() %>% scroll_box(height = '300px')
-```
-
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
- <thead>
-  <tr>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> reactor </th>
-   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> PHZadded </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> time </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred_high </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred_low </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate_b </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low_b </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high_b </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate_a </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low_a </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high_a </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> transfer </td>
-   <td style="text-align:left;"> 25uM </td>
-   <td style="text-align:right;"> 0.0500000 </td>
-   <td style="text-align:right;"> 1.7e-06 </td>
-   <td style="text-align:right;"> 1.8e-06 </td>
-   <td style="text-align:right;"> 1.7e-06 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 2e-07 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> transfer </td>
-   <td style="text-align:left;"> 25uM </td>
-   <td style="text-align:right;"> 0.0571238 </td>
-   <td style="text-align:right;"> 1.7e-06 </td>
-   <td style="text-align:right;"> 1.7e-06 </td>
-   <td style="text-align:right;"> 1.6e-06 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 2e-07 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> transfer </td>
-   <td style="text-align:left;"> 25uM </td>
-   <td style="text-align:right;"> 0.0642476 </td>
-   <td style="text-align:right;"> 1.6e-06 </td>
-   <td style="text-align:right;"> 1.7e-06 </td>
-   <td style="text-align:right;"> 1.5e-06 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 2e-07 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> transfer </td>
-   <td style="text-align:left;"> 25uM </td>
-   <td style="text-align:right;"> 0.0713714 </td>
-   <td style="text-align:right;"> 1.5e-06 </td>
-   <td style="text-align:right;"> 1.6e-06 </td>
-   <td style="text-align:right;"> 1.5e-06 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 2e-07 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> transfer </td>
-   <td style="text-align:left;"> 25uM </td>
-   <td style="text-align:right;"> 0.0784952 </td>
-   <td style="text-align:right;"> 1.5e-06 </td>
-   <td style="text-align:right;"> 1.6e-06 </td>
-   <td style="text-align:right;"> 1.4e-06 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 2e-07 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> transfer </td>
-   <td style="text-align:left;"> 25uM </td>
-   <td style="text-align:right;"> 0.0856190 </td>
-   <td style="text-align:right;"> 1.5e-06 </td>
-   <td style="text-align:right;"> 1.5e-06 </td>
-   <td style="text-align:right;"> 1.4e-06 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 2e-07 </td>
-   <td style="text-align:right;"> 3e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-   <td style="text-align:right;"> 6e-07 </td>
-  </tr>
-</tbody>
-</table></div>
-<br>
-
-Now they we have those predictions we can plot everything together:
-
-
-```r
-plot_decays_blank <- ggplot(blank_preds, aes(x = time, y = pred)) + 
-  geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
-  geom_path(linetype = 2)+
-  geom_point(data =df_blank_swv, aes(x = time, y = signal) , shape = 21)+
-  facet_wrap(~PHZadded, scale = 'free')
-
-plot_decays_blank_styled <- plot_decays_blank+
-    scale_y_continuous(labels = nA_label) +  
-  labs(y = expression(I[swv]~(nA)), x = 'Time (min)', title = 'Blank')
-
-plot_decays_blank_styled
-```
-
-<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" />
 
 # Create figure
 
@@ -1015,16 +727,16 @@ theme_set(theme_figure())
 
 top_panel <- plot_grid(plot_dap_combo_styled + guides(fill = F), plot_decay_combo_styled + guides(fill = F, color= F))
 
-fig_s6 <- plot_grid(top_panel,plot_swv_gc_dphz_styled, plot_decays_dphz_styled, plot_decays_blank_styled, 
-                    ncol = 1, rel_heights = c(0.5, 1,1,1))
+fig_s6 <- plot_grid(top_panel,plot_swv_gc_dphz_styled, plot_decays_dphz_styled, 
+                    ncol = 1, rel_heights = c(0.5, 1,1), labels = 'AUTO', label_size = 12, scale = 0.95)
 
 fig_s6
 ```
 
-<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" />
 
 ```r
-save_plot("../../../../figures/supplement/phz2019_Fig_S6.pdf", fig_s6, base_height = 10, base_width = 7)
+save_plot("../../../../figures/supplement/phz2019_Fig_S6.pdf", fig_s6, base_height = 8, base_width = 7)
 ```
 
 -----
@@ -1035,7 +747,7 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.3 (2019-03-11)
+## R version 3.5.2 (2018-12-20)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS Mojave 10.14.6
 ## 
@@ -1050,23 +762,23 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 modelr_0.1.4     
-##  [4] broom_0.5.2       kableExtra_1.1.0  cowplot_0.9.4    
-##  [7] forcats_0.4.0     stringr_1.4.0     dplyr_0.8.1      
-## [10] purrr_0.3.2       readr_1.3.1       tidyr_0.8.3      
-## [13] tibble_2.1.3      ggplot2_3.2.1     tidyverse_1.2.1  
+##  [1] viridis_0.5.1     viridisLite_0.3.0 modelr_0.1.2     
+##  [4] broom_0.5.1       kableExtra_1.0.1  cowplot_0.9.4    
+##  [7] forcats_0.3.0     stringr_1.3.1     dplyr_0.8.1      
+## [10] purrr_0.2.5       readr_1.3.1       tidyr_0.8.2      
+## [13] tibble_2.1.3      ggplot2_3.2.0     tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.1.0      lattice_0.20-38 
-##  [5] colorspace_1.4-1 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.4.2     glue_1.3.1       withr_2.1.2     
-## [13] readxl_1.3.1     munsell_0.5.0    gtable_0.3.0     cellranger_1.1.0
-## [17] rvest_0.3.4      evaluate_0.14    labeling_0.3     knitr_1.23      
-## [21] highr_0.8        Rcpp_1.0.2       scales_1.0.0     backports_1.1.4 
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
+##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
+##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
+## [13] readxl_1.2.0     munsell_0.5.0    gtable_0.2.0     cellranger_1.1.0
+## [17] rvest_0.3.2      evaluate_0.14    labeling_0.3     knitr_1.23      
+## [21] highr_0.7        Rcpp_1.0.1       scales_1.0.0     backports_1.1.3 
 ## [25] webshot_0.5.1    jsonlite_1.6     gridExtra_2.3    hms_0.4.2       
-## [29] digest_0.6.21    stringi_1.4.3    grid_3.5.3       cli_1.1.0       
-## [33] tools_3.5.3      magrittr_1.5     lazyeval_0.2.2   crayon_1.3.4    
-## [37] pkgconfig_2.0.3  MASS_7.3-51.1    xml2_1.2.0       lubridate_1.7.4 
-## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10 
-## [45] R6_2.4.0         nlme_3.1-137     compiler_3.5.3
+## [29] digest_0.6.18    stringi_1.2.4    grid_3.5.2       cli_1.1.0       
+## [33] tools_3.5.2      magrittr_1.5     lazyeval_0.2.1   crayon_1.3.4    
+## [37] pkgconfig_2.0.2  MASS_7.3-51.1    xml2_1.2.0       lubridate_1.7.4 
+## [41] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0
+## [45] R6_2.4.0         nlme_3.1-140     compiler_3.5.2
 ```

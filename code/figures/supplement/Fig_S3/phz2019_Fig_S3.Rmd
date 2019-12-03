@@ -366,6 +366,10 @@ plot_phz_red <- ggplot(df_fig_2, aes(x = dna, y = norm_mean, color = id)) + geom
   scale_y_continuous(labels = scales::percent, limits = c(0,1.25)) + 
   labs(x = 'bp DNA (uM)', y = 'Normalized fluorescence') + scale_color_manual(values = c('light gray','light gray','black','black','black')) + guides(color = F) + xlim(0,300)
 
+plot_phz_red <- ggplot(df_fig_2, aes(x = dna, y = mean, color = id)) + geom_point(aes(y = intensity), shape = 21, size = 1) + geom_line(size = 0.5) + 
+  facet_wrap(~ex, scales = 'free', ncol = 3) + 
+  labs(x = 'bp DNA (uM)', y = 'Normalized fluorescence') + scale_color_manual(values = c('light gray','light gray','black','black','black')) + guides(color = F) + xlim(0,300)
+
 
 plot_phz_red
 ```

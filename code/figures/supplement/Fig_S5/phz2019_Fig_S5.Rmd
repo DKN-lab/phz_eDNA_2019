@@ -39,3 +39,118 @@ source("../../../tools/plotting_tools.R")
 #Modify the plot theme
 theme_set(theme_notebook())
 ```
+
+
+```{r}
+ida_phz <- tibble(
+  Day = c(1,2,3),
+  PYO = c(79.86,115.4,88.6),
+  PCA = c(10.4, 18.1,29.3),
+  PCN = c(0.254, 0.51, 0.61)
+) %>% 
+  gather(key = phenazine, value = amount, -Day) %>% 
+  group_by(phenazine) %>% 
+  mutate(mean = ifelse(Day==1,mean(amount),NA))
+
+plot_ida_phz <- ggplot(ida_phz, aes(x = phenazine, y = amount, shape = factor(Day))) + 
+  geom_col(aes(y = mean), fill = 'light gray') + 
+  geom_jitter(width = 0.1, height = 0, size = 1) + scale_shape_manual(values = c(21,22,23), guide = F)
+
+plot_ida_phz_styled <- plot_ida_phz+
+  labs(x='', y = expression(Concentration ~(mu*M)))
+
+plot_ida_phz_styled
+````
+
+# Echem
+
+```{r}
+pca_soak_gc <- read_csv("../../../../data/Electrochemistry/IDA/75uM_PCA_dPHZstar_GC_1.txt", skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2) %>% 
+  mutate(reactor = 'soak')
+
+pca_tran1_gc <- read_csv("../../../../data/Electrochemistry/IDA/gc_1.txt", skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2)%>% 
+  mutate(reactor = 'transfer')
+
+pca_gc <- bind_rows(pca_soak_gc, pca_tran1_gc)
+
+pca_plot <- ggplot() + 
+  geom_vline(xintercept = -0.375, color = 'light gray', size = 0.5)+
+  geom_path(data = pca_gc %>% filter(electrode=='i1'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  geom_path(data = pca_gc %>% filter(electrode=='i2'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)), title = 'PCA')+
+  theme(legend.position = c(0.15,0.75), legend.background = element_blank(),  plot.title = element_text(hjust = 0.5))
+  
+
+pca_plot
+
+ggplot(pca_soak_gc, aes(x = E, y =current)) + geom_point()+
+  geom_point(data = pca_tran1_gc, color = 'red')+
+  scale_x_reverse()+ylim(-1e-8,+1e-8)
+```
+
+```{r}
+pyo_soak_gc <- read_csv('../../../../data/Electrochemistry/IDA/75uM_control_soak_3_GC_1.txt',skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2) %>% 
+  mutate(reactor = 'soak')
+
+pyo_tran1_gc <- read_csv('../../../../data/Electrochemistry/IDA/75uM_control_transfer_3_GC_1.txt',skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2) %>% 
+  mutate(reactor = 'transfer')
+
+pyo_gc <- bind_rows(pyo_soak_gc, pyo_tran1_gc)
+
+pyo_plot <- ggplot() + 
+  geom_vline(xintercept = -0.255, color = 'light gray', size = 0.5)+
+  geom_path(data = pyo_gc %>% filter(electrode=='i1'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  geom_path(data = pyo_gc %>% filter(electrode=='i2'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)), title = 'PYO')+
+  theme(legend.position = c(0.15,0.75), legend.background = element_blank(), plot.title = element_text(hjust = 0.5)) 
+
+pyo_plot
+
+
+ggplot(pyo_tran1_gc, aes(x = E, y =current)) + geom_point()+
+  scale_x_reverse()
+```
+
+```{r}
+plot_grid(pyo_plot, pca_plot, ncol = 2, align = 'hv', axis = 'tblr')
+```
+
+```{r}
+pyo_plot_zoom <- ggplot(data = pyo_gc %>% filter(electrode=='i2' & reactor=='transfer'), aes(x = E, y =current)) + 
+  geom_vline(xintercept = -0.255, color = 'light gray', size = 0.5)+
+  geom_path(linetype = 'dashed', size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)))
+
+pyo_plot_zoom
+
+pca_plot_zoom <- ggplot(data = pca_gc %>% filter(electrode=='i2' & reactor=='transfer'), aes(x = E, y =current)) + 
+  geom_vline(xintercept = -0.375, color = 'light gray', size = 0.5)+
+  geom_path(linetype = 'dashed', size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)))
+
+pca_plot_zoom
+```
+
+```{r}
+theme_set(theme_figure())
+
+inset <- plot_grid(NULL, pyo_plot_zoom,NULL,  pca_plot_zoom, ncol = 2, align = 'hv', axis = 'tblr', rel_widths = c(0.2,1))
+
+fig_s5 <- plot_grid(pyo_plot, pca_plot, plot_ida_phz_styled,inset , ncol = 3, align = 'hv', axis = 'tblr', labels = 'AUTO', label_size = 12, scale = 0.95, rel_heights = c(1,1.25))
+
+fig_s5
+
+save_plot("../../../../figures/supplement/phz2019_Fig_S5.pdf", fig_s5, base_width = 7, base_height = 4.5)
+```
