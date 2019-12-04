@@ -195,6 +195,10 @@ plot_dphz_binding <- ggplot(dphz_extracts_means, aes(x=added_phz_num,y=calcConc)
   geom_line(size=0.5, aes(y=mean, group = measured_phenazine))+
   geom_point(size=1, aes(shape=measured_phenazine))
 
+ggplot(dphz_extracts_means %>% filter(measured_phenazine=='PCA'), aes(x=added_phz_num,y=calcConc))+
+  geom_line(size=0.5, aes(y=mean, group = measured_phenazine))+
+  geom_point(size=1, aes(shape=measured_phenazine))
+
 # Plot styling
 plot_dphz_binding_styled <- plot_dphz_binding + 
   scale_shape_discrete(solid=F, guide = F)+
@@ -259,6 +263,30 @@ pdaMan_indPhz_plot_styled <- pdaMan_indPhz_plot +
 pdaMan_indPhz_plot_styled
 ```
 
+```{r}
+
+df_d3 <- pdaMan_data %>% filter(Condition == measured_phenazine) %>% filter(Day == 'D3') %>% mutate(d3_conc = calcConc) %>% select(measured_phenazine, Rep, d3_conc, )
+
+df_d4 <- pdaMan_data %>% filter(Condition == measured_phenazine) %>% filter(Day == 'D4')%>% mutate(d4_conc = calcConc) %>% select(measured_phenazine, Rep, d4_conc)
+
+df_d3_d4 <- left_join(df_d3, df_d4, by = c('measured_phenazine','Rep')) %>% 
+  mutate(percent_retained = d4_conc / d3_conc) %>% 
+  group_by(measured_phenazine) %>% 
+  mutate(mean = ifelse(Rep == 1, mean(percent_retained), NA))
+
+per_ret_plot <- ggplot(df_d3_d4, aes(x = measured_phenazine, y = percent_retained, )) + 
+  geom_col(aes(y = mean), fill='light gray')+
+  geom_jitter(height = 0, width = 0.1, shape = 21, size = 1) +
+  ylim(0,NA)
+
+#Plot styling
+per_ret_plot_styled <- per_ret_plot +
+  labs(x = NULL, y = 'Biofilm retained phenazine', title = '24 hrs post incubation') + 
+  scale_y_continuous(labels = scales::percent) 
+
+per_ret_plot_styled
+```
+
 ---
 
 # Create Fig. 1
@@ -266,27 +294,16 @@ pdaMan_indPhz_plot_styled
 ```{r}
 theme_set(theme_figure())
 
-top_panel <- plot_grid(NULL, wt_ret_ratio_styled, ncol = 2, rel_widths = c(2.5,1), scale = 1.0, labels = c('',"E"))
+#top_panel <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, ncol = 2, rel_widths = c(1.5,1), scale = 0.95, labels = c('E',"F"), align = 'hv', axis = 'tblr',label_size = 12)
 
-bottom_panel <- plot_grid(plot_wt_free_styled, plot_dphz_binding_styled, 
-                   ncol = 2,
-                   align = 'hv', axis = 'tblr', 
-                   rel_widths = c(1.25,1), 
-                   scale = 1, labels = c("D", "F"))
+#bottom_panel <- plot_grid(plot_dphz_binding_styled, per_ret_plot_styled, ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('G',"H"), align = 'hv', axis = 'tblr',label_size = 12)
 
-fig_1 <- plot_grid(top_panel, bottom_panel, ncol = 1, rel_heights = c(1,1.5))
+fig_1 <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, plot_dphz_binding_styled, per_ret_plot_styled, 
+                   ncol = 2, rel_heights = c(1,1), rel_widths = c(1.5,1), 
+                   align = 'hv', axis = 'tblr', scale = 0.95,
+                   labels = c('E','F','G','H'))
 
-fig_1
-```
-
-```{r}
-top_panel <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, ncol = 2, rel_widths = c(1.5,1), scale = 0.95, labels = c('E',"F"), align = 'hv', axis = 'tblr',label_size = 12)
-
-bottom_panel <- plot_grid(plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('G',"H"), align = 'hv', axis = 'tblr',label_size = 12)
-
-fig_1 <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_heights = c(1,1), rel_widths = c(1,1), align = 'hv', axis = 'tblr')
-
-fig_1 <- plot_grid(top_panel, bottom_panel, ncol = 1)
+#fig_1 <- plot_grid(top_panel, bottom_panel, ncol = 1)
 
 fig_1
 ```

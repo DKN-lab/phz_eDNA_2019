@@ -52,7 +52,7 @@ Extracellular electron transfer (EET), the process whereby cells access electron
 
 ## 1
 
-### *Pseudomonas aeruginosa* and phenazines
+### *Pseudomonas aeruginosa* and phenazines {.toc-ignore}
 
 *Pseudomonas aeruginosa* is a bacterium that makes special redox active metabolites (electron carriers), called phenazines. These phenazines come in a few different forms that are shown below (PCA, PCN, PYO). This organism tends to live as "biofilms", dense groups of cells attached to surfaces. These structures are so dense that the cells on the outside of the biofilm consume oxygen faster than it can diffuse to the inside of the group. These cells respire oxygen (use as a terminal electron acceptor), just like animals do, so the cells in the interior of the biofilm could suffocate without oxygen. However, these interior cells are able to actually use their phenazine molecules to transport electrons to the oxygen at the edge of the biofilm. This is an amazing strategy, but many aspects of this phenazine metabolism remain poorly understood. Specifically, we set out to answer X, Y, Z.
 
@@ -63,7 +63,7 @@ include_graphics("index_files/fig_1AB.png")
 
 ## 2
 
-### Colony biofilms retain certain phenazines
+### Colony biofilms retain certain phenazines {.toc-ignore}
 
 
 
@@ -73,26 +73,26 @@ include_graphics("index_files/fig_1CD.png")
 
 ## 3
 
-### PYO binds extracellular DNA in the biofilm
+### PYO binds extracellular DNA in the biofilm {.toc-ignore}
 
 [image of eDNA in biofilm]
 
 ## 4
 
-### Phenazines support electron transfer in vitro
+### Phenazines support electron transfer in vitro {.toc-ignore}
 
 [inter phz diagram] 
 [DNA CT diagram]
 
 ## 5
 
-### Biofilms grow on electrodes and support phenazine electron transfer
+### Biofilms grow on electrodes and support phenazine electron transfer {.toc-ignore}
 
 [IDA image / diagrams]
 
 ## 6
 
-### An updated picture of phenazine ET
+### An updated picture of phenazine ET {.toc-ignore}
 
 [fig 6 diagram]
 
