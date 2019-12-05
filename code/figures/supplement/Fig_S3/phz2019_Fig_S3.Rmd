@@ -372,6 +372,10 @@ plot_phz_red <- ggplot(df_fig_2, aes(x = dna, y = mean, color = id)) + geom_poin
 
 
 plot_phz_red
+
+
+ggplot(df_fig_2 %>% filter(id != 'control'), aes(x = dna, y = mean, color = id)) + geom_point(aes(y = intensity), shape = 21, size = 1) + geom_line(size = 0.5) + 
+  labs(x = 'bp DNA (uM)', y = 'Fluorescence (A.U.)')  + xlim(0,300)
 ```
 Conclusions: does not seem to be signficant fluorescence change compared to empty wells. Note that there is nonzero variation between wells in plate reader. Reduced phenazines do not bind strongly to DNA.
 

@@ -64,12 +64,46 @@ toto_plot_styled <- toto_plot +
 toto_plot_styled     
 ```
 
+#
+```{r}
+df_biofilms <- read_csv("../../../../data/Spectroscopy/2019_11_22_std_wt_dphz_postCTdna.csv") %>%  gather(key = "well", value = "FluorInt", -wavelength)
+
+df_meta <- read_csv("../../../../data/Spectroscopy/2019_11_22_well_metadata.csv")
+
+df_toto <- left_join(df_biofilms, df_meta, by = c('well')) %>% filter(wavelength == 535)
+
+df_toto %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
+    scroll_box(width = "100%", height = "400px")
+```
+
+```{r}
+bg_means <- df_toto %>% filter(strain != 'std' & tech_rep == 4) %>% group_by(strain) %>% summarise(mean = mean(FluorInt))
+
+plot_eDNA <- ggplot(df_toto %>% filter(strain != 'std') %>% mutate(facet_labels = ifelse(strain =='dPHZ', paste0('\u0394','phz'), strain)), 
+       aes(x = factor(tech_rep), y = FluorInt)) + 
+  geom_line(data = . %>% filter(tech_rep<4), aes(group = bio_rep), color = 'light gray')+
+  geom_hline(data = bg_means, aes(yintercept = mean), linetype = 2, color = 'light gray') +
+  geom_point(data = . %>% filter(tech_rep<4), aes(fill = factor(ctDNA_added)), shape = 21) + 
+  geom_jitter(data = . %>% filter(tech_rep==4), aes(x = 2), width = 1, shape = 21, color = 'light gray')+
+  facet_wrap(~facet_labels, scales = 'free') + ylim(0, 30000) + guides(fill = F)
+
+'\u0394'
+
+# Plot styling
+
+plot_eDNA_styled <- plot_eDNA + 
+  labs(x = 'Technical replicates', y = 'TOTO-1 Fluorescence (A.U.)')
+
+plot_eDNA_styled
+```
+
+
 # Create Figure
 
 ```{r}
 theme_set(theme_figure())
 
-fig_s2 <- plot_grid(NULL, toto_plot_styled, scale = 0.95, rel_widths = c(1.5,1))
+fig_s2 <- plot_grid( toto_plot_styled,plot_eDNA_styled, align = 'hv', axis = 'tblr', ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('D','E'), label_size = 12)
 
 fig_s2
 

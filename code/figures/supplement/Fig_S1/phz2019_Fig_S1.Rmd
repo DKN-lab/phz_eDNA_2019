@@ -15,7 +15,7 @@ output:
 
 # Notes
 
-Fig S1A is a set of images.
+Fig S1A and S1B are a sets of images.
 
 ----
 
@@ -40,7 +40,7 @@ source("../../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. S1B
+# Fig. S1C
 
 ```{r}
 df <- read_csv('../../../../data/LC-MS/WT_noMem_HPLC_03_08_18.csv')
@@ -64,7 +64,7 @@ noMem_plot_styled <- noMem_plot +
 noMem_plot_styled     
 ```
 
-# Fig. S1C
+# Fig. S1D
 
 ```{r}
 wtSon_pdaMan <- read_csv("../../../../data/LC-MS/WTsonication_PDAmanual_08_29_18.csv") %>% 
@@ -98,7 +98,53 @@ wtSon_pdaMan %>%
             p_value = t.test( noSon,withSon, alternative = 'less')$p.value)
 ```
 
+# Fig. S1E
 
+
+```{r}
+
+pdaMan_data <- read_csv("../../../../data/LC-MS/dPHZstar_PDAmanual_PHZretention_08_29_18.csv") %>% 
+  mutate(calcConc = Amount * 2 *(800 / 62) ) %>% 
+  group_by(Condition,Day,measured_phenazine) %>% 
+  mutate(mean = ifelse(Rep==1,mean(calcConc),NA))
+
+dphz_ret_pdaMan_plot <- ggplot(pdaMan_data %>% filter(Condition =='PHZ'), aes(x = Day, y = calcConc, )) + 
+  geom_col(aes(y = mean,fill = Day))+
+  geom_jitter(height = 0, width = 0.1, shape = 21) +
+  facet_wrap(~measured_phenazine, scales = 'free') + 
+  ylim(0,NA)
+
+#Plot styling
+dphz_ret_pdaMan_plot_styled <- dphz_ret_pdaMan_plot +
+  labs(x = NULL, y = "Phenazine Concentration") + 
+  theme(axis.title.x = element_text(size = 14)) + 
+  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66")) + 
+  scale_x_discrete(breaks = c('D3','D4'), 
+                   labels=c("Day 3","Day 4"))
+
+dphz_ret_pdaMan_plot_styled
+
+```
+
+For dPHZ* incubated with individual phenazines
+
+```{r}
+
+pdaMan_indPhz_plot <- ggplot(pdaMan_data %>% filter(Condition == measured_phenazine), aes(x = Day, y = calcConc, )) + 
+  geom_col(aes(y = mean), fill='light gray')+
+  geom_jitter(height = 0, width = 0.1, shape = 21, size = 1) +
+  facet_wrap(~measured_phenazine, scales = 'free') + 
+  ylim(0,NA)
+
+#Plot styling
+pdaMan_indPhz_plot_styled <- pdaMan_indPhz_plot +
+  labs(x = NULL, y = expression("Biofilm concentration" ~ (mu*M )), title = '∆phz*') + 
+  theme(axis.title.x = element_text(size = 14)) + 
+  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66")) + 
+  scale_x_discrete(breaks = c('D3','D4'), labels=c("Day 3","Day 4"))
+
+pdaMan_indPhz_plot_styled
+```
 
 
 # Create figure
@@ -106,11 +152,11 @@ wtSon_pdaMan %>%
 ```{r}
 theme_set(theme_figure())
 
-fig_s1 <- plot_grid(noMem_plot_styled, wtSon_pdaMan_plot_styled, labels = c('B','C'), label_size = 12, align = 'hv', axis = 'tblr', scale = 0.95)
+fig_s1 <- plot_grid(noMem_plot_styled, wtSon_pdaMan_plot_styled, pdaMan_indPhz_plot_styled, labels = c('C','D','E'), ncol = 3, label_size = 12, align = 'hv', axis = 'tblr', scale = 0.95)
 
 fig_s1
 
-save_plot("../../../../figures/supplement/phz2019_Fig_S1.pdf", fig_s1,base_width = 4.5, base_height = 2)
+save_plot("../../../../figures/supplement/phz2019_Fig_S1.pdf", fig_s1,base_width = 7, base_height = 2)
 
 ```
 
