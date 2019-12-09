@@ -327,6 +327,22 @@ plot_decays_blank_styled <- plot_decays_blank+
 plot_decays_blank_styled
 ```
 
+# Nafion
+
+```{r}
+df_nafion <- tibble(molecule = c('fc','fc','fc','ruHex','fc','fc','fc','ruHex','fc','fc','fc','ruHex'),
+                    method = c('chrono','chrono','chrono','chrono','swvGC','swvGC','swvGC','swvGC','swvGC_2','swvGC_2','swvGC_2','swvGC_2'),
+                    condition = c(1,2,3,4,1,2,3,4,1,2,3,4),
+                    Dap = c(5.89e-6, 5.48e-6, 1.4e-7, 5.e-7, 4.69e-6, 1.85e-6, 1.39e-7, 1.06e-6, 1.236e-5, 4.88e-6, 3.672e-7, 3.81e-6)
+)
+
+ggplot(df_nafion %>% filter(method != 'swvGC_2'), aes(x = condition, y = Dap, color = method)) + geom_point(position = position_dodge(width = 0.1)) + scale_y_log10(limits = c(1e-8, 2e-5))
+```
+
+```{r}
+ggplot(df_nafion %>% filter(method != 'swvGC'), aes(x = condition, y = Dap, color = method)) + geom_point(position = position_dodge(width = 0.1)) + scale_y_log10(limits = c(1e-8, 2e-5))
+
+```
 
 # Create figure
 
