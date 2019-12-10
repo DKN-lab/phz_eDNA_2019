@@ -141,103 +141,251 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
 
 <br>
 
-# Fig. S6C
+# Fig. S7A
 
-First let's read in the data, which are the peak SWV current signals over time from the ∆phz* biofilms:
+First we will import the blank IDA data that will be used for panels A-D. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
+
+Let's read in the data and convert the µM units to $mol / cm^3$, which will be important to calculate $D_{ap}$ in correct units.
 
 ```{r}
-df_dphz_swv <- read_csv("../../../processing/processed_data/phz_eDNA_2019_signals_long.csv") %>% 
-  filter(echem == 'SWV') %>% 
-  filter(electrode == 'i1' & reactor %in% c('transfer','soak')) %>% 
-  mutate(exp_id = ifelse(exp =='2', 'Biofilm 1', 'Biofilm 2')) %>% 
-  mutate(run_id = paste('Rep ',run, sep = ''))
-
-ggplot(df_dphz_swv %>% filter(reactor == 'transfer'), aes(x = time, y = signal)) + 
-  geom_point(shape = 21) + facet_wrap(exp_id~run_id, scales = 'free')
+df_soak <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_gc_soak_blank.csv") %>% 
+  mutate(PHZaddedInt = case_when(
+    PHZadded == '100uM' ~ 100,
+    PHZadded == '10uM' ~ 10,
+    PHZadded == '25uM' ~ 25,
+    PHZadded == '50uM' ~ 50,
+    PHZadded == '75uM' ~ 75
+  )) %>% 
+  mutate(C_mol_cm3 = PHZaddedInt*(10^-9))
 ```
 
-Now we will fit each of these decays with the expression: 
-$$y = b (x)^{-0.5} + a$$ 
-
-We will fit using a nonlinear least squares method, the `nls()` function. Here you can see the model coefficient estimates and confidence intervals for each data set. We will go ahead and save these coefficients as a csv, so that we can use them to calculate $D_{phys}$ values in main figure 6.
+Here is the relationship between GC peak current and concentration:
 
 ```{r}
-dphz_nls <- df_dphz_swv %>% filter(reactor == 'transfer') %>%
-  group_by(exp, run) %>% 
-  do(
-    tidy(
-      nls(data = ., formula =  signal ~ b * (time)^-0.5 + a, start = c(b = 0.1, a = 1e-07) ),
-      conf.int = T
-    )
-  ) %>% 
-  arrange(desc(term))
 
-# write results to csv for fig 6.
-write_csv(dphz_nls, "phz2019_dPHZ_Dphys_nls_coefs.csv")
+plot_GC <- ggplot(df_soak, aes(x = C_mol_cm3, y = signal_GC)) +    
+  geom_smooth(method='lm', linetype = 2, color = 'black') + geom_point(shape = 21)
 
-# print results here
-dphz_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
-
-```
-<br>
-
-Now we are going to take those coefficient estimates and predict datapoints that those values would generate at 1000 timepoints in the window our data is in. Essentially, we are going to generate the best fit line from those parameters and the 95% confidence interval so that we can plot it with the original datapoints.
-
-```{r}
-dphz_grid <- tibble(time = seq(0.4, max(df_dphz_swv$time), length.out = 1000))
-
-dphz_coefs <- left_join(dphz_nls %>% filter(term == 'b'),
-                      dphz_nls %>% filter(term == 'a'), 
-                      by = c('exp','run'), suffix = c('_b','_a'))
-
-dphz_grid <- left_join(df_dphz_swv %>% filter(reactor == 'transfer') %>% group_by(reactor, exp, run, exp_id, run_id) %>% summarise(),
-                       dphz_grid %>% mutate(reactor = 'transfer'), by = c('reactor'))
-
-dphz_grid_coef <- left_join(dphz_grid, dphz_coefs, by  = c('exp','run'))
-
-dphz_preds <- dphz_grid_coef %>% 
-  mutate(pred = estimate_b * (time^-0.5) + estimate_a) %>% 
-  mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
-  mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
-
-write_csv(dphz_preds, "phz2019_dPHZ_Dphys_preds.csv")
-
-# print simple results here
-dphz_preds %>% 
-  select(reactor,exp, run, time, pred, pred_high, pred_low, estimate_b, 
-         conf.low_b, conf.high_b, estimate_a, conf.low_a, conf.high_a) %>% 
-  head() %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
-```
-<br>
-
-Now they we have those predictions we can plot everything together:
-
-```{r}
-plot_decays_dphz <- ggplot(dphz_preds, aes(x = time, y = pred)) + 
-  geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
-  geom_path(linetype = 2)+
-  geom_point(data =df_dphz_swv %>% filter(reactor == 'transfer'), aes(x = time, y = signal) , shape = 21)+
-  facet_wrap(exp_id~run_id, scale = 'free')
-
-plot_decays_dphz_styled <- plot_decays_dphz + 
-  scale_y_continuous(labels = nA_label) +  
-  labs(y = expression(I[swv]~(nA)), x = 'Time (min)', title = '∆phz*')
-
-plot_decays_dphz_styled
+plot_GC_styled <- plot_GC+  
+  scale_x_continuous(labels = nA_label) + 
+  scale_y_continuous(labels = nA_label) + 
+  labs(x = expression(PYO~(mu*M)), y = expression(I[gc]~(nA)))
   
+plot_GC_styled
+
 ```
 
+$I_{GC}$ is simply $I = nFSDC$, so $D_{ap}$ is:
 
+$$D_{ap} = \frac{m}{n F S}$$
+
+We can define a simple function to calculate this $D_{ap}$ from the slope of the line in the above plot.
+
+```{r}
+dap_from_GC <- function(m){
+  
+  n=1.8
+  S <-  18.4 #cm
+  F_C = 96485.332
+  
+  d_ap <- m / (n * F_C * S)
+  
+  d_ap
+}
+```
+
+Fitting the linear model and calculating $D_{ap}$ gives these values: 
+
+```{r}
+lm_GC <- tidy(lm(signal_GC~C_mol_cm3, data = df_soak), conf.int = T) %>% 
+  filter(term=='C_mol_cm3') %>% 
+  mutate(dap=dap_from_GC(m = estimate)) %>% 
+  mutate(dap_high = dap_from_GC(m = conf.high)) %>% 
+  mutate(dap_low = dap_from_GC(m = conf.low)) %>% 
+  mutate(dataset = 'GC')
+
+lm_GC %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+<br>
+
+# Fig. S7B
+
+Now we will look at the relationship between concentration and peak SWV current.
+
+```{r}
+plot_SWV <- ggplot(df_soak, aes(x = C_mol_cm3, y = signal_SWV)) +
+    geom_smooth(method='lm', linetype = 2, color = 'black') + geom_point(shape = 21)
+
+plot_SWV_styled <- plot_SWV+  
+  scale_x_continuous(labels = nA_label) + 
+  scale_y_continuous(labels = nA_label) + 
+  labs(x = expression(PYO~(mu*M)), y = expression(I[swv]~(nA)))
+  
+plot_SWV_styled
+```
+
+For a plot of $I_{SWV}$ vs. $C$, the slope can be defined in terms of the parameters for $I_{SWV}$ other than concentration. This yields an expression for $D_{ap}$:
+
+$$D_{ap} = \pi t_p \left( \frac{m}{\psi n F A} \right) ^2 $$
+
+So we'll again define the function to calculate it:
+
+```{r}
+dap_from_SWV <- function(m, t_p=1/(2*300)){
+  
+  n=1.8
+  psi <-  0.7
+  A <-  0.025 #cm^2
+  F_C = 96485.332
+  
+  d_ap <- pi * t_p * (m / (psi * n * F_C * A))^2
+  
+  d_ap
+}
+```
+
+The linear model of this data gives the following:
+
+```{r}
+lm_SWV <- tidy(lm(signal_SWV~C_mol_cm3, data = df_soak), conf.int = T) %>% 
+  filter(term=='C_mol_cm3') %>% 
+  mutate(dap=dap_from_SWV(m = estimate)) %>% 
+  mutate(dap_high = dap_from_SWV(m = conf.high)) %>% 
+  mutate(dap_low = dap_from_SWV(m = conf.low)) %>% 
+  mutate(dataset = 'SWV')
+
+#glance(lm(signal_from_swv~C_mol_cm3, data = df_cal))
+
+lm_SWV %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+<br>
+
+# Fig. S7C
+
+Finally, we will examine the peak SWV current vs. the peak GC current, which is not dependent on the known PYO concentrations.
+
+```{r}
+plot_swvGC <- ggplot(df_soak, aes(x = signal_SWV, y = signal_GC)) + 
+  geom_smooth(method='lm', linetype = 2, color = 'black') + geom_point(shape = 21)
+
+plot_swvGC_styled <- plot_swvGC+  
+  scale_x_continuous(labels = nA_label) + 
+  scale_y_continuous(labels = nA_label) + 
+  labs(x = expression(I[swv]~(nA)), y = expression(I[gc]~(nA)))
+  
+plot_swvGC_styled
+```
+
+Recall that for this type of data:
+
+$$D_{ap} = \frac{1}{\pi t_p} \left( \frac{m A \psi}{S} \right) ^2$$  
+
+So, here's a function that will calculate $D_{ap}$ from the slope of this data:
+
+```{r}
+dap_from_swvGC <- function(m, t_p=1/(2*300)){
+  
+  psi <-  0.7
+  A <-  0.025 #cm^2
+  S <-  18.4 #cm
+  
+  d_ap <- (m*A*psi)^2 / (S^2 * pi * t_p)
+  
+  d_ap
+}
+```
+
+And now, we'll fit a linear model and calculate a $D_{ap}$. We'll go ahead and save a csv of this result for use in main figure 6F.
+
+```{r}
+output_lm_swv_gc <- tidy(lm(signal_GC~signal_SWV, data = df_soak), conf.int = T) %>% 
+  mutate(exp_id = 'Blank 1', run_id = 'Rep 1')
+
+write_csv(output_lm_swv_gc, "phz2019_blank_Dap_lm_coefs.csv")
+
+lm_swvGC <- tidy(lm(signal_GC~signal_SWV, data = df_soak), conf.int = T) %>% 
+  filter(term=='signal_SWV') %>% 
+  mutate(dap=dap_from_swvGC(m = estimate)) %>% 
+  mutate(dap_high = dap_from_swvGC(m = conf.high)) %>% 
+  mutate(dap_low = dap_from_swvGC(m = conf.low)) %>% 
+  mutate(dataset = 'SWVvsGC')
+
+lm_swvGC %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+<br>
+
+# Fig. S7D
+
+Now let's compare the estimates from each subset of the data:
+
+```{r}
+
+lms <- bind_rows(lm_swvGC,lm_SWV,lm_GC) %>% 
+  select(dataset, term, dap, dap_low, dap_high)
+
+plot_cal_dap <- ggplot(lms, aes(x = dataset, y = dap)) + 
+  geom_pointrange(aes(ymin = dap_low, ymax = dap_high), size = 0.25) + 
+  ylim(0, 1e-5)
+
+plot_cal_dap_styled <- plot_cal_dap+
+  labs(x = 'Dataset', y = expression(D[ap]~(cm^2 / sec)))+
+  scale_x_discrete(breaks = c('GC','SWV', 'SWVvsGC'), labels=c('GC vs.\n[PYO]', 'SWV vs.\n[PYO]', 'GC vs.\nSWV'))
+
+plot_cal_dap_styled
+```
+
+# Nafion
+
+```{r}
+
+df_nafion <- tibble(molecule = c('fc','fc','fc','ruHex','fc','fc','fc','ruHex','fc','fc','fc','ruHex'),
+                    method = c('chrono','chrono','chrono','chrono','swvGC','swvGC','swvGC','swvGC','swvGC_2','swvGC_2','swvGC_2','swvGC_2'),
+                    condition = c(1,2,3,4,1,2,3,4,1,2,3,4),
+                    Dap = c(5.89e-6, 5.48e-6, 1.4e-7, 5.e-7, 4.69e-6, 1.85e-6, 1.39e-7, 1.06e-6, 1.236e-5, 4.88e-6, 3.672e-7, 3.81e-6)
+)
+
+labels = c('FC solution','FC nafion soak','FC nafion transfer','RuHex nafion transfer')
+
+plot_nafion <- ggplot(df_nafion %>% filter(method != 'swvGC_2'), aes(x = condition, y = Dap, color = method)) + geom_point(position = position_dodge(width = 0.1)) + scale_y_log10(limits = c(1e-8, 2e-5))+
+  scale_x_discrete(limits = c(1,2,3,4),labels = labels ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = 'right') + labs(y = expression(D[ap]), x = NULL) + guides(color = F)
+
+plot_nafion
+```
+
+```{r}
+plot_nafion_2 <- ggplot(df_nafion %>% filter(method != 'swvGC'), aes(x = condition, y = Dap, color = method)) + geom_point(position = position_dodge(width = 0.1)) + scale_y_log10(limits = c(1e-8, 2e-5))+
+  scale_x_discrete(limits = c(1,2,3,4),labels = labels ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = 'right') + labs(y = expression(D[ap]), x = NULL)
+
+plot_nafion_2
+```
 
 # Create figure
 
 ```{r}
 theme_set(theme_figure())
 
-top_panel <- plot_grid(plot_dap_combo_styled + guides(fill = F), plot_decay_combo_styled + guides(fill = F, color= F))
+fig_s6_top <- plot_grid(plot_dap_combo_styled + guides(fill = F), plot_decay_combo_styled + guides(fill = F, color= F), labels = c('A','B'), label_size = 12)
 
-fig_s6 <- plot_grid(top_panel,plot_swv_gc_dphz_styled, plot_decays_dphz_styled, 
-                    ncol = 1, rel_heights = c(0.5, 1,1), labels = 'AUTO', label_size = 12, scale = 0.95)
+fig_s6_blank <- plot_grid(plot_GC_styled, plot_SWV_styled, plot_swvGC_styled, plot_cal_dap_styled, plot_nafion,
+          align = 'v', axis = 'lr',scale = 0.95, labels = c('D','E','F','G','H'), label_size = 12, ncol = 3 )
+
+#fig_s6_dap_nafion <- plot_grid(plot_cal_dap_styled, plot_nafion,
+#          align = 'v', axis = 'lr',scale = 0.95, labels = 'AUTO', label_size = 12, ncol = 2)
+
+
+fig_s6 <- plot_grid(fig_s6_top, plot_swv_gc_dphz_styled, fig_s6_blank,
+                    ncol = 1, rel_heights = c(1, 2,2.5), label_size = 12, labels = c('','C',''))
 
 fig_s6
 

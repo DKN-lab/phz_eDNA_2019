@@ -103,7 +103,7 @@ plot_eDNA_styled
 ```{r}
 theme_set(theme_figure())
 
-fig_s2 <- plot_grid( toto_plot_styled,plot_eDNA_styled, align = 'hv', axis = 'tblr', ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('D','E'), label_size = 12)
+fig_s2 <- plot_grid( toto_plot_styled,plot_eDNA_styled, align = 'hv', axis = 'tblr', ncol = 2, rel_widths = c(1,2), scale = 0.95, labels = c('C','E'), label_size = 12)
 
 fig_s2
 

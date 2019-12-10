@@ -97,7 +97,7 @@ ggplot(df_690, aes(x = red_ox, y = intensity, color = DNA )) +
 ```{r}
 
 
-labels = labels = c('PBS + PYO[ox]','PYO[red] + PBS','PCA[red] + PYO[ox]','PCN[red] + PYO[ox]')
+labels = c('PBS + PYO[ox]','PYO[red] + PBS','PCA[red] + PYO[ox]','PCN[red] + PYO[ox]')
 
 
 plot_ctDNA_690 <- ggplot(df_690, aes(x = red_ox, y = mean, color = DNA)) +  
@@ -193,10 +193,13 @@ ggplot(df, aes(x = t, y = abs690)) + geom_point(shape = 21) + facet_wrap(~phz_re
 
 ```{r}
 
-plot_phzET_o2 <- ggplot(df %>% filter(abs690>-0.01), aes(x = t, y = abs690, color = phz_redox)) + 
-  geom_point(shape = 21, alpha = 0.5, size = 0.5) + 
-  geom_smooth(data = . %>% filter(abs690>0.01 & abs690<0.4), size = 0.5) + 
-  labs(x = 'Time (sec)',y = 'Absorbance at 690nm') + scale_color_manual(values = c('light gray', 'light gray', 'light gray',"#E69F00", "#56B4E9", "#000000")) +   theme(legend.position = c(0.5, 0.8))
+
+
+plot_phzET_o2 <- ggplot(df %>% filter(abs690>-0.01), aes(x = t-15, y = abs690, color = phz_redox)) + 
+  geom_point(data = . %>% filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))),shape = 21, alpha = 0.5, size = 0.5) + 
+  geom_smooth(data = . %>% filter(abs690>0.01 & abs690<0.4) %>% filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))), size = 0.5) + 
+  geom_line(data = . %>% filter(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred') & t >11), aes(group = phz_redox), color = 'light gray', linetype = 2)+
+  scale_color_manual(values = c('gray', "#56B4E9","#E69F00", "#000000")) +  labs(x = 'Time (sec)',y = 'Absorbance at 690nm') +  theme(legend.position = c(0.5, 0.8))
 
 plot_phzET_o2
 ```
@@ -398,6 +401,8 @@ df_spec_preds %>% head()
 ```{r}
 #write_csv(df_exp_2_ests, "2019_09_27_spectroscopy_fits_bg_sub.csv")
 
+write_csv(df_spec_ests, "phz2019_dna_ct_spec_biexp_fits.csv")
+
 df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 ```
 
@@ -454,24 +459,24 @@ plot_spec_tau
 ```{r}
 theme_set(theme_figure())
 
-fig_4 <- plot_grid(plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
-          plot_fac, plot_fac, plot_bg_spec, 
-          ncol = 3, scale = 0.95, align = 'hv', axis = 'tblr', labels = 'AUTO', label_size = 12)
+#fig_4 <- plot_grid(plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
+#          plot_fac, plot_fac, plot_bg_spec, 
+#          ncol = 3, scale = 0.95, align = 'hv', axis = 'tblr', labels = 'AUTO', label_size = 12)
 
-fig_4
+#fig_4
 
-save_plot("../../../figures/phz2019_Fig_4.pdf", fig_4, base_height = 4, base_width = 7)
+#save_plot("../../../figures/phz2019_Fig_4.pdf", fig_4, base_height = 4, base_width = 7)
 ```
 
 ```{r}
-fig_4 <- plot_grid(plot_ctDNA_690, plot_ctDNA_690, plot_phzET_o2,
+fig_3 <- plot_grid(plot_ctDNA_690, plot_ctDNA_690, plot_phzET_o2,
                    plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
           plot_fac, plot_fac, plot_bg_spec, 
           ncol = 3, scale = 0.95, align = 'hv', axis = 'tlr', labels = 'AUTO', label_size = 12)
 
-fig_4
+fig_3
 
-save_plot("../../../figures/phz2019_Fig_3combo.pdf", fig_4, base_height = 6, base_width = 7)
+save_plot("../../../figures/phz2019_Fig_3.pdf", fig_4, base_height = 6, base_width = 7)
 ```
 
 ```{r}
