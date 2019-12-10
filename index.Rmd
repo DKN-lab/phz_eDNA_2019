@@ -107,11 +107,11 @@ These are notebooks generated in R. They fully reproduce the figures in the pape
 
 ## Main figures
 
-* [Figure 1.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_1/phz2019_Fig_1_colony_retention.html) Colony biofilms retain PYO and PCN, but not PCA.
+* [Figure 1.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_1/phz2019_Fig_1.html) Colony biofilms retain PYO and PCN, but not PCA.
 
-* [Figure 2.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_2/phz2019_Fig_2_PYO_eDNA.html) Phenazines bind extracellular DNA in vitro and in vivo.
+* [Figure 2.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_2/phz2019_Fig_2.html) Phenazines bind extracellular DNA in vitro and in vivo.
 
-* [Figure 3.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_3/phz2019_Fig_3_phz_ET_invitro.html) Constraints on phenazine electron transfer in vitro.
+* [Figure 3.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_3/phz2019_Fig_3.html) Constraints on phenazine electron transfer in vitro.
 
 * [Figure 4.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_5/phz2019_Fig_5.html) Electrode grown biofilms exhibit PYO dependent electron transfer.
 
