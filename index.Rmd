@@ -113,18 +113,26 @@ These are notebooks generated in R. They fully reproduce the figures in the pape
 
 * [Figure 3.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_3/phz2019_Fig_3.html) Constraints on phenazine electron transfer in vitro.
 
-* [Figure 4.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_5/phz2019_Fig_5.html) Electrode grown biofilms exhibit PYO dependent electron transfer.
+* [Figure 4.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_4/phz2019_Fig_4.html) Electrode grown biofilms exhibit PYO dependent electron transfer.
 
-* [Figure 5.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_6/phz2019_Fig_6.html) PYO mediated electron transfer is faster than PYO loss from the biofilm.
+* [Figure 5.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_5/phz2019_Fig_5.html) PYO mediated electron transfer is faster than PYO loss from the biofilm.
 
 
 ## Supplemental figures
 
 * [Figure S1.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S1/phz2019_Fig_S1.html) Colony biofilm images and controls.
 
-* [Figure S6.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html) IDA Dap and Dloss measurements.
+* [Figure S2.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S2/phz2019_Fig_S2.html) Phenazine - DNA binding assays.
 
-* [Figure S7.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html) Estimation of Dap for solution PYO at blank IDA with known PYO concentrations. 
+* [Figure S3.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S3/phz2019_Fig_S3.html) eDNA in colony biofilms.
+
+* [Figure S4.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S4/phz2019_Fig_S4.html) Phenazine electron transfer and time resolved spectroscopy.
+
+* [Figure S5.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S4/phz2019_Fig_S4.html) IDA biofilm phenazine production and retention.
+
+* [Figure S6.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html) IDA Dap measurements.
+
+* [Figure S7.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html) IDA Dloss measurements. 
 
 ## Data processing
 

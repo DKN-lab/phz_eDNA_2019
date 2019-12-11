@@ -21,7 +21,7 @@ To see how we got from the raw electrochemical scans to the datasets used here, 
 * [IDA WT biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
 * [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
 
-This supplemental figure and notebook underlies some of the data in main figure 6, particularly the final panel. Specifically the model coefficients for $D_{ap}$ and $D_{phys}$ are calculated in the Fig. S6B-D sections. These data are saved as .csv files in the directory containing this notebook.
+This supplemental figure and notebook underlies some of the data in main figure 6, particularly the final panel. Specifically the model coefficients for $D_{ap}$ are calculated in the Fig. S6C and S6F sections. These data are saved as .csv files in the directory containing this notebook.
 
 
 ----
@@ -61,7 +61,23 @@ df_dphz_1 <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_gc_s
 
 df_combined <- bind_rows(df_dphz_1, df_WT)
 
+```
 
+```{r}
+plot_dap_combo <- ggplot(df_combined %>% filter(rep>0), aes(x = signal_SWV, y = signal_GC, fill = strain)) + 
+  geom_smooth(method = 'lm', color = 'black', fill = 'light gray',linetype = 2, aes(group = strain)) + 
+  geom_point(shape = 21)  
+plot_dap_combo_styled <- plot_dap_combo+
+  scale_x_continuous(labels = nA_label) + 
+  scale_y_continuous(labels = nA_label) + 
+  labs(x = expression(I[swv]~(nA)), y = expression(I[gc]~(nA)))
+
+plot_dap_combo_styled
+```
+
+# Fig. S6B
+
+```{r}
 plot_decay_combo <- ggplot(df_combined, aes(x = time_SWV, y = signal_SWV, fill = strain, color = strain)) + 
   geom_line() + geom_point(shape = 21, color = 'black') 
 
@@ -86,7 +102,7 @@ plot_dap_combo_styled <- plot_dap_combo+
 plot_dap_combo_styled
 ```
 
-# Fig. S6B
+# Fig. S6C
 
 First, we will read in the paired SWV and GC signals that were generated from the processing notebook. Then we can plot the SWV vs. GC signals for both biofilms and technical replicates. Each dataset is fit with a linear model shaded with a 95% confidence interval.
 
@@ -141,7 +157,7 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
 
 <br>
 
-# Fig. S7A
+# Fig. S6D
 
 First we will import the blank IDA data that will be used for panels A-D. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
 
@@ -211,7 +227,7 @@ lm_GC %>%
 
 <br>
 
-# Fig. S7B
+# Fig. S6E
 
 Now we will look at the relationship between concentration and peak SWV current.
 
@@ -266,7 +282,7 @@ lm_SWV %>%
 
 <br>
 
-# Fig. S7C
+# Fig. S6F
 
 Finally, we will examine the peak SWV current vs. the peak GC current, which is not dependent on the known PYO concentrations.
 
@@ -323,7 +339,7 @@ lm_swvGC %>%
 
 <br>
 
-# Fig. S7D
+# Fig. S6G
 
 Now let's compare the estimates from each subset of the data:
 
@@ -343,14 +359,14 @@ plot_cal_dap_styled <- plot_cal_dap+
 plot_cal_dap_styled
 ```
 
-# Nafion
+# Fig. S6H - Nafion
 
 ```{r}
 
-df_nafion <- tibble(molecule = c('fc','fc','fc','ruHex','fc','fc','fc','ruHex','fc','fc','fc','ruHex'),
-                    method = c('chrono','chrono','chrono','chrono','swvGC','swvGC','swvGC','swvGC','swvGC_2','swvGC_2','swvGC_2','swvGC_2'),
-                    condition = c(1,2,3,4,1,2,3,4,1,2,3,4),
-                    Dap = c(5.89e-6, 5.48e-6, 1.4e-7, 5.e-7, 4.69e-6, 1.85e-6, 1.39e-7, 1.06e-6, 1.236e-5, 4.88e-6, 3.672e-7, 3.81e-6)
+df_nafion <- tibble(molecule = c('fc','fc','fc','ruHex','fc','fc','fc','ruHex'),
+                    method = c('chrono','chrono','chrono','chrono','swvGC','swvGC','swvGC','swvGC'),
+                    condition = c(1,2,3,4,1,2,3,4),
+                    Dap = c(5.89e-6, 5.48e-6, 1.4e-7, 5.e-7, 4.69e-6, 1.85e-6, 1.39e-7, 1.06e-6)
 )
 
 labels = c('FC solution','FC nafion soak','FC nafion transfer','RuHex nafion transfer')
@@ -360,14 +376,6 @@ plot_nafion <- ggplot(df_nafion %>% filter(method != 'swvGC_2'), aes(x = conditi
   theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = 'right') + labs(y = expression(D[ap]), x = NULL) + guides(color = F)
 
 plot_nafion
-```
-
-```{r}
-plot_nafion_2 <- ggplot(df_nafion %>% filter(method != 'swvGC'), aes(x = condition, y = Dap, color = method)) + geom_point(position = position_dodge(width = 0.1)) + scale_y_log10(limits = c(1e-8, 2e-5))+
-  scale_x_discrete(limits = c(1,2,3,4),labels = labels ) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = 'right') + labs(y = expression(D[ap]), x = NULL)
-
-plot_nafion_2
 ```
 
 # Create figure

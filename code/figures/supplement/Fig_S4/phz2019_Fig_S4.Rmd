@@ -15,7 +15,7 @@ output:
 
 # Notes
 
-
+Fig. S4B-G were made outside of R.
 
 ----
 
@@ -40,7 +40,7 @@ source("../../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. S1A
+# Fig. S4A
 
 ```{r}
 df_meta <- read_csv("../../../../data/Spectroscopy/2019_09_17_solution_ET_well_metadata.csv")
@@ -75,7 +75,8 @@ plot_phzET_PYO <- ggplot(df_phzET_PYO, aes(x = red_ox, y = abs)) +
 
 plot_phzET_PYO
 ```
-# Biexponential fits
+
+# Fig. S4H - Biexponential fits
 
 ```{r}
 df_biexp <- read_csv("../../Fig_3/phz2019_dna_ct_spec_biexp_fits.csv")
@@ -83,19 +84,16 @@ df_biexp <- read_csv("../../Fig_3/phz2019_dna_ct_spec_biexp_fits.csv")
 
 
 ```{r}
-background_ests <- df_spec_ests %>% filter(is.na(quencher_eq))
 
 #background_ests
 
 ggplot(df_biexp, aes(x = quencher_eq, y = estimate)) + 
-  geom_hline(data = background_ests, aes(yintercept = estimate), linetype = 2, color = 'light gray') + 
   geom_pointrange(aes(ymin = estimate - 2*std.error, ymax = estimate + 2*std.error)) +
   facet_wrap(~term, scales = 'free')
 
 ```
 ```{r}
 plot_spec_A <- ggplot(df_biexp %>% filter(term %in% c('A1','A2')), aes(x = quencher_eq, y = estimate)) + 
-  geom_hline(data = background_ests, aes(yintercept = estimate), linetype = 2, color = 'light gray') + 
   geom_pointrange(aes(ymin = estimate - 2*std.error, ymax = estimate + 2*std.error), size = 0.25) +
   facet_wrap(~term, scales = 'free',labeller = labeller(term = c(A1 = 'Component 1 \n Amplitude', A2 = 'Component 2 \n Amplitude'))) + labs(x = 'Quencher equivalents', y = 'A')
 plot_spec_A
@@ -105,12 +103,11 @@ plot_spec_A
 df_biexp_tau <- df_biexp %>% filter(term %in% c('lrc1','lrc2')) %>% mutate(tau = 1/exp(estimate)) %>% mutate(tau_low = 1/exp(estimate + 2*std.error), tau_high = 1/exp(estimate - 2*std.error))
 
 
-background_spec_tau <- df_spec_tau %>% filter(is.na(quencher_eq))
+#background_spec_tau <- df_spec_tau %>% filter(is.na(quencher_eq))
 
 #background_ests
 
-plot_spec_tau <- ggplot(df_spec_tau, aes(x = quencher_eq, y = tau)) + 
-  geom_hline(data = background_spec_tau, aes(yintercept = tau), linetype = 1, color = 'light gray') + 
+plot_spec_tau <- ggplot(df_biexp_tau, aes(x = quencher_eq, y = tau)) + 
   geom_pointrange(aes(ymin = tau_low, ymax = tau_high), size = 0.25) +
   facet_wrap(~term, scales = 'free', labeller = labeller(term = c(lrc1 = 'Component 1 \n Half life', lrc2 = 'Component 2 \n Half life'))) + 
   scale_y_continuous(labels = ns_label, limits = c(0,NA)) + labs(x = 'Quencher equivalents')

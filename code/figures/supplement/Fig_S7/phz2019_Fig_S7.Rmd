@@ -19,7 +19,7 @@ To see how we got from the raw electrochemical scans to the datasets used here, 
 
 * [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
 
-This supplemental figure and notebook underlies some of the data in main figure 6, particularly the final panel. Specifically the model coefficients for the blank $D_{ap}$ Fig. S7C. These data are saved as .csv files in the directory containing this notebook.
+This supplemental figure and notebook underlies some of the data in main figure 6, particularly the final panel. Specifically the model coefficients for $D_{loss}$. These data are saved as .csv files in the directory containing this notebook.
 
 ----
 
@@ -43,9 +43,89 @@ source("../../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
+# Fig. S7A
+
+Now let's plot the SWV peak current decays for the blank IDA. This data comes from the blank IDA processing notebook.
+
+```{r}
+
+df_blank_swv <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_blank_tran_time_signals.csv") %>% 
+  filter(reactor == 'transfer' & PHZadded != '10uM') %>% 
+  mutate(PHZadded = fct_relevel(PHZadded, c('25uM','50uM','75uM','100uM') ))
+
+ggplot(df_blank_swv, aes(x = time, y = signal)) + 
+  geom_point(shape = 21) + facet_wrap(~PHZadded, scales = 'free')
+```
+
+Now we will fit each of these decays. We will go ahead and save these coefficients as a csv, so that we can use them to calculate Dphys values in main figure 6.
+
+```{r}
+blank_nls <- df_blank_swv%>%
+  group_by(PHZadded) %>% 
+  do(
+    tidy(
+      nls(data = ., formula =  signal ~ b * (time)^-0.5 + a, start = c(b = 0.1, a = 1e-07) ),
+      conf.int = T
+    )
+  ) %>% 
+  arrange(desc(term))
+
+# write results to csv for fig 6.
+write_csv(blank_nls, "phz2019_blank_Dphys_nls_coefs.csv")
+
+# print results here
+blank_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
+
+```
+<br>
+
+Now we are going to take those coefficient estimates and predict datapoints that those values would generate at 1000 timepoints in the window our data is in. Essentially, we are going to generate the best fit line from those parameters and the 95% confidence interval so that we can plot it with the original datapoints.
+
+```{r}
+blank_grid <- tibble(time = seq(0.05, max(df_blank_swv$time), length.out = 1000))
+
+blank_coefs <- left_join(blank_nls %>% filter(term == 'b'),
+                      blank_nls %>% filter(term == 'a'), 
+                      by = c('PHZadded'), suffix = c('_b','_a'))
+
+blank_grid <- left_join(df_blank_swv %>% group_by(reactor, PHZadded) %>% summarise(),
+                       blank_grid %>% mutate(reactor = 'transfer'), by = c('reactor'))
+
+blank_grid_coef <- left_join(blank_grid, blank_coefs, by  = c('PHZadded'))
+
+blank_preds <- blank_grid_coef %>% 
+  mutate(pred = estimate_b * (time^-0.5) + estimate_a) %>% 
+  mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
+  mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
+
+write_csv(blank_preds, "phz2019_blank_Dphys_preds.csv")
+
+# print simple results here
+blank_preds %>% 
+  select(reactor,PHZadded, time, pred, pred_high, pred_low, estimate_b, 
+         conf.low_b, conf.high_b, estimate_a, conf.low_a, conf.high_a) %>% 
+  head() %>% kable(digits = 7) %>% kable_styling() %>% scroll_box(height = '300px')
+```
+<br>
+
+Now they we have those predictions we can plot everything together:
+
+```{r}
+plot_decays_blank <- ggplot(blank_preds, aes(x = time, y = pred)) + 
+  geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
+  geom_path(linetype = 2)+
+  geom_point(data =df_blank_swv, aes(x = time, y = signal) , shape = 21)+
+  facet_wrap(~PHZadded, scale = 'free')
+
+plot_decays_blank_styled <- plot_decays_blank+
+    scale_y_continuous(labels = nA_label) +  
+  labs(y = expression(I[swv]~(nA)), x = 'Time (min)', title = 'Blank')
+
+plot_decays_blank_styled
+```
 
 
-# Fig. S6C
+# Fig. S7B
 
 First let's read in the data, which are the peak SWV current signals over time from the ∆phz* biofilms:
 
@@ -131,86 +211,6 @@ plot_decays_dphz_styled
   
 ```
 
-# Fig. S7E
-
-Now let's plot the SWV peak current decays for the blank IDA. This data comes from the blank IDA processing notebook.
-
-```{r}
-
-df_blank_swv <- read_csv("../../../processing/processed_data/phz_eDNA_2019_swv_blank_tran_time_signals.csv") %>% 
-  filter(reactor == 'transfer' & PHZadded != '10uM') %>% 
-  mutate(PHZadded = fct_relevel(PHZadded, c('25uM','50uM','75uM','100uM') ))
-
-ggplot(df_blank_swv, aes(x = time, y = signal)) + 
-  geom_point(shape = 21) + facet_wrap(~PHZadded, scales = 'free')
-```
-
-Now we will fit each of these decays. We will go ahead and save these coefficients as a csv, so that we can use them to calculate Dphys values in main figure 6.
-
-```{r}
-blank_nls <- df_blank_swv%>%
-  group_by(PHZadded) %>% 
-  do(
-    tidy(
-      nls(data = ., formula =  signal ~ b * (time)^-0.5 + a, start = c(b = 0.1, a = 1e-07) ),
-      conf.int = T
-    )
-  ) %>% 
-  arrange(desc(term))
-
-# write results to csv for fig 6.
-write_csv(blank_nls, "phz2019_blank_Dphys_nls_coefs.csv")
-
-# print results here
-blank_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
-
-```
-<br>
-
-Now we are going to take those coefficient estimates and predict datapoints that those values would generate at 1000 timepoints in the window our data is in. Essentially, we are going to generate the best fit line from those parameters and the 95% confidence interval so that we can plot it with the original datapoints.
-
-```{r}
-blank_grid <- tibble(time = seq(0.05, max(df_blank_swv$time), length.out = 1000))
-
-blank_coefs <- left_join(blank_nls %>% filter(term == 'b'),
-                      blank_nls %>% filter(term == 'a'), 
-                      by = c('PHZadded'), suffix = c('_b','_a'))
-
-blank_grid <- left_join(df_blank_swv %>% group_by(reactor, PHZadded) %>% summarise(),
-                       blank_grid %>% mutate(reactor = 'transfer'), by = c('reactor'))
-
-blank_grid_coef <- left_join(blank_grid, blank_coefs, by  = c('PHZadded'))
-
-blank_preds <- blank_grid_coef %>% 
-  mutate(pred = estimate_b * (time^-0.5) + estimate_a) %>% 
-  mutate(pred_low = conf.low_b* (time^-0.5) + conf.low_a) %>% 
-  mutate(pred_high = conf.high_b* (time^-0.5) + conf.high_a) 
-
-write_csv(blank_preds, "phz2019_blank_Dphys_preds.csv")
-
-# print simple results here
-blank_preds %>% 
-  select(reactor,PHZadded, time, pred, pred_high, pred_low, estimate_b, 
-         conf.low_b, conf.high_b, estimate_a, conf.low_a, conf.high_a) %>% 
-  head() %>% kable(digits = 7) %>% kable_styling() %>% scroll_box(height = '300px')
-```
-<br>
-
-Now they we have those predictions we can plot everything together:
-
-```{r}
-plot_decays_blank <- ggplot(blank_preds, aes(x = time, y = pred)) + 
-  geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
-  geom_path(linetype = 2)+
-  geom_point(data =df_blank_swv, aes(x = time, y = signal) , shape = 21)+
-  facet_wrap(~PHZadded, scale = 'free')
-
-plot_decays_blank_styled <- plot_decays_blank+
-    scale_y_continuous(labels = nA_label) +  
-  labs(y = expression(I[swv]~(nA)), x = 'Time (min)', title = 'Blank')
-
-plot_decays_blank_styled
-```
 
 
 
