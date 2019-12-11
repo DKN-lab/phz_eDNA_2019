@@ -42,12 +42,105 @@ theme_set(theme_notebook())
 
 # Fig. S1A
 
+```{r}
+df_meta <- read_csv("../../../../data/Spectroscopy/2019_09_17_solution_ET_well_metadata.csv")
 
-#
+df_spectra <- read_csv("../../../../data/Spectroscopy/2019_09_17_solution_ET_abs_spectra_1.csv", skip = 1) %>% gather(key = 'well', value = 'abs',-Wavelength)
+
+df_phzET <- left_join(df_spectra, df_meta, by = 'well') %>% filter(Wavelength == 690)
+
+ggplot(df_phzET %>% filter(red == 'PYO' | ox == 'PYO'), aes(x = red_ox, y = abs)) + geom_point(shape = 21)
+
+```
+```{r}
+df_phzET %>% filter(red != 'PYO' & ox != 'PYO') %>% summarise(mean = mean(abs))
+
+df_phzET_PYO <- df_phzET %>% filter(red == 'PYO' | ox == 'PYO')
+
+levels(factor(df_phzET_PYO$red_ox))
+
+df_phzET_PYO$red_ox <- factor(df_phzET_PYO$red_ox, levels = c("PBS_PYO","PYO_PBS","PCA_PYO", "PCN_PYO","PYO_PCA", "PYO_PCN"))
+
+ggplot(df_phzET_PYO, aes(x = red_ox, y = abs)) + geom_point(shape = 21)
+
+labels = c('PBS + PYO[ox]','PYO[red] + PBS','PCA[red] + PYO[ox]','PCN[red] + PYO[ox]', 'PYO[red] + PCA[ox]', 'PYO[red] + PCN[ox]')
+
+
+plot_phzET_PYO <- ggplot(df_phzET_PYO, aes(x = red_ox, y = abs)) +  
+  geom_hline(yintercept = 0.0328, linetype = 2, color = 'light gray')+
+  geom_point(shape = 21)+
+  scale_x_discrete(labels = parse(text = labels )) + 
+  labs(x = 'Reactants', y = 'Absorbance at 690nm', color = NULL) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.5,1)) + scale_shape_manual(values = c(21,22))
+
+plot_phzET_PYO
+```
+# Biexponential fits
+
+```{r}
+df_biexp <- read_csv("../../Fig_3/phz2019_dna_ct_spec_biexp_fits.csv")
+```
+
+
+```{r}
+background_ests <- df_spec_ests %>% filter(is.na(quencher_eq))
+
+#background_ests
+
+ggplot(df_biexp, aes(x = quencher_eq, y = estimate)) + 
+  geom_hline(data = background_ests, aes(yintercept = estimate), linetype = 2, color = 'light gray') + 
+  geom_pointrange(aes(ymin = estimate - 2*std.error, ymax = estimate + 2*std.error)) +
+  facet_wrap(~term, scales = 'free')
+
+```
+```{r}
+plot_spec_A <- ggplot(df_biexp %>% filter(term %in% c('A1','A2')), aes(x = quencher_eq, y = estimate)) + 
+  geom_hline(data = background_ests, aes(yintercept = estimate), linetype = 2, color = 'light gray') + 
+  geom_pointrange(aes(ymin = estimate - 2*std.error, ymax = estimate + 2*std.error), size = 0.25) +
+  facet_wrap(~term, scales = 'free',labeller = labeller(term = c(A1 = 'Component 1 \n Amplitude', A2 = 'Component 2 \n Amplitude'))) + labs(x = 'Quencher equivalents', y = 'A')
+plot_spec_A
+```
+
+```{r}
+df_biexp_tau <- df_biexp %>% filter(term %in% c('lrc1','lrc2')) %>% mutate(tau = 1/exp(estimate)) %>% mutate(tau_low = 1/exp(estimate + 2*std.error), tau_high = 1/exp(estimate - 2*std.error))
+
+
+background_spec_tau <- df_spec_tau %>% filter(is.na(quencher_eq))
+
+#background_ests
+
+plot_spec_tau <- ggplot(df_spec_tau, aes(x = quencher_eq, y = tau)) + 
+  geom_hline(data = background_spec_tau, aes(yintercept = tau), linetype = 1, color = 'light gray') + 
+  geom_pointrange(aes(ymin = tau_low, ymax = tau_high), size = 0.25) +
+  facet_wrap(~term, scales = 'free', labeller = labeller(term = c(lrc1 = 'Component 1 \n Half life', lrc2 = 'Component 2 \n Half life'))) + 
+  scale_y_continuous(labels = ns_label, limits = c(0,NA)) + labs(x = 'Quencher equivalents')
+
+plot_spec_tau
+```
 
 
 
 # Create Figure
+
+```{r}
+theme_set(theme_figure())
+
+biexp_grid <- plot_grid(plot_spec_A, plot_spec_tau, ncol = 1, align = 'hv', axis = 'tblr')
+
+biexp_grid
+```
+
+
+```{r}
+fig_s4 <- plot_grid(plot_phzET_PYO, NULL, NULL, biexp_grid, scale = 0.95, labels = c('A','','', 'I'), ncol = 2, rel_widths = c(1,1.5),rel_heights = c(1,1.5), label_size = 12)
+
+fig_s4
+
+save_plot("../../../../figures/supplement/phz2019_Fig_S4.pdf", fig_s4, base_width = 7, base_height = 5)
+```
+
+
+
 
 
 ----
