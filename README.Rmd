@@ -49,6 +49,13 @@ Lastly, there's the `tools` folder. This contains a few .R scripts that have mad
 
 If you feel so inclined, you could download this whole repository and open any of the .Rmd notebook files in R, and recreate or modify any of the figures. The version numbers of R and associated packages are documented at the bottom of each notebook. 
 
+### Final thoughts
+
+Science is changing in front of us, and reproducibility and transparency facilitated by code is becoming commonplace and often required for publication. That said, this change is hard and imperfect and this repository is far from perfect! So please [let me know](https://scott-saunders.github.io/website/) what you think, whether it is positive, negative or simply curious. 
+
+I started reframing my thesis project and this paper in Rmarkdown code, while taking a fantastic data analysis class with [Justin Bois](http://bois.caltech.edu/index.html) and hearing from my fellow grad student [Griffin Chure](https://gchure.github.io/) about [his amazing work](https://github.com/gchure/reproducible_research) developing lab notebooks and papers around code and reproducible research. They are on the cutting edge - check out their work! 
+
+Thanks - *Scott Saunders*
 
 --------
 
