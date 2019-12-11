@@ -39,12 +39,7 @@ theme_set(theme_notebook())
 
 -----
 
-# Fig. 1C - Wildtype phenazine concentrations
-
-Read in the data - concentrations quantified from LC (Absorbance) peaks with standard curve.
-
-
-# Panel D
+# Fig. 1E - Wildtype phenazine concentrations
 
 Read in the data - concentrations quantified from LC (Absorbance) peaks with standard curve.
 ```{r}
@@ -85,7 +80,7 @@ plot_wt_fixed +
 ```
 
 
-Here you can see that the abundance of phena
+And now we'll plot each phenazine on its own Y-axis.
 
 ```{r}
 #Plot layout
@@ -102,11 +97,10 @@ plot_wt_free_styled <- plot_wt_free +
     
 plot_wt_free_styled     
 ```
-ok and now this makes our point.
 
 ---
 
-# Fig. 1D - WT phenazine retention ratio
+# Fig. 1F - WT phenazine retention ratio
 
 ```{r}
 # Split dataset by material
@@ -139,7 +133,7 @@ wt_ret_ratio_styled
 
 ---
 
-# Fig. 1E - ∆phz* phenazine accumlation
+# Fig. 1G - ∆phz* phenazine accumlation
 
 Let's first read in the data. This csv contains the data for multiple experiments that were run on the LC-MS on the same day, so let's just look at the dPHZ* colonies.
 
@@ -195,10 +189,6 @@ plot_dphz_binding <- ggplot(dphz_extracts_means, aes(x=added_phz_num,y=calcConc)
   geom_line(size=0.5, aes(y=mean, group = measured_phenazine))+
   geom_point(size=1, aes(shape=measured_phenazine))
 
-ggplot(dphz_extracts_means %>% filter(measured_phenazine=='PCA'), aes(x=added_phz_num,y=calcConc))+
-  geom_line(size=0.5, aes(y=mean, group = measured_phenazine))+
-  geom_point(size=1, aes(shape=measured_phenazine))
-
 # Plot styling
 plot_dphz_binding_styled <- plot_dphz_binding + 
   scale_shape_discrete(solid=F, guide = F)+
@@ -216,7 +206,7 @@ plot_dphz_binding_styled
 
 ---
 
-# Fig. 1F - ∆phz* phenazine retention
+# Fig. 1H - ∆phz* phenazine retention
 
 ```{r}
 
@@ -247,7 +237,7 @@ For dPHZ* incubated with individual phenazines
 
 ```{r}
 
-pdaMan_indPhz_plot <- ggplot(pdaMan_data %>% filter(Condition == measured_phenazine), aes(x = Day, y = calcConc, )) + 
+pdaMan_indPhz_plot <- ggplot(pdaMan_data %>% filter(Condition == measured_phenazine), aes(x = Day, y = calcConc )) + 
   geom_col(aes(y = mean), fill='light gray')+
   geom_jitter(height = 0, width = 0.1, shape = 21, size = 1) +
   facet_wrap(~measured_phenazine, scales = 'free') + 

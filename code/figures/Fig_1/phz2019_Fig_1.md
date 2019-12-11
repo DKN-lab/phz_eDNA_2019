@@ -40,12 +40,7 @@ theme_set(theme_notebook())
 
 -----
 
-# Fig. 1C - Wildtype phenazine concentrations
-
-Read in the data - concentrations quantified from LC (Absorbance) peaks with standard curve.
-
-
-# Panel D
+# Fig. 1E - Wildtype phenazine concentrations
 
 Read in the data - concentrations quantified from LC (Absorbance) peaks with standard curve.
 
@@ -287,7 +282,7 @@ plot_wt_fixed +
 <img src="phz2019_Fig_1_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" />
 
 
-Here you can see that the abundance of phena
+And now we'll plot each phenazine on its own Y-axis.
 
 
 ```r
@@ -307,11 +302,10 @@ plot_wt_free_styled
 ```
 
 <img src="phz2019_Fig_1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
-ok and now this makes our point.
 
 ---
 
-# Fig. 1D - WT phenazine retention ratio
+# Fig. 1F - WT phenazine retention ratio
 
 
 ```r
@@ -347,7 +341,7 @@ wt_ret_ratio_styled
 
 ---
 
-# Fig. 1E - ∆phz* phenazine accumlation
+# Fig. 1G - ∆phz* phenazine accumlation
 
 Let's first read in the data. This csv contains the data for multiple experiments that were run on the LC-MS on the same day, so let's just look at the dPHZ* colonies.
 
@@ -2590,7 +2584,7 @@ plot_dphz_binding_styled
 
 ---
 
-# Fig. 1F - ∆phz* phenazine retention
+# Fig. 1H - ∆phz* phenazine retention
 
 
 ```r
@@ -2622,7 +2616,7 @@ For dPHZ* incubated with individual phenazines
 
 
 ```r
-pdaMan_indPhz_plot <- ggplot(pdaMan_data %>% filter(Condition == measured_phenazine), aes(x = Day, y = calcConc, )) + 
+pdaMan_indPhz_plot <- ggplot(pdaMan_data %>% filter(Condition == measured_phenazine), aes(x = Day, y = calcConc )) + 
   geom_col(aes(y = mean), fill='light gray')+
   geom_jitter(height = 0, width = 0.1, shape = 21, size = 1) +
   facet_wrap(~measured_phenazine, scales = 'free') + 
@@ -2640,6 +2634,32 @@ pdaMan_indPhz_plot_styled
 
 <img src="phz2019_Fig_1_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" />
 
+
+```r
+df_d3 <- pdaMan_data %>% filter(Condition == measured_phenazine) %>% filter(Day == 'D3') %>% mutate(d3_conc = calcConc) %>% select(measured_phenazine, Rep, d3_conc, )
+
+df_d4 <- pdaMan_data %>% filter(Condition == measured_phenazine) %>% filter(Day == 'D4')%>% mutate(d4_conc = calcConc) %>% select(measured_phenazine, Rep, d4_conc)
+
+df_d3_d4 <- left_join(df_d3, df_d4, by = c('measured_phenazine','Rep')) %>% 
+  mutate(percent_retained = d4_conc / d3_conc) %>% 
+  group_by(measured_phenazine) %>% 
+  mutate(mean = ifelse(Rep == 1, mean(percent_retained), NA))
+
+per_ret_plot <- ggplot(df_d3_d4, aes(x = measured_phenazine, y = percent_retained, )) + 
+  geom_col(aes(y = mean), fill='light gray')+
+  geom_jitter(height = 0, width = 0.1, shape = 21, size = 1) +
+  ylim(0,NA)
+
+#Plot styling
+per_ret_plot_styled <- per_ret_plot +
+  labs(x = NULL, y = 'Biofilm retained phenazine', title = '24 hrs post incubation') + 
+  scale_y_continuous(labels = scales::percent) 
+
+per_ret_plot_styled
+```
+
+<img src="phz2019_Fig_1_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" />
+
 ---
 
 # Create Fig. 1
@@ -2648,30 +2668,16 @@ pdaMan_indPhz_plot_styled
 ```r
 theme_set(theme_figure())
 
-top_panel <- plot_grid(NULL, wt_ret_ratio_styled, ncol = 2, rel_widths = c(2.5,1), scale = 1.0, labels = c('',"E"))
+#top_panel <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, ncol = 2, rel_widths = c(1.5,1), scale = 0.95, labels = c('E',"F"), align = 'hv', axis = 'tblr',label_size = 12)
 
-bottom_panel <- plot_grid(plot_wt_free_styled, plot_dphz_binding_styled, 
-                   ncol = 2,
-                   align = 'hv', axis = 'tblr', 
-                   rel_widths = c(1.25,1), 
-                   scale = 1, labels = c("D", "F"))
+#bottom_panel <- plot_grid(plot_dphz_binding_styled, per_ret_plot_styled, ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('G',"H"), align = 'hv', axis = 'tblr',label_size = 12)
 
-fig_1 <- plot_grid(top_panel, bottom_panel, ncol = 1, rel_heights = c(1,1.5))
+fig_1 <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, plot_dphz_binding_styled, per_ret_plot_styled, 
+                   ncol = 2, rel_heights = c(1,1), rel_widths = c(1.5,1), 
+                   align = 'hv', axis = 'tblr', scale = 0.95,
+                   labels = c('E','F','G','H'))
 
-fig_1
-```
-
-<img src="phz2019_Fig_1_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" />
-
-
-```r
-top_panel <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, ncol = 2, rel_widths = c(1.5,1), scale = 0.95, labels = c('E',"F"), align = 'hv', axis = 'tblr',label_size = 12)
-
-bottom_panel <- plot_grid(plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('G',"H"), align = 'hv', axis = 'tblr',label_size = 12)
-
-fig_1 <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, plot_dphz_binding_styled, pdaMan_indPhz_plot_styled, ncol = 2, rel_heights = c(1,1), rel_widths = c(1,1), align = 'hv', axis = 'tblr')
-
-fig_1 <- plot_grid(top_panel, bottom_panel, ncol = 1)
+#fig_1 <- plot_grid(top_panel, bottom_panel, ncol = 1)
 
 fig_1
 ```

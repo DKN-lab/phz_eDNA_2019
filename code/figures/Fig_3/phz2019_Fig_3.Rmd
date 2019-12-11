@@ -476,8 +476,10 @@ fig_3 <- plot_grid(plot_ctDNA_690, plot_ctDNA_690, plot_phzET_o2,
 
 fig_3
 
-save_plot("../../../figures/phz2019_Fig_3.pdf", fig_4, base_height = 6, base_width = 7)
+save_plot("../../../figures/phz2019_Fig_3.pdf", fig_3, base_height = 6, base_width = 7)
 ```
+
+-----
 
 ```{r}
 sessionInfo()

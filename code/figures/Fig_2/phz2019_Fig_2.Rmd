@@ -328,3 +328,10 @@ fig_2
 save_plot("../../../figures/phz2019_Fig_2.pdf", fig_2, base_width = 7, base_height = 3.5)
 ```
 
+------
+
+```{r}
+
+sessionInfo()
+
+```
