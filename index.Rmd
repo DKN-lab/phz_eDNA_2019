@@ -44,66 +44,12 @@ Extracellular electron transfer (EET), the process whereby cells access electron
 
 <br>
 
-# Summary {.tabset}
-
-----
-
-[Motivation statement here]
-
-## 1
-
-### *Pseudomonas aeruginosa* and phenazines {.toc-ignore}
-
-*Pseudomonas aeruginosa* is a bacterium that makes special redox active metabolites (electron carriers), called phenazines. These phenazines come in a few different forms that are shown below (PCA, PCN, PYO). This organism tends to live as "biofilms", dense groups of cells attached to surfaces. These structures are so dense that the cells on the outside of the biofilm consume oxygen faster than it can diffuse to the inside of the group. These cells respire oxygen (use as a terminal electron acceptor), just like animals do, so the cells in the interior of the biofilm could suffocate without oxygen. However, these interior cells are able to actually use their phenazine molecules to transport electrons to the oxygen at the edge of the biofilm. This is an amazing strategy, but many aspects of this phenazine metabolism remain poorly understood. Specifically, we set out to answer X, Y, Z.
-
-
-```{r out.width='75%'}
-include_graphics("index_files/fig_1AB.png")
-```
-
-## 2
-
-### Colony biofilms retain certain phenazines {.toc-ignore}
-
-
-
-```{r out.width='75%'}
-include_graphics("index_files/fig_1CD.png")
-```
-
-## 3
-
-### PYO binds extracellular DNA in the biofilm {.toc-ignore}
-
-[image of eDNA in biofilm]
-
-## 4
-
-### Phenazines support electron transfer in vitro {.toc-ignore}
-
-[inter phz diagram] 
-[DNA CT diagram]
-
-## 5
-
-### Biofilms grow on electrodes and support phenazine electron transfer {.toc-ignore}
-
-[IDA image / diagrams]
-
-## 6
-
-### An updated picture of phenazine ET {.toc-ignore}
-
-[fig 6 diagram]
-
-# {.toc-ignore}
-<br>
 
 # Computational notebooks
 
 ----
 
-These are notebooks generated in R. They fully reproduce the figures in the paper from the underlying raw data. These links will bring you to rendered html versions of the notebooks, but you are free to download the data and code from the [github repository]() and run the notebooks on your own computer (given that you have R).
+These are notebooks generated in R. They fully reproduce the figures in the paper from the underlying raw data. These links will bring you to rendered html versions of the notebooks, but you are free to download the data and code from the [github repository](https://github.com/DKN-lab/phz_eDNA_2019) and run the notebooks on your own computer (given that you have R).
 
 ## Main figures
 
@@ -116,6 +62,8 @@ These are notebooks generated in R. They fully reproduce the figures in the pape
 * [Figure 4.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_4/phz2019_Fig_4.html) Electrode grown biofilms exhibit PYO dependent electron transfer.
 
 * [Figure 5.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/Fig_5/phz2019_Fig_5.html) PYO mediated electron transfer is faster than PYO loss from the biofilm.
+
+* Figure 6 is a diagram that was made in Illustrator.
 
 
 ## Supplemental figures
@@ -130,9 +78,9 @@ These are notebooks generated in R. They fully reproduce the figures in the pape
 
 * [Figure S5.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S4/phz2019_Fig_S4.html) IDA biofilm phenazine production and retention.
 
-* [Figure S6.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html) IDA Dap measurements.
+* [Figure S6.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html) IDA $D_{ap}$ measurements.
 
-* [Figure S7.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html) IDA Dloss measurements. 
+* [Figure S7.](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html) IDA $D_{loss}$ measurements. 
 
 ## Data processing
 
