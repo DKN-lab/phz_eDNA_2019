@@ -1,7 +1,7 @@
 ---
 title: "Figure S1"
 subtitle: 'Extracellular DNA promotes efficient extracellular electron transfer by pyocyanin in *Pseudomonas aeruginosa* biofilms.'
-author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez-Otero, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
+author: 'Scott H. Saunders, Edmund C.M. Tse, Matthew D. Yates, Fernanda Jiménez Otero, Scott A. Trammell, Eric D.A. Stemp, Jacqueline K. Barton, Leonard M. Tender and Dianne K. Newman'
 output:
   html_document:
     theme: cosmo
@@ -15,7 +15,7 @@ output:
 
 # Notes
 
-Fig S1A is a set of images.
+Fig S1A and S1B are a sets of images.
 
 ----
 
@@ -41,7 +41,7 @@ source("../../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. S1B
+# Fig. S1C
 
 
 ```r
@@ -55,13 +55,12 @@ df_corrected <- df %>%
 
 noMem_plot <- ggplot(df_corrected,aes(x=Material,y=phzConc))+
   geom_col(aes(y = mean, fill = Material)) + 
-  geom_jitter(height = 0, width = 0.1, shape = 21) +
+  geom_jitter(height = 0, width = 0.1, shape = 21, size =1) +
   facet_wrap(~Name, scales = 'free')
 
 #Plot styling
 noMem_plot_styled <- noMem_plot +
   labs(x = NULL, y = expression("Phenazine concentration" ~ ( mu*M )), title = 'WT: no membrane') + 
-  theme(axis.title.x = element_text(size = 14)) + 
   scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66"))
     
 noMem_plot_styled     
@@ -69,7 +68,7 @@ noMem_plot_styled
 
 <img src="phz2019_Fig_S1_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" />
 
-# Fig. S1C
+# Fig. S1D
 
 
 ```r
@@ -81,15 +80,13 @@ wtSon_pdaMan <- read_csv("../../../../data/LC-MS/WTsonication_PDAmanual_08_29_18
 # Plot layout
 wtSon_pdaMan_plot <- ggplot(wtSon_pdaMan, aes(x = Condition, y = calcConc)) +
   geom_col(aes(y = mean), fill = 'light gray')+
-  geom_jitter(shape = 21, height = 1, width = 0.1) + 
+  geom_jitter(shape = 21, height = 1, width = 0.1, size =1) + 
   facet_wrap(~measured_phenazine, scales = 'free') + 
   ylim(0,NA)
 
 #Plot styling
 wtSon_pdaMan_plot_styled <- wtSon_pdaMan_plot +
-  labs(x = NULL, y = expression("Biofilm concentration" ~ ( mu*M )), title = 'WT: sonication') + 
-  theme(axis.title.x = element_text(size = 14)) + 
-  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66")) + 
+  labs(x = 'Sonication', y = expression("Biofilm concentration" ~ ( mu*M )), title = 'WT: sonication') + 
   scale_x_discrete(breaks = c('noSon','withSon'), 
                    labels=c("-","+"))
     
@@ -118,7 +115,56 @@ wtSon_pdaMan %>%
 ## 3 PYO                        -Inf          1.26  0.161
 ```
 
+# Fig. S1E
 
+
+
+```r
+pdaMan_data <- read_csv("../../../../data/LC-MS/dPHZstar_PDAmanual_PHZretention_08_29_18.csv") %>% 
+  mutate(calcConc = Amount * 2 *(800 / 62) ) %>% 
+  group_by(Condition,Day,measured_phenazine) %>% 
+  mutate(mean = ifelse(Rep==1,mean(calcConc),NA))
+
+dphz_ret_pdaMan_plot <- ggplot(pdaMan_data %>% filter(Condition =='PHZ'), aes(x = Day, y = calcConc, )) + 
+  geom_col(aes(y = mean,fill = Day))+
+  geom_jitter(height = 0, width = 0.1, shape = 21) +
+  facet_wrap(~measured_phenazine, scales = 'free') + 
+  ylim(0,NA)
+
+#Plot styling
+dphz_ret_pdaMan_plot_styled <- dphz_ret_pdaMan_plot +
+  labs(x = NULL, y = "Phenazine Concentration") + 
+  theme(axis.title.x = element_text(size = 14)) + 
+  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66")) + 
+  scale_x_discrete(breaks = c('D3','D4'), 
+                   labels=c("Day 3","Day 4"))
+
+dphz_ret_pdaMan_plot_styled
+```
+
+<img src="phz2019_Fig_S1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
+
+For dPHZ* incubated with individual phenazines
+
+
+```r
+pdaMan_indPhz_plot <- ggplot(pdaMan_data %>% filter(Condition == measured_phenazine), aes(x = Day, y = calcConc, )) + 
+  geom_col(aes(y = mean), fill='light gray')+
+  geom_jitter(height = 0, width = 0.1, shape = 21, size = 1) +
+  facet_wrap(~measured_phenazine, scales = 'free') + 
+  ylim(0,NA)
+
+#Plot styling
+pdaMan_indPhz_plot_styled <- pdaMan_indPhz_plot +
+  labs(x = NULL, y = expression("Biofilm concentration" ~ (mu*M )), title = '∆phz*') + 
+  theme(axis.title.x = element_text(size = 14)) + 
+  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66")) + 
+  scale_x_discrete(breaks = c('D3','D4'), labels=c("Day 3","Day 4"))
+
+pdaMan_indPhz_plot_styled
+```
+
+<img src="phz2019_Fig_S1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
 
 
 # Create figure
@@ -127,15 +173,15 @@ wtSon_pdaMan %>%
 ```r
 theme_set(theme_figure())
 
-fig_s1 <- plot_grid(noMem_plot_styled, wtSon_pdaMan_plot_styled, labels = c('B','C'), label_size = 12, align = 'hv', axis = 'tblr')
+fig_s1 <- plot_grid(noMem_plot_styled, wtSon_pdaMan_plot_styled, pdaMan_indPhz_plot_styled, labels = c('C','D','E'), ncol = 3, label_size = 12, align = 'hv', axis = 'tblr', scale = 0.95)
 
 fig_s1
 ```
 
-<img src="phz2019_Fig_S1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_S1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" />
 
 ```r
-save_plot("../../../../figures/supplement/phz2019_Fig_S1.pdf", fig_s1,base_width = 7, base_height = 3)
+save_plot("../../../../figures/supplement/phz2019_Fig_S1.pdf", fig_s1,base_width = 7, base_height = 2)
 ```
 
 -------

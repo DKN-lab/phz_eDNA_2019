@@ -24,7 +24,7 @@ library(knitr)
 
 ---
 
-Extracellular electron transfer (EET), the process whereby cells access electron acceptors or donors that reside many cell lengths away, enables metabolic activity by microorganisms, particularly under oxidant-limited conditions that occur in multicellular bacterial biofilms. Although different mechanisms underpin this process in select organisms, a widespread strategy involves extracellular electron shuttles, redox-active metabolites that are secreted and recycled by diverse bacteria. How these shuttles catalyze electron transfer within biofilms without being lost to the environment has been a long-standing question. Here, we show that phenazine electron shuttles mediate efficient EET through interactions with extracellular DNA (eDNA) in Pseudomonas aeruginosa biofilms, which are important in nature and disease. Retention of pyocyanin (PYO) and phenazine carboxamide in the biofilm matrix is facilitated by binding to eDNA. In vitro, different phenazines can exchange electrons in the presence or absence of DNA and phenazines can participate directly in redox reactions through DNA; the biofilm eDNA can also support rapid ET between intercalators. Electrochemical measurements of biofilms indicate that retained PYO supports an efficient redox cycle with rapid EET and slow loss from the biofilm. Together, these results establish that eDNA plays a previously unrecognized role facilitating phenazine metabolic processes in P. aeruginosa biofilms, suggesting a model for how extracellular electron shuttles achieve retention and efficient EET in biofilms. 
+Extracellular electron transfer (EET), the process whereby cells access electron acceptors or donors that reside many cell lengths away, enables metabolic activity by microorganisms, particularly under oxidant-limited conditions that occur in multicellular bacterial biofilms. Although different mechanisms underpin this process in select organisms, a widespread strategy involves extracellular electron shuttles, redox-active metabolites that are secreted and recycled by diverse bacteria. How these shuttles catalyze electron transfer within biofilms without being lost to the environment has been a long-standing question. Here, we show that phenazine electron shuttles mediate efficient EET through interactions with extracellular DNA (eDNA) in *Pseudomonas aeruginosa* biofilms, which are important in nature and disease. Retention of pyocyanin (PYO) and phenazine carboxamide in the biofilm matrix is facilitated by binding to eDNA. In vitro, different phenazines can exchange electrons in the presence or absence of DNA and phenazines can participate directly in redox reactions through DNA; the biofilm eDNA can also support rapid ET between intercalators. Electrochemical measurements of biofilms indicate that retained PYO supports an efficient redox cycle with rapid EET and slow loss from the biofilm. Together, these results establish that eDNA plays a previously unrecognized role facilitating phenazine metabolic processes in P. aeruginosa biofilms, suggesting a model for how extracellular electron shuttles achieve retention and efficient EET in biofilms. 
 
 <br>
 
@@ -33,13 +33,13 @@ Extracellular electron transfer (EET), the process whereby cells access electron
 ---
 
 * [Scott H. Saunders](https://scott-saunders.github.io/labwork/), Graduate student, Caltech BBE, Pasadena, CA
-* Edmund Tse
-* Matthew Yates
-* Fernanda Jimenéz
-* Scott Trammell
-* Eric Stemp
-* [Jacqueline K. Barton](http://www.its.caltech.edu/~jkbgrp/)
-* [Leonard M. Tender](NRL), Scientist, Navy Research Lab
+* [Edmund Tse](https://et-lab-hku.weebly.com/), Assistant Professor, University of Hong Kong, Hong Kong
+* [Matthew Yates](https://scholar.google.com/citations?user=QjVhIr0AAAAJ&hl=en), Research Biologist, Naval Research Laboratory, Washington, D.C.
+* [Fernanda Jimenéz Otero](http://orcid.org/0000-0003-1583-6495), Post-Doc, Naval Research Laboratory, Washington, D.C.
+* [Scott Trammell](https://scholar.google.com/citations?user=KgxbIM8AAAAJ&hl=en), Scientist, Naval Research Laboratory, Washington, D.C.
+* [Eric Stemp](https://www.msmu.edu/resources-culture/faculty-directory/faculty-members/stemp-eric.php), Professor, Mount St. Mary's, Los Angeles, CA
+* [Jacqueline K. Barton](http://www.its.caltech.edu/~jkbgrp/), Professor, Caltech CCE, Pasadena, CA
+* [Leonard M. Tender](https://scholar.google.com/citations?user=Rd6gIBUAAAAJ&hl=en), Scientist, Naval Research Laboratory, Washington, D.C.
 * [Dianne K. Newman](http://dknweb.caltech.edu/Newman_Lab.html), Professor, Caltech BBE & GPS, Pasadena, CA
 
 <br>
