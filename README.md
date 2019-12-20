@@ -41,8 +41,8 @@ shuttles achieve retention and efficient EET in biofilms.
 <center>
 
 [bioRxiv
-preprint](https://www.biorxiv.org/content/10.1101/2019.12.12.872085v1)  
-|   [Website](https://dkn-lab.github.io/phz_eDNA_2019/)
+preprint](https://www.biorxiv.org/content/10.1101/2019.12.12.872085v1) |
+[Website](https://dkn-lab.github.io/phz_eDNA_2019/)
 
 The website has rendered code notebooks that generate the figures in
 this paper under the section “Computational notebooks.”
