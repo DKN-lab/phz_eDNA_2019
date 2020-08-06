@@ -34,12 +34,15 @@ unrecognized role facilitating phenazine metabolic processes in P.
 aeruginosa biofilms, suggesting a model for how extracellular electron
 shuttles achieve retention and efficient EET in biofilms.
 
-  - **[bioRxiv
-    preprint](https://www.biorxiv.org/content/10.1101/2019.12.12.872085v1)**
-    | Posted Dec. 12, 2019
+  - **[doi](https://doi.org/10.1016/j.cell.2020.07.006)** | Now
+    published in *Cell*
 
   - **[Website](https://dkn-lab.github.io/phz_eDNA_2019/)** | Rendered
     computational notebooks
+
+  - **[bioRxiv
+    preprint](https://www.biorxiv.org/content/10.1101/2019.12.12.872085v1)**
+    | Posted Dec. 12, 2019
 
 <br>
 
@@ -161,5 +164,3 @@ is distributed under the standard MIT license as follows
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
-
-\`
