@@ -22,6 +22,9 @@ Fig S1A and S1B are a sets of images.
 Setup packages and plotting for the notebook:
 
 ```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Check packages
+source("../../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -40,7 +43,9 @@ source("../../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. S1C
+# Fig. S1C - Biofilms without membrane
+
+Let's read in the data and we will calculate the biofilm concentration by assuming the colony was about 200 µL in size and resuspended in 3 mL, while the agar is the same as elsewhere (5 mL volume with 3 mL PBS added = 8 mL total).
 
 ```{r}
 df <- read_csv('../../../../data/LC-MS/WT_noMem_HPLC_03_08_18.csv')
@@ -59,13 +64,14 @@ noMem_plot <- ggplot(df_corrected,aes(x=Material,y=phzConc))+
 #Plot styling
 noMem_plot_styled <- noMem_plot +
   labs(x = NULL, y = expression("Phenazine concentration" ~ ( mu*M )), title = 'WT: no membrane') + 
-  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66"))
+  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66")) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
 noMem_plot_styled     
 ```
 
-# Fig. S1D
+# Fig. S1D - Biofilms with sonication
 
+Let's read in the +/- sonication data and calculate the concentration as done in Fig. 1:
 ```{r}
 wtSon_pdaMan <- read_csv("../../../../data/LC-MS/WTsonication_PDAmanual_08_29_18.csv") %>% 
   mutate(calcConc = Amount*2*(800 / 62)) %>% #Dilution factor
@@ -88,26 +94,32 @@ wtSon_pdaMan_plot_styled <- wtSon_pdaMan_plot +
 wtSon_pdaMan_plot_styled     
 ```
 
+It looks like there may be a slightly higher biofilm concentration upon sonication. Let's perform a statistical test:
 
 ```{r}
 wtSon_pdaMan %>% 
   spread(Condition,calcConc) %>% 
   group_by(measured_phenazine) %>% 
-  summarise(conf_int_low = t.test(noSon, withSon,  alternative = 'less')$conf.int[1],
-            conf_int_high = t.test(noSon,withSon, alternative = 'less')$conf.int[2],
-            p_value = t.test( noSon,withSon, alternative = 'less')$p.value)
+  summarise(conf_int_low = t.test(withSon,noSon,   alternative = 'greater')$conf.int[1],
+            conf_int_high = t.test(withSon, noSon,alternative = 'greater')$conf.int[2],
+            p_value = t.test( withSon,noSon, alternative = 'greater')$p.value)
 ```
 
-# Fig. S1E
+It appears there is a statistically significant difference for PCN at p<0.05.
 
+# Fig. S1E - ∆phz* retention
 
+Let's read in the ∆phz* retention data.
 ```{r}
 
 pdaMan_data <- read_csv("../../../../data/LC-MS/dPHZstar_PDAmanual_PHZretention_08_29_18.csv") %>% 
   mutate(calcConc = Amount * 2 *(800 / 62) ) %>% 
   group_by(Condition,Day,measured_phenazine) %>% 
   mutate(mean = ifelse(Rep==1,mean(calcConc),NA))
+```
 
+Here's a plot of the data for all 3 phenazines incubated simultaneously:
+```{r}
 dphz_ret_pdaMan_plot <- ggplot(pdaMan_data %>% filter(Condition =='PHZ'), aes(x = Day, y = calcConc, )) + 
   geom_col(aes(y = mean,fill = Day))+
   geom_jitter(height = 0, width = 0.1, shape = 21) +
@@ -126,7 +138,7 @@ dphz_ret_pdaMan_plot_styled
 
 ```
 
-For dPHZ* incubated with individual phenazines
+And here is the final plot where ∆phz* biofilms were incubated with individual phenazines:
 
 ```{r}
 
@@ -139,7 +151,7 @@ pdaMan_indPhz_plot <- ggplot(pdaMan_data %>% filter(Condition == measured_phenaz
 #Plot styling
 pdaMan_indPhz_plot_styled <- pdaMan_indPhz_plot +
   labs(x = NULL, y = expression("Biofilm concentration" ~ (mu*M )), title = '∆phz*') + 
-  theme(axis.title.x = element_text(size = 14)) + 
+  theme(axis.title.x = element_text(size = 14),axis.text.x = element_text(angle = 45, hjust = 1)) + 
   scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66")) + 
   scale_x_discrete(breaks = c('D3','D4'), labels=c("Day 3","Day 4"))
 
@@ -150,9 +162,11 @@ pdaMan_indPhz_plot_styled
 # Create figure
 
 ```{r}
+
 theme_set(theme_figure())
 
-fig_s1 <- plot_grid(noMem_plot_styled, wtSon_pdaMan_plot_styled, pdaMan_indPhz_plot_styled, labels = c('C','D','E'), ncol = 3, label_size = 12, align = 'hv', axis = 'tblr', scale = 0.95)
+fig_s1 <- plot_grid(noMem_plot_styled, wtSon_pdaMan_plot_styled, pdaMan_indPhz_plot_styled, 
+                    labels = c('C','D','E'), ncol = 3, label_size = 12, scale = 0.95)
 
 fig_s1
 

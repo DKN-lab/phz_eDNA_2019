@@ -1,5 +1,6 @@
 # generic text file import
 
+
 library(tidyverse)
 
 import <- function(filenames, file_paths, data_cols = c('E', 'i1', 'i2', 't'), skip_rows=18, n_max = 100) {

@@ -17,11 +17,11 @@ output:
 
 To see how we got from the raw electrochemical scans to the datasets used here, please see the following notebooks:
 
-* [IDA ∆phz biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
-* [IDA WT biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
-* [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
+* [IDA ∆phz biofilm processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
+* [IDA WT biofilm processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
+* [IDA blank processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
 
-This supplemental figure and notebook underlies some of the data in main figure 6, particularly the final panel. Specifically the model coefficients for $D_{ap}$ are calculated in the Fig. S6C and S6F sections. These data are saved as .csv files in the directory containing this notebook.
+This supplemental figure and notebook underlies some of the data in main figure 5, particularly the final panel. Specifically the model coefficients for $D_{ap}$ are calculated in the Fig. S6C and S6F sections. These data are saved as .csv files in the directory containing this notebook.
 
 
 ----
@@ -48,7 +48,7 @@ source("../../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. S6A
+# Fig. S6A - WT & ∆phz SWV vs. GC
 
 Let's compare WT and ∆phz* + PYO biofilms. We'll go ahead and read in some of the processed data from the WT and ∆phz processing notebooks. First we will look at the decays of the SWV peak currents:
 
@@ -79,7 +79,7 @@ plot_dap_combo_styled
 
 <img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" />
 
-# Fig. S6B
+# Fig. S6B - WT and ∆phz signal decay
 
 
 ```r
@@ -112,7 +112,7 @@ plot_dap_combo_styled
 
 <img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
 
-# Fig. S6C
+# Fig. S6C - ∆phz + PYO $D_{ap}$ fits
 
 First, we will read in the paired SWV and GC signals that were generated from the processing notebook. Then we can plot the SWV vs. GC signals for both biofilms and technical replicates. Each dataset is fit with a linear model shaded with a 95% confidence interval.
 
@@ -154,14 +154,14 @@ mods_swv_gc_glance <- glance(mods_swv_gc, fit) %>%
 mods_swv_gc_glance %>% kable(digits = 20) %>%  kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> exp_id </th>
-   <th style="text-align:left;"> run_id </th>
-   <th style="text-align:right;"> r.squared </th>
-   <th style="text-align:right;"> adj.r.squared </th>
-   <th style="text-align:right;"> p.value </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp_id </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run_id </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> r.squared </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> adj.r.squared </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
   </tr>
  </thead>
 <tbody>
@@ -223,18 +223,18 @@ write_csv(mods_swv_gc_tidy, "phz2019_dPHZ_Dap_lm_coefs.csv")
 mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> exp_id </th>
-   <th style="text-align:left;"> run_id </th>
-   <th style="text-align:left;"> term </th>
-   <th style="text-align:right;"> estimate </th>
-   <th style="text-align:right;"> std.error </th>
-   <th style="text-align:right;"> statistic </th>
-   <th style="text-align:right;"> p.value </th>
-   <th style="text-align:right;"> conf.low </th>
-   <th style="text-align:right;"> conf.high </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp_id </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run_id </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> term </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> std.error </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> statistic </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high </th>
   </tr>
  </thead>
 <tbody>
@@ -375,9 +375,9 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
 
 <br>
 
-# Fig. S6D
+# Fig. S6D - GC vs. [PYO]
 
-First we will import the blank IDA data that will be used for panels A-D. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
+Let's import the blank IDA data. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
 
 Let's read in the data and convert the µM units to $mol / cm^3$, which will be important to calculate $D_{ap}$ in correct units.
 
@@ -482,7 +482,7 @@ lm_GC %>%
 
 <br>
 
-# Fig. S6E
+# Fig. S6E - SWV vs. [PYO]
 
 Now we will look at the relationship between concentration and peak SWV current.
 
@@ -575,7 +575,7 @@ lm_SWV %>%
 
 <br>
 
-# Fig. S6F
+# Fig. S6F - SWV vs. GC
 
 Finally, we will examine the peak SWV current vs. the peak GC current, which is not dependent on the known PYO concentrations.
 
@@ -670,7 +670,7 @@ lm_swvGC %>%
 
 <br>
 
-# Fig. S6G
+# Fig. S6G - $D_{ap}$ estimates (Blank + PYO)
 
 Now let's compare the estimates from each subset of the data:
 
@@ -692,7 +692,7 @@ plot_cal_dap_styled
 
 <img src="phz2019_Fig_S6_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" />
 
-# Fig. S6H - Nafion
+# Fig. S6H - Nafion $D_{ap}$ estimates
 
 
 ```r
@@ -717,6 +717,25 @@ plot_nafion
 
 
 ```r
+theme_figure <- function () {
+  theme_classic( ) %+replace%
+    theme(
+      axis.line = element_line(color = 'black', size = 0.25),
+      axis.ticks = element_line(color = 'black', size =0.25),
+      axis.text = element_text(color = 'black', size=8),
+      axis.title=element_text(color = 'black', size=8),
+      strip.text = element_text(color = 'black', size = 8),
+      strip.background = element_blank(),
+      legend.background = element_blank(),
+      legend.title=element_text(color = 'black',size=8),
+      legend.text=element_text(color = 'black',size=8),
+      legend.text.align=0,
+      panel.spacing = unit(0,'cm'),
+      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm'),
+      plot.title = element_text(hjust = 0.5, color = 'black', size = 8)
+    )
+}
+
 theme_set(theme_figure())
 
 fig_s6_top <- plot_grid(plot_dap_combo_styled + guides(fill = F), plot_decay_combo_styled + guides(fill = F, color= F), labels = c('A','B'), label_size = 12)
@@ -748,9 +767,9 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-## Running under: macOS Mojave 10.14.6
+## Running under: macOS  10.15.6
 ## 
 ## Matrix products: default
 ## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
@@ -763,23 +782,25 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 modelr_0.1.2     
-##  [4] broom_0.5.1       kableExtra_1.0.1  cowplot_0.9.4    
-##  [7] forcats_0.3.0     stringr_1.3.1     dplyr_0.8.1      
-## [10] purrr_0.2.5       readr_1.3.1       tidyr_0.8.2      
-## [13] tibble_2.1.3      ggplot2_3.2.0     tidyverse_1.2.1  
+##  [1] viridis_0.5.1     viridisLite_0.3.0 modelr_0.1.5     
+##  [4] broom_0.5.2       kableExtra_1.1.0  cowplot_0.9.4    
+##  [7] forcats_0.4.0     stringr_1.4.0     dplyr_0.8.3      
+## [10] purrr_0.3.3       readr_1.3.1       tidyr_1.0.0      
+## [13] tibble_2.1.3      ggplot2_3.3.0     tidyverse_1.3.0  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
-## [13] readxl_1.2.0     munsell_0.5.0    gtable_0.2.0     cellranger_1.1.0
-## [17] rvest_0.3.2      evaluate_0.14    labeling_0.3     knitr_1.23      
-## [21] highr_0.7        Rcpp_1.0.1       scales_1.0.0     backports_1.1.3 
-## [25] webshot_0.5.1    jsonlite_1.6     gridExtra_2.3    hms_0.4.2       
-## [29] digest_0.6.18    stringi_1.2.4    grid_3.5.2       cli_1.1.0       
-## [33] tools_3.5.2      magrittr_1.5     lazyeval_0.2.1   crayon_1.3.4    
-## [37] pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4  assertthat_0.2.1
-## [41] rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0 R6_2.4.0        
-## [45] nlme_3.1-140     compiler_3.5.2
+##  [1] tidyselect_0.2.5 xfun_0.7         splines_3.5.3    haven_2.2.0     
+##  [5] lattice_0.20-38  colorspace_1.4-1 vctrs_0.3.1      generics_0.0.2  
+##  [9] htmltools_0.4.0  mgcv_1.8-27      yaml_2.2.0       rlang_0.4.6     
+## [13] pillar_1.4.2     glue_1.3.1       withr_2.1.2      DBI_1.0.0       
+## [17] dbplyr_1.4.2     readxl_1.3.1     lifecycle_0.1.0  munsell_0.5.0   
+## [21] gtable_0.3.0     cellranger_1.1.0 rvest_0.3.5      evaluate_0.14   
+## [25] labeling_0.3     knitr_1.23       highr_0.8        Rcpp_1.0.2      
+## [29] scales_1.0.0     backports_1.1.4  webshot_0.5.1    jsonlite_1.6    
+## [33] fs_1.3.1         gridExtra_2.3    hms_0.5.3        digest_0.6.21   
+## [37] stringi_1.4.3    grid_3.5.3       cli_1.1.0        tools_3.5.3     
+## [41] magrittr_1.5     crayon_1.3.4     pkgconfig_2.0.3  Matrix_1.2-15   
+## [45] xml2_1.2.2       reprex_0.3.0     lubridate_1.7.4  assertthat_0.2.1
+## [49] rmarkdown_1.13   httr_1.4.1       rstudioapi_0.10  R6_2.4.0        
+## [53] nlme_3.1-137     compiler_3.5.3
 ```

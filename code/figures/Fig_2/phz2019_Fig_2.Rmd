@@ -22,6 +22,9 @@ Panel A of figure 2 is isothermal titration calorimetry data that was analyzed o
 Setup packages and plotting for the notebook:
 
 ```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Check packages
+source("../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -64,6 +67,36 @@ ggplot(dnase_extracts ,aes(x=Condition,y=calcConc))+
     facet_wrap(Material~Phenazine,scales='free')
 
 ```
+
+And let's do a statistical test to compare the DNase +/- treatments. 
+
+First, a t-test for whether or not agar with DNase concentrations were higher than the 'none' treatment:
+
+```{r}
+
+dnase_extracts %>% 
+  spread(Condition,calcConc) %>% 
+  filter(Material=='agar') %>% 
+  group_by(Material,Phenazine) %>% 
+  summarise(conf_int_low = t.test( DNase,none, alternative = 'greater')$conf.int[1],
+            conf_int_high = t.test( DNase,none, alternative = 'greater')$conf.int[2],
+            p_value = t.test( DNase,none, alternative = 'greater')$p.value)
+```
+There are no significant differences p<0.05.
+
+Second, a t-test for whether or not biofilm (aka cell) with DNase concentrations were lower than the 'none' treatment
+```{r}
+  
+dnase_extracts %>% 
+  spread(Condition,calcConc) %>% 
+  filter(Material=='cells') %>% 
+  group_by(Material,Phenazine) %>% 
+  summarise(conf_int_low = t.test( DNase, none, alternative = 'less')$conf.int[1],
+            conf_int_high = t.test(DNase, none,  alternative = 'less')$conf.int[2],
+            p_value = t.test( DNase, none, alternative = 'less')$p.value)
+```
+There is a significant difference for PYO and PCN.
+
 Here you can see that the agar concentrations between the Dnase treated and untreated don't differ meaningfully, but the cell/biofilm concentrations might. This might be because for this experiment the colonies were transferred to a fresh agar plate for only 24hrs as opposed to staying on the same plate for 4 days as with the pel experiment. So, let's ignore the agar concentrations for now. It's also important to note that by calculating a ratio as we did above for pel we do risk amplifying meaningless differences by dividing large numbers by small numbers.
 
 Here's the biofilm only:
@@ -79,33 +112,11 @@ dnase_plot <- ggplot(dnase_extracts %>% filter(Material=='cells') ,aes(x=Conditi
 dnase_plot_styled <- dnase_plot +
   labs(x=NULL, y=expression("Biofilm concentration" ~ (mu*M ))) + 
   scale_x_discrete(limits = c("none",'DNase')) +
-  guides(fill = F)
+  guides(fill = F)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 dnase_plot_styled
 
-dnase_PYO_none <- dnase_extracts %>% filter(Material=='cells' & Phenazine=='PCA') %>% filter(Condition=='none')
-
-dnase_PYO_dnase <- dnase_extracts %>% filter(Material=='cells' & Phenazine=='PCA') %>% filter(Condition=='DNase')
-
-t.test(x=dnase_PYO_none$calcConc ,y = dnase_PYO_dnase$calcConc, alternative = 'greater')$conf.int[2]
-
-
-dnase_extracts %>% 
-  spread(Condition,calcConc) %>% 
-  filter(Material=='agar') %>% 
-  group_by(Material,Phenazine) %>% 
-  summarise(conf_int_low = t.test(none, DNase, alternative = 'less')$conf.int[1],
-            conf_int_high = t.test(none, DNase, alternative = 'less')$conf.int[2],
-            p_value = t.test(none, DNase, alternative = 'less')$p.value)
-  
-  
-dnase_extracts %>% 
-  spread(Condition,calcConc) %>% 
-  filter(Material=='cells') %>% 
-  group_by(Material,Phenazine) %>% 
-  summarise(conf_int_low = t.test(none, DNase, alternative = 'greater')$conf.int[1],
-            conf_int_high = t.test(none, DNase, alternative = 'greater')$conf.int[2],
-            p_value = t.test(none, DNase, alternative = 'greater')$p.value)
 ```
 
 # Fig. 2C - ∆pel colony
@@ -134,32 +145,23 @@ ggplot(pel_extracts_means ,aes(x=strain,y=calcConc))+
     scale_x_discrete(breaks = c('dPel','WTpar'), labels=c(expression(Delta*"pel"),"WT")) +
     labs(x='Strain',y=expression("Biofilm concentration" ~ (mu*M )) ) +
     guides(fill=F)
+```
+You can see that for each phenazine the concentration differs between the strains for both the cells aka biofilm and the agar.
 
+And let's perform the t-test on whether or not ∆pel concentrations are different than WT concentrations. 
+
+```{r}
 pel_extracts %>% 
   spread(strain,calcConc) %>% 
   group_by( material ,measured_phenazine) %>% 
   summarise(conf_int_low = t.test(dPel, WTpar,  alternative = 'two.sided')$conf.int[1],
             conf_int_high = t.test(dPel,WTpar, alternative = 'two.sided')$conf.int[2],
             p_value = t.test( dPel,WTpar, alternative = 'two.sided')$p.value)
-
-# Plot Layout
-plot_pel_biofilm <- ggplot(pel_extracts_means %>% filter(material=='cells') ,aes(x=strain,y=calcConc))+
-  geom_col( aes(y = mean), fill = 'light gray') +
-    geom_jitter(width=0.1,height=0,shape=21,size=1)+
-    facet_wrap(~measured_phenazine,scales='free')
-
-# Styling
-plot_pel_biofilm_styled <- plot_pel_biofilm +
-  scale_x_discrete(breaks = c('WTpar','dPel'), 
-                   labels=c("WT",expression(Delta*"pel")), 
-                   limits = c('WTpar','dPel')) +
-  scale_y_continuous(labels = fold_label)+
-  labs(x=NULL, y = expression("Biofilm concentration" ~ (mu*M ))) +
-  guides(fill=F) 
-
-plot_pel_biofilm_styled
 ```
-You can see that for each phenazine the concentration differs between the strains for both the cells aka biofilm and the agar. What we actually care about is the retention ratio, so let's calculate and look at that. 
+
+Both the agar and biofilm concentrations for PYO and PCN are statistically significantly different in ∆pel vs. WT strains.
+
+Let's calculate the retention ratio.
 
 ```{r}
 
@@ -179,10 +181,6 @@ pel_extracts_means_join <- left_join(pel_extracts_means_biofilm,
   mutate(retention_ratio = calcConc_from_biofilm / calcConc_from_agar) %>% 
   mutate(mean_retention_ratio = mean_from_biofilm / mean_from_agar)
 
-fold_label <- function(x){
-  lab <- paste(x, "x", sep = '')
-}
-
 # Plot Layout
 plot_pel <- ggplot(pel_extracts_means_join ,aes(x=strain,y=retention_ratio))+
   geom_col( aes(y = mean_retention_ratio), fill = 'light gray') +
@@ -196,21 +194,30 @@ plot_pel_styled <- plot_pel +
                    limits = c('WTpar','dPel')) +
   scale_y_continuous(labels = fold_label)+
   labs(x=NULL, y = '[Biofilm] / [Agar]') +
-  guides(fill=F) 
+  guides(fill=F)  +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 plot_pel_styled
 
+```
+
+And let's perform the t-test on whether or not ∆pel ratios are greater than WT ratios. 
+
+```{r}
 pel_extracts_means_join %>% 
   spread(strain,retention_ratio) %>% 
   group_by(measured_phenazine) %>% 
   summarise(conf_int_low = t.test(dPel, WTpar,  alternative = 'greater')$conf.int[1],
             conf_int_high = t.test(dPel,WTpar, alternative = 'greater')$conf.int[2],
             p_value = t.test( dPel,WTpar, alternative = 'greater')$p.value)
+
 ```
 
+There is a statistically significant difference for PYO. 
 
 # Fig. 2D - EtBr vs. PHZ in colonies
 
+Let's read in the data and calculate the concentrations.
 ```{r}
 df_dphz_2 <- read_csv("../../../data/LC-MS/2019_07_23_colony_HPLC_dPHZ_data_2.csv")
 
@@ -227,9 +234,9 @@ df_dphz_conc <- df_dphz_2 %>%
   group_by(measured_phz, strain, condition, condition_conc) %>% 
   mutate(mean_phz_conc = mean(measured_phz_conc))
   
-  
 ```
 
+And let's plot:
 
 ```{r}
 plot_dphz_etbr <- ggplot(df_dphz_conc %>% filter(condition %in% c('etbr','PBS')), 
@@ -238,20 +245,17 @@ plot_dphz_etbr <- ggplot(df_dphz_conc %>% filter(condition %in% c('etbr','PBS'))
            aes(x = condition_conc, y  = mean_phz_conc), fill = 'light gray') +
   geom_point(shape = 21, size = 1)  + facet_wrap(~measured_phz, scales = 'free') + ylim(0, NA) + 
   labs(x = expression('EtBr added to agar'~(mu*M)), y = expression('Biofilm phz concentration'~(mu*M)))+
-  scale_x_discrete(labels = c(0, 10, 100, 500))
-
-
-#saveRDS(plot_dphz_etbr, "../../../../Figures/2019_09_27_group_meeting/plot_dphz_etbr")
-
+  scale_x_discrete(labels = c(0, 10, 100, 500)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
 plot_dphz_etbr
 ```
 
 
 # Fig. 2E - WT eDNA with TOTO-1
 
-See the processing of this data in this notebook: [link here]
-
-```{r eval = T}
+Let's read in the standards, biofilm and metadata:
+```{r}
 
 df_stds <- read_csv("../../../data/Spectroscopy/2019_11_22_std_preCTdna.csv") %>%  gather(key = "well", value = "FluorInt", -wavelength) %>% mutate(read = 1)
 
@@ -265,6 +269,7 @@ df_toto %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
     scroll_box(width = "100%", height = "400px")
 ```
 
+Now we can make the plot:
 ```{r}
 std_levels <- df_toto %>% filter(strain == 'std') %>% filter(FluorInt <30000 & FluorInt >5000) %>% 
   mutate(eDNA_ug_mL = well_std_conc * 4 * 800 / 60) %>% 
@@ -276,7 +281,7 @@ bio_reps <- df_toto %>% filter(strain %in% c('WT','dPHZ') & ctDNA_added == FALSE
   summarise(mean = mean(FluorInt), sd = sd(FluorInt))
 
 plot_toto <- ggplot(bio_reps, aes(x = strain, y = mean)) +
-  geom_hline(yintercept = std_levels$FluorInt, linetype = 2, color = 'light gray', label)+
+  geom_hline(yintercept = std_levels$FluorInt, linetype = 2, color = 'light gray', label = labels)+
   geom_pointrange(aes(ymin = mean - sd, ymax = mean + sd), position = position_jitter(width = 0.15, height = 0), size = 0.1) + 
   geom_text(data = std_levels, aes(x = c(2.5,2.5,2.5,2.5), y = FluorInt - 1000, label = labels),parse = T, color = 'light gray', size = (6 * 5 / 14))+
   ylim(0,NA) 
@@ -284,42 +289,26 @@ plot_toto <- ggplot(bio_reps, aes(x = strain, y = mean)) +
 plot_toto_styled <- plot_toto + 
   labs(x = NULL, y = 'TOTO-1 Fluorescence (A.U.)') + 
   scale_x_discrete(breaks = c('dPHZ','WT'), 
-                   labels=c(expression(Delta*"phz*"), 'WT')) 
+                   labels=c(expression(Delta*"phz*"), 'WT')) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(angle = 45, hjust = 1))
 
 plot_toto_styled
 ```
 
-
-
-
-
-
-
-
 # Create Figure
 
-
-
+Let's put everything together:
 ```{r}
 
 theme_set(theme_figure())
 
-#l_plots <- align_plots(plot_redox + labs(title = NULL), plot_pel_styled, align = 'v', axis = 'l')
+top_panels <- plot_grid(dnase_plot_styled, plot_pel_styled, ncol = 2, labels = c('B','C'), scale = 0.95, 
+                        label_size = 12, align = 'hv', axis = 'tblr')
 
-#top_panel <- plot_grid(l_plots[[1]], plot_toto, dnase_plot_styled, ncol = 3, rel_widths = c(0.5, 0.5, 1), align = 'h', axis = 'tb', labels = c('B','C','D'), scale = 0.95, label_size = 12)
+bottom_panels <- plot_grid(plot_dphz_etbr, plot_toto_styled, ncol = 2, labels = c('D','E'), 
+                           scale = 0.95, label_size = 12, align = 'hv', axis = 'lr')
 
-#bottom_panel <- plot_grid(l_plots[[2]], plot_dphz_etbr, ncol = 2, align = 'h', axis = 'tb', labels = c('E','F'), scale = 0.95) 
-
-#all_right_panels <- plot_grid(top_panel, bottom_panel, ncol = 1, align = 'v', axis = 'lr')
-
-
-
-
-
-
-
-
-all_right_panels <- plot_grid(dnase_plot_styled, plot_pel_styled, plot_dphz_etbr, plot_toto_styled, ncol = 2, align = 'hv', axis = 'tblr', labels = c('B','C','D','E'), scale = 0.95, label_size = 12)
+all_right_panels <- plot_grid(top_panels, bottom_panels, ncol = 1, scale = 1.0, align = 'hv', axis = 'tblr')
 
 fig_2 <- plot_grid(NULL, all_right_panels, ncol = 2, rel_widths = c(0.5, 1), labels = c('A',''), label_size = 12)
 

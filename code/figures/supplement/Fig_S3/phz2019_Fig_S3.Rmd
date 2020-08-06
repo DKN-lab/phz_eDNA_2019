@@ -22,6 +22,9 @@ Fig S3A,B and D are images.
 Setup packages and plotting for the notebook:
 
 ```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Check packages
+source("../../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -40,7 +43,9 @@ source("../../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. S3C
+# Fig. S3C - DNase colony TOTO-1 measurement
+
+Let's read in the data and make the plot:
 
 ```{r}
 pRdata <- read_csv('../../../../data/Spectroscopy/TOTO_DAPI_extracts.csv') %>% rename(TOTO=`1uM_TOTO_avg_(535nm)`,DAPI=`1uM_DAPI_avg_(445nm)`) %>%  
@@ -64,7 +69,9 @@ toto_plot_styled <- toto_plot +
 toto_plot_styled     
 ```
 
-# Fig. S3E
+# Fig. S3E - Colony biofilm eDNA quantification
+
+Let's read in the raw well data and the metadata:
 
 ```{r}
 df_biofilms <- read_csv("../../../../data/Spectroscopy/2019_11_22_std_wt_dphz_postCTdna.csv") %>%  gather(key = "well", value = "FluorInt", -wavelength)
@@ -77,6 +84,8 @@ df_toto %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
     scroll_box(width = "100%", height = "400px")
 ```
 
+Now let's make the plot:
+
 ```{r}
 bg_means <- df_toto %>% filter(strain != 'std' & tech_rep == 4) %>% group_by(strain) %>% summarise(mean = mean(FluorInt))
 
@@ -87,8 +96,6 @@ plot_eDNA <- ggplot(df_toto %>% filter(strain != 'std') %>% mutate(facet_labels 
   geom_point(data = . %>% filter(tech_rep<4), aes(fill = factor(ctDNA_added)), shape = 21) + 
   geom_jitter(data = . %>% filter(tech_rep==4), aes(x = 2), width = 1, shape = 21, color = 'light gray')+
   facet_wrap(~facet_labels, scales = 'free') + ylim(0, 30000) + guides(fill = F)
-
-'\u0394'
 
 # Plot styling
 
@@ -102,6 +109,7 @@ plot_eDNA_styled
 # Create Figure
 
 ```{r}
+
 theme_set(theme_figure())
 
 fig_s3 <- plot_grid( toto_plot_styled,plot_eDNA_styled, align = 'hv', axis = 'tblr', ncol = 2, rel_widths = c(1,2), scale = 0.95, labels = c('C','E'), label_size = 12)

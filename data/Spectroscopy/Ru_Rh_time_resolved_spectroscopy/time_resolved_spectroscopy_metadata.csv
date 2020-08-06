@@ -1,0 +1,17 @@
+﻿rep,material,material_id,ruphen_conc,quencher_conc,quencher_eq,quencher_id,comment
+13,biofilm,2,0,0,NA,Rh,
+14,biofilm,2,5,0,0,Rh,
+15,biofilm,2,5,5,1,Rh,
+16,biofilm,2,5,10,2,Rh,
+17,biofilm,2,5,15,3,Rh,
+18,biofilm,2,5,20,4,Rh,
+19,biofilm,2,5,30,6,Rh,
+20,biofilm,2,5,40,8,Rh,
+21,biofilm,2,5,50,10,Rh,
+22,biofilm,2,5,60,12,Rh,
+39,biofilm,2,5,60,12,Rh,1 hr later
+23,liquid_cells,1,0,0,NA,Rh,
+24,liquid_cells,1,5,0,0,Rh,
+25,liquid_cells,1,5,5,1,Rh,
+26,liquid_cells,1,5,10,2,Rh,
+27,liquid_cells,1,5,20,4,Rh,

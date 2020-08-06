@@ -23,6 +23,9 @@ Setup packages and plotting for the notebook:
 
 
 ```r
+# Check packages
+source("../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -55,21 +58,21 @@ dnase_extracts %>%
   scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> Phenazine </th>
-   <th style="text-align:left;"> Strain </th>
-   <th style="text-align:left;"> Condition </th>
-   <th style="text-align:right;"> Replicate </th>
-   <th style="text-align:left;"> Material </th>
-   <th style="text-align:left;"> Day </th>
-   <th style="text-align:right;"> RT </th>
-   <th style="text-align:right;"> Area </th>
-   <th style="text-align:left;"> Channel Name </th>
-   <th style="text-align:right;"> Amount </th>
-   <th style="text-align:right;"> calcConc </th>
-   <th style="text-align:right;"> mean </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Phenazine </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Strain </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Condition </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Replicate </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Material </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Day </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> RT </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Area </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Channel Name </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Amount </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> calcConc </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> mean </th>
   </tr>
  </thead>
 <tbody>
@@ -591,6 +594,56 @@ ggplot(dnase_extracts ,aes(x=Condition,y=calcConc))+
 ```
 
 <img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" />
+
+And let's do a statistical test to compare the DNase +/- treatments. 
+
+First, a t-test for whether or not agar with DNase concentrations were higher than the 'none' treatment:
+
+
+```r
+dnase_extracts %>% 
+  spread(Condition,calcConc) %>% 
+  filter(Material=='agar') %>% 
+  group_by(Material,Phenazine) %>% 
+  summarise(conf_int_low = t.test( DNase,none, alternative = 'greater')$conf.int[1],
+            conf_int_high = t.test( DNase,none, alternative = 'greater')$conf.int[2],
+            p_value = t.test( DNase,none, alternative = 'greater')$p.value)
+```
+
+```
+## # A tibble: 3 x 5
+## # Groups:   Material [1]
+##   Material Phenazine conf_int_low conf_int_high p_value
+##   <chr>    <chr>            <dbl>         <dbl>   <dbl>
+## 1 agar     PCA             -1.79            Inf   0.778
+## 2 agar     PCN             -5.71            Inf   0.261
+## 3 agar     PYO             -0.585           Inf   0.811
+```
+There are no significant differences p<0.05.
+
+Second, a t-test for whether or not biofilm (aka cell) with DNase concentrations were lower than the 'none' treatment
+
+```r
+dnase_extracts %>% 
+  spread(Condition,calcConc) %>% 
+  filter(Material=='cells') %>% 
+  group_by(Material,Phenazine) %>% 
+  summarise(conf_int_low = t.test( DNase, none, alternative = 'less')$conf.int[1],
+            conf_int_high = t.test(DNase, none,  alternative = 'less')$conf.int[2],
+            p_value = t.test( DNase, none, alternative = 'less')$p.value)
+```
+
+```
+## # A tibble: 3 x 5
+## # Groups:   Material [1]
+##   Material Phenazine conf_int_low conf_int_high p_value
+##   <chr>    <chr>            <dbl>         <dbl>   <dbl>
+## 1 cells    PCA               -Inf          3.76  0.198 
+## 2 cells    PCN               -Inf        -23.5   0.0127
+## 3 cells    PYO               -Inf         -4.94  0.0273
+```
+There is a significant difference for PYO and PCN.
+
 Here you can see that the agar concentrations between the Dnase treated and untreated don't differ meaningfully, but the cell/biofilm concentrations might. This might be because for this experiment the colonies were transferred to a fresh agar plate for only 24hrs as opposed to staying on the same plate for 4 days as with the pel experiment. So, let's ignore the agar concentrations for now. It's also important to note that by calculating a ratio as we did above for pel we do risk amplifying meaningless differences by dividing large numbers by small numbers.
 
 Here's the biofilm only:
@@ -607,64 +660,13 @@ dnase_plot <- ggplot(dnase_extracts %>% filter(Material=='cells') ,aes(x=Conditi
 dnase_plot_styled <- dnase_plot +
   labs(x=NULL, y=expression("Biofilm concentration" ~ (mu*M ))) + 
   scale_x_discrete(limits = c("none",'DNase')) +
-  guides(fill = F)
+  guides(fill = F)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 dnase_plot_styled
 ```
 
-<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" />
-
-```r
-dnase_PYO_none <- dnase_extracts %>% filter(Material=='cells' & Phenazine=='PCA') %>% filter(Condition=='none')
-
-dnase_PYO_dnase <- dnase_extracts %>% filter(Material=='cells' & Phenazine=='PCA') %>% filter(Condition=='DNase')
-
-t.test(x=dnase_PYO_none$calcConc ,y = dnase_PYO_dnase$calcConc, alternative = 'greater')$conf.int[2]
-```
-
-```
-## [1] Inf
-```
-
-```r
-dnase_extracts %>% 
-  spread(Condition,calcConc) %>% 
-  filter(Material=='agar') %>% 
-  group_by(Material,Phenazine) %>% 
-  summarise(conf_int_low = t.test(none, DNase, alternative = 'less')$conf.int[1],
-            conf_int_high = t.test(none, DNase, alternative = 'less')$conf.int[2],
-            p_value = t.test(none, DNase, alternative = 'less')$p.value)
-```
-
-```
-## # A tibble: 3 x 5
-## # Groups:   Material [1]
-##   Material Phenazine conf_int_low conf_int_high p_value
-##   <chr>    <chr>            <dbl>         <dbl>   <dbl>
-## 1 agar     PCA               -Inf         1.79    0.778
-## 2 agar     PCN               -Inf         5.71    0.261
-## 3 agar     PYO               -Inf         0.585   0.811
-```
-
-```r
-dnase_extracts %>% 
-  spread(Condition,calcConc) %>% 
-  filter(Material=='cells') %>% 
-  group_by(Material,Phenazine) %>% 
-  summarise(conf_int_low = t.test(none, DNase, alternative = 'greater')$conf.int[1],
-            conf_int_high = t.test(none, DNase, alternative = 'greater')$conf.int[2],
-            p_value = t.test(none, DNase, alternative = 'greater')$p.value)
-```
-
-```
-## # A tibble: 3 x 5
-## # Groups:   Material [1]
-##   Material Phenazine conf_int_low conf_int_high p_value
-##   <chr>    <chr>            <dbl>         <dbl>   <dbl>
-## 1 cells    PCA              -3.76           Inf  0.198 
-## 2 cells    PCN              23.5            Inf  0.0127
-## 3 cells    PYO               4.94           Inf  0.0273
-```
+<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
 
 # Fig. 2C - ∆pel colony
 
@@ -680,20 +682,20 @@ pel_extracts %>%
   scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> measured_phenazine </th>
-   <th style="text-align:left;"> strain </th>
-   <th style="text-align:left;"> amount_added </th>
-   <th style="text-align:left;"> added_phenazine </th>
-   <th style="text-align:left;"> material </th>
-   <th style="text-align:right;"> replicate </th>
-   <th style="text-align:right;"> RT </th>
-   <th style="text-align:right;"> Area </th>
-   <th style="text-align:left;"> Channel Name </th>
-   <th style="text-align:right;"> Amount </th>
-   <th style="text-align:right;"> calcConc </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> measured_phenazine </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> strain </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> amount_added </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> added_phenazine </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> material </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> replicate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> RT </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Area </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Channel Name </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Amount </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> calcConc </th>
   </tr>
  </thead>
 <tbody>
@@ -1184,7 +1186,11 @@ ggplot(pel_extracts_means ,aes(x=strain,y=calcConc))+
     guides(fill=F)
 ```
 
-<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" />
+You can see that for each phenazine the concentration differs between the strains for both the cells aka biofilm and the agar.
+
+And let's perform the t-test on whether or not ∆pel concentrations are different than WT concentrations. 
+
 
 ```r
 pel_extracts %>% 
@@ -1208,27 +1214,9 @@ pel_extracts %>%
 ## 6 cells    PYO                      17.2          39.2   0.00553
 ```
 
-```r
-# Plot Layout
-plot_pel_biofilm <- ggplot(pel_extracts_means %>% filter(material=='cells') ,aes(x=strain,y=calcConc))+
-  geom_col( aes(y = mean), fill = 'light gray') +
-    geom_jitter(width=0.1,height=0,shape=21,size=1)+
-    facet_wrap(~measured_phenazine,scales='free')
+Both the agar and biofilm concentrations for PYO and PCN are statistically significantly different in ∆pel vs. WT strains.
 
-# Styling
-plot_pel_biofilm_styled <- plot_pel_biofilm +
-  scale_x_discrete(breaks = c('WTpar','dPel'), 
-                   labels=c("WT",expression(Delta*"pel")), 
-                   limits = c('WTpar','dPel')) +
-  scale_y_continuous(labels = fold_label)+
-  labs(x=NULL, y = expression("Biofilm concentration" ~ (mu*M ))) +
-  guides(fill=F) 
-
-plot_pel_biofilm_styled
-```
-
-<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" />
-You can see that for each phenazine the concentration differs between the strains for both the cells aka biofilm and the agar. What we actually care about is the retention ratio, so let's calculate and look at that. 
+Let's calculate the retention ratio.
 
 
 ```r
@@ -1248,10 +1236,6 @@ pel_extracts_means_join <- left_join(pel_extracts_means_biofilm,
   mutate(retention_ratio = calcConc_from_biofilm / calcConc_from_agar) %>% 
   mutate(mean_retention_ratio = mean_from_biofilm / mean_from_agar)
 
-fold_label <- function(x){
-  lab <- paste(x, "x", sep = '')
-}
-
 # Plot Layout
 plot_pel <- ggplot(pel_extracts_means_join ,aes(x=strain,y=retention_ratio))+
   geom_col( aes(y = mean_retention_ratio), fill = 'light gray') +
@@ -1265,12 +1249,16 @@ plot_pel_styled <- plot_pel +
                    limits = c('WTpar','dPel')) +
   scale_y_continuous(labels = fold_label)+
   labs(x=NULL, y = '[Biofilm] / [Agar]') +
-  guides(fill=F) 
+  guides(fill=F)  +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 plot_pel_styled
 ```
 
-<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" />
+
+And let's perform the t-test on whether or not ∆pel ratios are greater than WT ratios. 
+
 
 ```r
 pel_extracts_means_join %>% 
@@ -1290,9 +1278,11 @@ pel_extracts_means_join %>%
 ## 3 PYO                      9.45             Inf 0.000692
 ```
 
+There is a statistically significant difference for PYO. 
 
 # Fig. 2D - EtBr vs. PHZ in colonies
 
+Let's read in the data and calculate the concentrations.
 
 ```r
 df_dphz_2 <- read_csv("../../../data/LC-MS/2019_07_23_colony_HPLC_dPHZ_data_2.csv")
@@ -1311,6 +1301,7 @@ df_dphz_conc <- df_dphz_2 %>%
   mutate(mean_phz_conc = mean(measured_phz_conc))
 ```
 
+And let's plot:
 
 
 ```r
@@ -1320,21 +1311,18 @@ plot_dphz_etbr <- ggplot(df_dphz_conc %>% filter(condition %in% c('etbr','PBS'))
            aes(x = condition_conc, y  = mean_phz_conc), fill = 'light gray') +
   geom_point(shape = 21, size = 1)  + facet_wrap(~measured_phz, scales = 'free') + ylim(0, NA) + 
   labs(x = expression('EtBr added to agar'~(mu*M)), y = expression('Biofilm phz concentration'~(mu*M)))+
-  scale_x_discrete(labels = c(0, 10, 100, 500))
-
-
-#saveRDS(plot_dphz_etbr, "../../../../Figures/2019_09_27_group_meeting/plot_dphz_etbr")
-
+  scale_x_discrete(labels = c(0, 10, 100, 500)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
 plot_dphz_etbr
 ```
 
-<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
 
 
 # Fig. 2E - WT eDNA with TOTO-1
 
-See the processing of this data in this notebook: [link here]
-
+Let's read in the standards, biofilm and metadata:
 
 ```r
 df_stds <- read_csv("../../../data/Spectroscopy/2019_11_22_std_preCTdna.csv") %>%  gather(key = "well", value = "FluorInt", -wavelength) %>% mutate(read = 1)
@@ -1349,19 +1337,19 @@ df_toto %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
     scroll_box(width = "100%", height = "400px")
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:400px; overflow-x: scroll; width:100%; "><table class="table table-condensed" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; overflow-x: scroll; width:100%; "><table class="table table-condensed" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;"> wavelength </th>
-   <th style="text-align:left;"> well </th>
-   <th style="text-align:right;"> FluorInt </th>
-   <th style="text-align:right;"> read </th>
-   <th style="text-align:left;"> strain </th>
-   <th style="text-align:left;"> toto_added </th>
-   <th style="text-align:left;"> ctDNA_added </th>
-   <th style="text-align:right;"> well_std_conc </th>
-   <th style="text-align:right;"> bio_rep </th>
-   <th style="text-align:right;"> tech_rep </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> wavelength </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> well </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> FluorInt </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> read </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> strain </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> toto_added </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> ctDNA_added </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> well_std_conc </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> bio_rep </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> tech_rep </th>
   </tr>
  </thead>
 <tbody>
@@ -2088,6 +2076,7 @@ df_toto %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
 </tbody>
 </table></div>
 
+Now we can make the plot:
 
 ```r
 std_levels <- df_toto %>% filter(strain == 'std') %>% filter(FluorInt <30000 & FluorInt >5000) %>% 
@@ -2100,7 +2089,7 @@ bio_reps <- df_toto %>% filter(strain %in% c('WT','dPHZ') & ctDNA_added == FALSE
   summarise(mean = mean(FluorInt), sd = sd(FluorInt))
 
 plot_toto <- ggplot(bio_reps, aes(x = strain, y = mean)) +
-  geom_hline(yintercept = std_levels$FluorInt, linetype = 2, color = 'light gray', label)+
+  geom_hline(yintercept = std_levels$FluorInt, linetype = 2, color = 'light gray', label = labels)+
   geom_pointrange(aes(ymin = mean - sd, ymax = mean + sd), position = position_jitter(width = 0.15, height = 0), size = 0.1) + 
   geom_text(data = std_levels, aes(x = c(2.5,2.5,2.5,2.5), y = FluorInt - 1000, label = labels),parse = T, color = 'light gray', size = (6 * 5 / 14))+
   ylim(0,NA) 
@@ -2108,51 +2097,35 @@ plot_toto <- ggplot(bio_reps, aes(x = strain, y = mean)) +
 plot_toto_styled <- plot_toto + 
   labs(x = NULL, y = 'TOTO-1 Fluorescence (A.U.)') + 
   scale_x_discrete(breaks = c('dPHZ','WT'), 
-                   labels=c(expression(Delta*"phz*"), 'WT')) 
+                   labels=c(expression(Delta*"phz*"), 'WT')) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(angle = 45, hjust = 1))
 
 plot_toto_styled
 ```
 
-<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" />
-
-
-
-
-
-
-
+<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" />
 
 # Create Figure
 
-
-
+Let's put everything together:
 
 ```r
 theme_set(theme_figure())
 
-#l_plots <- align_plots(plot_redox + labs(title = NULL), plot_pel_styled, align = 'v', axis = 'l')
+top_panels <- plot_grid(dnase_plot_styled, plot_pel_styled, ncol = 2, labels = c('B','C'), scale = 0.95, 
+                        label_size = 12, align = 'hv', axis = 'tblr')
 
-#top_panel <- plot_grid(l_plots[[1]], plot_toto, dnase_plot_styled, ncol = 3, rel_widths = c(0.5, 0.5, 1), align = 'h', axis = 'tb', labels = c('B','C','D'), scale = 0.95, label_size = 12)
+bottom_panels <- plot_grid(plot_dphz_etbr, plot_toto_styled, ncol = 2, labels = c('D','E'), 
+                           scale = 0.95, label_size = 12, align = 'hv', axis = 'lr')
 
-#bottom_panel <- plot_grid(l_plots[[2]], plot_dphz_etbr, ncol = 2, align = 'h', axis = 'tb', labels = c('E','F'), scale = 0.95) 
-
-#all_right_panels <- plot_grid(top_panel, bottom_panel, ncol = 1, align = 'v', axis = 'lr')
-
-
-
-
-
-
-
-
-all_right_panels <- plot_grid(dnase_plot_styled, plot_pel_styled, plot_dphz_etbr, plot_toto_styled, ncol = 2, align = 'hv', axis = 'tblr', labels = c('B','C','D','E'), scale = 0.95, label_size = 12)
+all_right_panels <- plot_grid(top_panels, bottom_panels, ncol = 1, scale = 1.0, align = 'hv', axis = 'tblr')
 
 fig_2 <- plot_grid(NULL, all_right_panels, ncol = 2, rel_widths = c(0.5, 1), labels = c('A',''), label_size = 12)
 
 fig_2
 ```
 
-<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_2_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" />
 
 ```r
 save_plot("../../../figures/phz2019_Fig_2.pdf", fig_2, base_width = 7, base_height = 3.5)
@@ -2166,9 +2139,9 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-## Running under: macOS Mojave 10.14.6
+## Running under: macOS  10.15.6
 ## 
 ## Matrix products: default
 ## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
@@ -2181,24 +2154,25 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.0.1 
-##  [4] cowplot_0.9.4     forcats_0.3.0     stringr_1.3.1    
-##  [7] dplyr_0.8.1       purrr_0.2.5       readr_1.3.1      
-## [10] tidyr_0.8.2       tibble_2.1.3      ggplot2_3.2.0    
-## [13] tidyverse_1.2.1  
+##  [1] lubridate_1.7.4   hms_0.5.3         modelr_0.1.5     
+##  [4] broom_0.5.2       kableExtra_1.1.0  cowplot_0.9.4    
+##  [7] viridis_0.5.1     viridisLite_0.3.0 knitr_1.23       
+## [10] forcats_0.4.0     stringr_1.4.0     dplyr_0.8.3      
+## [13] purrr_0.3.3       readr_1.3.1       tidyr_1.0.0      
+## [16] tibble_2.1.3      ggplot2_3.3.0     tidyverse_1.3.0  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] utf8_1.1.4       rlang_0.4.0      pillar_1.3.1     glue_1.3.1      
-## [13] withr_2.1.2      modelr_0.1.2     readxl_1.2.0     munsell_0.5.0   
-## [17] gtable_0.2.0     cellranger_1.1.0 rvest_0.3.2      evaluate_0.14   
-## [21] labeling_0.3     knitr_1.23       fansi_0.4.0      highr_0.7       
-## [25] broom_0.5.1      Rcpp_1.0.1       scales_1.0.0     backports_1.1.3 
-## [29] webshot_0.5.1    jsonlite_1.6     gridExtra_2.3    hms_0.4.2       
-## [33] digest_0.6.18    stringi_1.2.4    grid_3.5.2       cli_1.1.0       
-## [37] tools_3.5.2      magrittr_1.5     lazyeval_0.2.1   crayon_1.3.4    
-## [41] pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4  assertthat_0.2.1
-## [45] rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0 R6_2.4.0        
-## [49] nlme_3.1-140     compiler_3.5.2
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.2.0      lattice_0.20-38 
+##  [5] colorspace_1.4-1 vctrs_0.3.1      generics_0.0.2   htmltools_0.4.0 
+##  [9] yaml_2.2.0       utf8_1.1.4       rlang_0.4.6      pillar_1.4.2    
+## [13] glue_1.3.1       withr_2.1.2      DBI_1.0.0        dbplyr_1.4.2    
+## [17] readxl_1.3.1     lifecycle_0.1.0  munsell_0.5.0    gtable_0.3.0    
+## [21] cellranger_1.1.0 rvest_0.3.5      evaluate_0.14    labeling_0.3    
+## [25] fansi_0.4.0      highr_0.8        Rcpp_1.0.2       scales_1.0.0    
+## [29] backports_1.1.4  webshot_0.5.1    jsonlite_1.6     fs_1.3.1        
+## [33] gridExtra_2.3    digest_0.6.21    stringi_1.4.3    grid_3.5.3      
+## [37] cli_1.1.0        tools_3.5.3      magrittr_1.5     crayon_1.3.4    
+## [41] pkgconfig_2.0.3  ellipsis_0.3.0   xml2_1.2.2       reprex_0.3.0    
+## [45] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.1       rstudioapi_0.10 
+## [49] R6_2.4.0         nlme_3.1-137     compiler_3.5.3
 ```

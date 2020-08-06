@@ -15,7 +15,7 @@ output:
 
 # Notes
 
-Panel A of figure 2 is isothermal titration calorimetry data that was analyzed outside of R. 
+Panels A, D, and G of figure 3 are diagrams made in illustrator, so plots are replicated as placeholders in this R generated figure. 
 
 ----
 
@@ -23,6 +23,9 @@ Setup packages and plotting for the notebook:
 
 
 ```r
+# Check packages
+source("../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -38,11 +41,14 @@ source("../../tools/plotting_tools.R")
 
 # Modify the plot theme
 theme_set(theme_notebook())
+
+# Load text file import tools
+source("../../tools/text_file_import.R")
 ```
 
-# Results
+# Fig. 3B - Interphenazine electron transfer (anoxic)
 
-Here's the info for each well:
+This experiment was conducted in a plate reader - here's the info for each well:
 
 ```r
 metadata <- read_csv("../../../data/Spectroscopy/2019_10_18_ET_ctDNA_metadata.csv")
@@ -50,16 +56,16 @@ metadata <- read_csv("../../../data/Spectroscopy/2019_10_18_ET_ctDNA_metadata.cs
 metadata %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:400px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> well </th>
-   <th style="text-align:left;"> red </th>
-   <th style="text-align:left;"> ox </th>
-   <th style="text-align:left;"> red_ox </th>
-   <th style="text-align:left;"> DNA </th>
-   <th style="text-align:right;"> rep </th>
-   <th style="text-align:left;"> exp </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> well </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> red </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> ox </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> red_ox </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> DNA </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> rep </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
   </tr>
  </thead>
 <tbody>
@@ -282,7 +288,7 @@ metadata %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 </tbody>
 </table></div>
 
-## Abs Spectrum 1
+## Absorbance Spectra
 
 Now let's read in the first absorbance spectra taken for each condition and we'll add the appropriate metadata:
 
@@ -295,18 +301,18 @@ df_meta <- left_join(df, metadata, by = 'well')
 df_meta %>% kable %>% kable_styling() %>% scroll_box(height = '400px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:400px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;"> Wavelength </th>
-   <th style="text-align:left;"> well </th>
-   <th style="text-align:right;"> intensity </th>
-   <th style="text-align:left;"> red </th>
-   <th style="text-align:left;"> ox </th>
-   <th style="text-align:left;"> red_ox </th>
-   <th style="text-align:left;"> DNA </th>
-   <th style="text-align:right;"> rep </th>
-   <th style="text-align:left;"> exp </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Wavelength </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> well </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> intensity </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> red </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> ox </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> red_ox </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> DNA </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> rep </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
   </tr>
  </thead>
 <tbody>
@@ -11148,7 +11154,7 @@ ggplot(df_meta, aes(x = Wavelength, y = intensity, color = red_ox)) + geom_point
 
 <img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" />
 
-This looks pretty much like the past notebook with interphenazine ET. If we look out at 690 for the PYO abs peak it looks like the orange PYOox is higher than all the other conditions. Let's zoom into that region for a closer look:
+These match characteristic phenazine spectra. If we look out at 690 for the PYO abs peak it looks like the orange PYOox is higher than all the other conditions. Let's zoom into that region for a closer look:
 
 
 ```r
@@ -11158,48 +11164,42 @@ ggplot(df_meta, aes(x = Wavelength, y = intensity, color = red_ox)) +
 
 <img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
 
-Ok, this looks pretty much as we expected. All of the conditions show 690 abs closer to PYOred than PYOox.
+All of the conditions show 690 abs closer to PYOred than PYOox, except for the control condition that only contains oxidized PYO.
 
 Let's try and condense this info into some pointranges:
 
 
 ```r
-df_690 <- df_meta %>% group_by(red_ox, Wavelength, DNA) %>% mutate(mean = mean(intensity), sd = sd(intensity))  %>% filter(Wavelength == 690)
+df_690 <- df_meta %>% 
+  group_by(red_ox, Wavelength, DNA) %>% 
+  mutate(mean = mean(intensity), sd = sd(intensity))  %>% 
+  filter(Wavelength == 690)
 
-ggplot(df_690, aes(x = red_ox, y = intensity, color = DNA )) + 
-  geom_jitter(shape = 21, width = 0.1) + 
-  geom_pointrange(data = . %>% filter(rep ==1), 
-                  aes(y = mean,ymin = mean-sd,ymax = mean+sd), 
-                  position = position_jitter(width = 0.1))
-```
-
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
-
-
-
-```r
 labels = c('PBS + PYO[ox]','PYO[red] + PBS','PCA[red] + PYO[ox]','PCN[red] + PYO[ox]')
 
 
 plot_ctDNA_690 <- ggplot(df_690, aes(x = red_ox, y = mean, color = DNA)) +  
   geom_hline(yintercept = 0.033, linetype = 2, color = 'light gray')+
-  geom_jitter(aes(y = intensity, shape = DNA),color = 'black', size = 0.5, stroke = 0.2, position = position_jitterdodge(dodge.width = 0.4, jitter.width = 0.1, jitter.height = 0))+
-  geom_pointrange(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.4),size = 0.5, fatten = 0.5) + 
+  geom_jitter(aes(y = intensity, shape = DNA),color = 'black', size = 0.5, stroke = 0.2, 
+              position = position_jitterdodge(dodge.width = 0.4, jitter.width = 0.1, jitter.height = 0))+
+  geom_pointrange(aes(ymin = mean - sd, ymax = mean + sd), 
+                  position = position_dodge(width = 0.4),size = 0.5, fatten = 0.5) + 
   scale_x_discrete(limits = c('PBS_PYO','PYO_PBS','PCA_PYO','PCN_PYO'), labels = parse(text = labels )) + 
   scale_color_manual(breaks = c(F,T), labels = c('-DNA','+DNA'), values = colorblind_palette)+
   labs(x = NULL, y = 'Absorbance at 690nm', color = NULL) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.5,1)) + scale_shape_manual(values = c(21,22))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.5,1)) + 
+  scale_shape_manual(values = c(21,22))
 
 plot_ctDNA_690
 ```
 
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
 
-Ok these pointranges show mean +/- 2 standard deviations. So it looks like for all of the conditions there's no significant difference +/- ctDNA.
+Ok these pointranges show mean +/- standard deviations. So it looks like for all of the conditions there's no significant difference +/- ctDNA, but the reactions with reduced PCA and PCN yield reduced PYO (and therefore a reaction occured).
 
-## Abs690 Kinetic
+## Kinetics
 
-The Spectrum data looks good, let's also take a look at the kinetic data at 690 to see if there's a difference in the reaction rates. First we'll read it in:
+In addition to spectra taken immediately following mixing, we also acquired time courses at 690nm to see if there's a difference in the reaction rates. First we'll read in the data:
 
 
 ```r
@@ -11211,18 +11211,18 @@ df_kin_meta <- left_join(df_kin, metadata, by = 'well')
 df_kin_meta %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:400px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;"> min </th>
-   <th style="text-align:left;"> well </th>
-   <th style="text-align:right;"> intensity </th>
-   <th style="text-align:left;"> red </th>
-   <th style="text-align:left;"> ox </th>
-   <th style="text-align:left;"> red_ox </th>
-   <th style="text-align:left;"> DNA </th>
-   <th style="text-align:right;"> rep </th>
-   <th style="text-align:left;"> exp </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> min </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> well </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> intensity </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> red </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> ox </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> red_ox </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> DNA </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> rep </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
   </tr>
  </thead>
 <tbody>
@@ -13876,29 +13876,11 @@ Now let's look at the values over time (~2min)
 ggplot(df_kin_meta, aes(x = min, y = intensity, color = DNA)) + geom_point() + facet_wrap(~red_ox)
 ```
 
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" />
 
 Ok, the intensity trends we observed with the spectra looks the same here. There are no obvious differences in slope, so I still don't think we can say anything about reaction rates...they all proceed too fast.
 
-
-```r
-theme_set(theme_figure())
-
-fig_3 <- plot_grid(NULL, plot_ctDNA_690, ncol = 2, scale = 0.95, labels = 'AUTO', label_size = 12, rel_widths = c(1,1.5))
-
-fig_3
-```
-
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" />
-
-```r
-save_plot("../../../figures/phz2019_Fig_3.pdf", fig_3, base_height = 2, base_width = 3.4)
-```
-
-
-```r
-source("../../tools/text_file_import.R")
-```
+# Fig. 3C - Interphenazine ET with oxygen
 
 Now let's setup the filenames, data columns etc, and we can go ahead and import and view the dataframe:
 
@@ -13928,21 +13910,21 @@ df <- import_to_df(filenames = filenames,
 df %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> year </th>
-   <th style="text-align:left;"> month </th>
-   <th style="text-align:left;"> day </th>
-   <th style="text-align:left;"> PHZox </th>
-   <th style="text-align:left;"> ox </th>
-   <th style="text-align:left;"> PHZred </th>
-   <th style="text-align:left;"> red </th>
-   <th style="text-align:right;"> rep </th>
-   <th style="text-align:right;"> t </th>
-   <th style="text-align:left;"> blank </th>
-   <th style="text-align:right;"> abs690 </th>
-   <th style="text-align:left;"> phz_redox </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> year </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> month </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> day </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> PHZox </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> ox </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> PHZred </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> red </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> rep </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> t </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> blank </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> abs690 </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> phz_redox </th>
   </tr>
  </thead>
 <tbody>
@@ -25906,36 +25888,43 @@ df %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
 </table></div>
 <br>
 
+Let's take a look at the conditions (triplicates) individually.
+
 
 ```r
 ggplot(df, aes(x = t, y = abs690)) + geom_point(shape = 21) + facet_wrap(~phz_redox)
 ```
 
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" />
+
+And now we can assemble the final plot:
 
 
 ```r
 plot_phzET_o2 <- ggplot(df %>% filter(abs690>-0.01), aes(x = t-15, y = abs690, color = phz_redox)) + 
-  geom_point(data = . %>% filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))),shape = 21, alpha = 0.5, size = 0.5) + 
-  geom_smooth(data = . %>% filter(abs690>0.01 & abs690<0.4) %>% filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))), size = 0.5) + 
-  geom_line(data = . %>% filter(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred') & t >11), aes(group = phz_redox), color = 'light gray', linetype = 2)+
-  scale_color_manual(values = c('gray', "#56B4E9","#E69F00", "#000000")) +  labs(x = 'Time (sec)',y = 'Absorbance at 690nm') +  theme(legend.position = c(0.5, 0.8))
+  geom_point(data = . %>% filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))),
+             shape = 21, alpha = 0.5, size = 0.5) + 
+  geom_smooth(data = . %>% filter(abs690>0.01 & abs690<0.4) %>% 
+                filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))), 
+              size = 0.5) + 
+  geom_line(data = . %>% filter(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred') & t >11), 
+            aes(group = phz_redox), color = 'light gray', linetype = 2)+
+  scale_color_manual(values = c('gray', "#56B4E9","#E69F00", "#000000")) +  
+  labs(x = 'Time (sec)',y = 'Absorbance at 690nm') +  
+  theme(legend.position = c(0.5, 0.8))
 
 plot_phzET_o2
 ```
 
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" />
 
 
 ------
 
-# Adding DNA CT to same figure
-
------
-
-# Panel E - MM Discrimination
+# Fig. 3E - DNA modified electrode (anoxic)
 
 This data is electrochemical and contains the third/final sweep of an electrode with two different DNA monolayers.
+
 
 ```r
 df_noO2 <- read_csv('../../../data/Electrochemistry/DNA_modified_electrode_noO2.csv',comment = "#") %>% 
@@ -25947,12 +25936,12 @@ df_noO2 %>%
   scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;"> E </th>
-   <th style="text-align:right;"> Current </th>
-   <th style="text-align:left;"> Construct </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> E </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Current </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Construct </th>
   </tr>
  </thead>
 <tbody>
@@ -33977,12 +33966,12 @@ plot_dnaCT_noO2_styled <- plot_dnaCT_noO2 +
 plot_dnaCT_noO2_styled
 ```
 
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
 
 
+# Fig. 3F - DNA modified electrode (with oxygen)
 
-
-# Panel F - DNA CT Catalytic
+Let's read in the echem data:
 
 
 ```r
@@ -33996,15 +33985,15 @@ df_wO2 %>%
   scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;"> E </th>
-   <th style="text-align:right;"> Current </th>
-   <th style="text-align:left;"> Construct </th>
-   <th style="text-align:left;"> Aerobic </th>
-   <th style="text-align:left;"> PCN </th>
-   <th style="text-align:left;"> Condition </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> E </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Current </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Construct </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Aerobic </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> PCN </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Condition </th>
   </tr>
  </thead>
 <tbody>
@@ -59611,6 +59600,8 @@ df_wO2 %>%
 </tbody>
 </table></div>
 
+And let's make the figure:
+
 
 ```r
 plot_dnaCT_wO2 <- ggplot(df_wO2 %>% filter(Aerobic==T),aes(x = E, y = Current, color = Condition))+
@@ -59632,70 +59623,351 @@ plot_dnaCT_wO2_styled <- plot_dnaCT_wO2 +
 plot_dnaCT_wO2_styled
 ```
 
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" />
 
-# Spectroscopy
+# Fig. 3H - Time resolved spectroscopy - raw data: liquid cells vs. biofilm
+
+First let's read in the raw datasets. This uses the function `import_to_df()` from the `text_file_import.R` tool.
 
 
 ```r
-df_spec <- read_csv("../../../data/Spectroscopy/2019_08_29_spectroscopy_RuRh_dphz.csv") %>% filter(exp_num == 2)
+data_path = '../../../data/Spectroscopy/Ru_Rh_time_resolved_spectroscopy/'
 
-df_spec <- df_spec %>% 
-  mutate(min = ifelse(ruphen_conc==0,intensity, NA)) %>% 
-  group_by(time) %>% 
-  mutate(bg = min(min, na.rm = T)) %>% 
-  mutate(bg_sub = intensity - bg)
+data_cols <-  c('time','intensity')
 
-plot_raw_spec <- ggplot(df_spec %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
+skip_rows=16
+
+# Add 'reactor' to file name so it is parsed into column
+filename_cols = c('date','rep','compressed')
+
+data_names <- dir(path=data_path, pattern = ".+[dat]$")
+
+# Add correct paths separate from filenames
+data_paths <- data_names %>% paste(data_path, ., sep='')
+
+# Read in all SWVs with one function call 
+spec_data <- import_to_df(filenames = data_names, file_paths = data_paths, data_cols = data_cols, 
+                          skip_rows = skip_rows, filename_cols = filename_cols, rep = T, PHZadded = F, n_max = 500)
+
+spec_data %>% head() %>% kable(digits = 10) %>% kable_styling(bootstrap_options = 'condensed')
+```
+
+<table class="table table-condensed" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> date </th>
+   <th style="text-align:right;"> rep </th>
+   <th style="text-align:left;"> compressed </th>
+   <th style="text-align:right;"> time </th>
+   <th style="text-align:right;"> intensity </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> 82919 </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:left;"> compressed.dat </td>
+   <td style="text-align:right;"> -9.94e-08 </td>
+   <td style="text-align:right;"> 3.14141e-04 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 82919 </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:left;"> compressed.dat </td>
+   <td style="text-align:right;"> -9.78e-08 </td>
+   <td style="text-align:right;"> -2.84226e-04 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 82919 </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:left;"> compressed.dat </td>
+   <td style="text-align:right;"> -9.56e-08 </td>
+   <td style="text-align:right;"> -1.53899e-04 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 82919 </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:left;"> compressed.dat </td>
+   <td style="text-align:right;"> -9.34e-08 </td>
+   <td style="text-align:right;"> -3.76200e-04 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 82919 </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:left;"> compressed.dat </td>
+   <td style="text-align:right;"> -9.12e-08 </td>
+   <td style="text-align:right;"> 1.92188e-05 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 82919 </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:left;"> compressed.dat </td>
+   <td style="text-align:right;"> -8.91e-08 </td>
+   <td style="text-align:right;"> 3.21563e-04 </td>
+  </tr>
+</tbody>
+</table>
+
+Next let's read in the metadata for the files. 
+
+
+```r
+metadata <- read_csv("../../../data/Spectroscopy/Ru_Rh_time_resolved_spectroscopy/time_resolved_spectroscopy_metadata.csv") %>% 
+  group_by(material, material_id) %>% 
+  mutate(run = rep - min(rep) + 1)
+
+
+metadata %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
+    scroll_box(width = "100%", height = "400px")
+```
+
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; overflow-x: scroll; width:100%; "><table class="table table-condensed" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> rep </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> material </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> material_id </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> ruphen_conc </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> quencher_conc </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> quencher_eq </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> quencher_id </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> comment </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 14 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 15 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 16 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 17 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 15 </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 18 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 20 </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 30 </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 20 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 40 </td>
+   <td style="text-align:right;"> 8 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 21 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 50 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 60 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 10 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 39 </td>
+   <td style="text-align:left;"> biofilm </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 60 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> 1 hr later </td>
+   <td style="text-align:right;"> 27 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 23 </td>
+   <td style="text-align:left;"> liquid_cells </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> liquid_cells </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 25 </td>
+   <td style="text-align:left;"> liquid_cells </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 26 </td>
+   <td style="text-align:left;"> liquid_cells </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 27 </td>
+   <td style="text-align:left;"> liquid_cells </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 20 </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:left;"> Rh </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> 5 </td>
+  </tr>
+</tbody>
+</table></div>
+
+We will join the metadata with the raw data and make the plot comparing biofilm to liquid cells. We will only examine the first 6 conditions, since at higher quencher levels the signal exhibits complex behavior below the background signal.
+
+
+```r
+df_spec <- left_join(spec_data, metadata, by = 'rep') 
+
+plot_raw_spec <- ggplot(df_spec %>% filter(run<= 6), 
+                        aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
   geom_path() + 
-  scale_x_continuous(limits = c(NA, 5e-7), labels = ns_label) +
-  labs(x = 'Time', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + 
-  guides(color = F)
-  
+  scale_x_continuous(limits = c(NA, 5e-7), labels = nA_label) + 
+  labs(x = 'Time (ns)', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + guides(color = F) +
+  facet_wrap(~material, scale = 'free') 
+
 plot_raw_spec
+```
+
+<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" />
+
+Now we will background subtract from the cell only acquisition - "run 1".
+
+
+```r
+df_spec_bg <- df_spec %>% 
+  group_by(material, material_id, time) %>% 
+  mutate(min = min(ifelse(run == 1, intensity, NA), na.rm = T)) %>% 
+  mutate(bg_sub = intensity - min)
+
+plot_bg_spec <- ggplot(df_spec_bg %>% filter(run <= 6 & bg_sub>=0), 
+                       aes(x = time, y = bg_sub, color = quencher_eq, group = quencher_eq)) + 
+  geom_path() + 
+  scale_x_continuous(limits = c(NA, 5e-7), labels = nA_label) + 
+  labs(x = 'Time (ns)', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + 
+  guides(color = F) + facet_wrap(~material)
+
+plot_bg_spec
 ```
 
 <img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" />
 
-```r
-df_liq <- read_csv("../../../data/Spectroscopy/2019_08_29_spectroscopy_RuRh_dphz.csv") %>% filter(exp_num == 7)
+Clearly the biofilm signal shows the lifetime of the Ru probe, while the liquid sample shows mostly noise. There may be a small amount of signal in the absence of the quencher.
 
-plot_liq_spec <- ggplot(df_liq %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
-  geom_path() + 
-  scale_x_continuous(limits = c(NA, 5e-7), labels = ns_label) + 
-  labs(x = 'Time', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + guides(color = F)
+Now let's fit biexponential decays to the background subtracted biofilm datasets. This makes use of the self starting non-linear least squares biexponential function, `SSbiexp()`. This function is parameterized in the following way:
 
-plot_liq_spec
-```
+`output = A1*exp(-exp(lrc1)*input) + A2*exp(-exp(lrc2)*input)`
 
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-18-2.png" width="672" style="display: block; margin: auto;" />
+Where input is our time vector and output is the background subtracted intensity vector. A is the multiplier of the first (A1) and second (A2) exponential. Lrc is the natural log of the rate constant for the first (lrc1) and second (lrc2) exponential.
 
-```r
-ggplot(df_spec %>% filter(run %in% 2:6) %>% filter(time>30e-9), aes(x = time, y = bg_sub, color = quencher_eq, group = quencher_eq)) + geom_path()
-```
-
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-18-3.png" width="672" style="display: block; margin: auto;" />
-
-```r
-df_fac <- bind_rows(df_spec, df_liq)
-
-labels <- c('2' = "biofilm", '7' = "liquid")
-
-df_fac$exp_num <- factor(df_fac$exp_num, levels = c('7','2'))
-
-plot_fac <- ggplot(df_fac %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
-  geom_path() + 
-  scale_x_continuous(limits = c(NA, 5e-7), labels = nA_label) + 
-  labs(x = 'Time (ns)', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + guides(color = F) + facet_wrap(~exp_num, labeller=labeller(exp_num = labels), scale = 'free')
-
-plot_fac
-```
-
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-18-4.png" width="672" style="display: block; margin: auto;" />
+For figure S4, lrc parameters are converted into tau half lives `tau = 1/exp(lrc)`.
 
 
 ```r
-df_spec_fit <- df_spec %>% 
+df_spec_fit <- df_spec_bg %>% 
+  filter(material == 'biofilm') %>% 
   filter(run %in% 2:6) %>% 
   filter(time>30e-9) %>% 
   filter(bg_sub>0) %>% 
@@ -59723,88 +59995,48 @@ df_spec_ests <- df_spec_models %>%
   unnest(ests)
 
 
-df_spec_preds %>% head()
+df_spec_ests %>% head()
 ```
 
 ```
-## # A tibble: 6 x 18
-##     run quencher_eq  date   rep compressed    time intensity material
-##   <dbl>       <dbl> <dbl> <dbl> <chr>        <dbl>     <dbl> <chr>   
-## 1     2           0 82919    14 compresse… 3.02e-8    0.0326 biofilm 
-## 2     2           0 82919    14 compresse… 3.09e-8    0.0319 biofilm 
-## 3     2           0 82919    14 compresse… 3.16e-8    0.0306 biofilm 
-## 4     2           0 82919    14 compresse… 3.23e-8    0.0292 biofilm 
-## 5     2           0 82919    14 compresse… 3.31e-8    0.0282 biofilm 
-## 6     2           0 82919    14 compresse… 3.39e-8    0.0271 biofilm 
-## # … with 10 more variables: material_id <dbl>, ruphen_conc <dbl>,
-## #   quencher_conc <dbl>, quencher_id <chr>, comment <lgl>, exp_num <dbl>,
-## #   min <dbl>, bg_sub <dbl>, bg <dbl>, pred <dbl>
+## # A tibble: 6 x 9
+## # Groups:   quencher_eq, run [2]
+##   quencher_eq   run data  models term  estimate std.error statistic
+##         <dbl> <dbl> <lis> <list> <chr>    <dbl>     <dbl>     <dbl>
+## 1           0     2 <tib… <nls>  A1     0.00921  0.000343      26.9
+## 2           0     2 <tib… <nls>  lrc1  15.9      0.0584       273. 
+## 3           0     2 <tib… <nls>  A2     0.00488  0.000404      12.1
+## 4           0     2 <tib… <nls>  lrc2  14.2      0.0737       193. 
+## 5           1     3 <tib… <nls>  A1     0.00735  0.000478      15.4
+## 6           1     3 <tib… <nls>  lrc1  15.6      0.0845       184. 
+## # … with 1 more variable: p.value <dbl>
 ```
 
-Exponential decay, parameterized with half-life.
-
-$$ N(t) = N_0 2^{-t / t_h} $$ 
-
-```r
-### for testing what single exponential looks like. 
-
-df_spec_fit <- df_spec %>% 
-  filter(run %in% 2:6) %>% 
-  filter(time>30e-9) %>% 
-  filter(bg_sub>0) %>% 
-  group_by(run, quencher_eq) %>% 
-  nest()
-
-fit_exp_bg_sub <- function(df){
-  
-  A1 = 0.02; lrc1 = 16.5; A2 = 0.02; lrc2 = 15.7
-  
-  mod <- nls(bg_sub~A*2^(-time / half_life), start = c(A = 0.02, half_life = 2e-7),data = df)
-  
-  mod
-}
-
-df_spec_models <- df_spec_fit %>% 
-  mutate(models = map(data, fit_exp_bg_sub)) 
-
-df_spec_preds <- df_spec_models %>% 
-  mutate(preds = map2(data, models, add_predictions)) %>% 
-  unnest(preds)
-
-df_spec_ests <- df_spec_models %>% 
-  mutate(ests = map(models, tidy)) %>% 
-  unnest(ests)
-
-
-df_spec_preds %>% head()
-```
-
+Let's save these parameter estimates for use in supplemental figure S4. 
 
 
 ```r
-#write_csv(df_exp_2_ests, "2019_09_27_spectroscopy_fits_bg_sub.csv")
+write_csv(df_spec_ests %>% select(-data, -models), "phz2019_dna_ct_spec_biexp_fits.csv")
 
-write_csv(df_spec_ests, "phz2019_dna_ct_spec_biexp_fits.csv")
-
-df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
+df_spec_ests %>% select(-data, -models) %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:400px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;"> run </th>
-   <th style="text-align:right;"> quencher_eq </th>
-   <th style="text-align:left;"> term </th>
-   <th style="text-align:right;"> estimate </th>
-   <th style="text-align:right;"> std.error </th>
-   <th style="text-align:right;"> statistic </th>
-   <th style="text-align:right;"> p.value </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> quencher_eq </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> term </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> std.error </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> statistic </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
   </tr>
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 2 </td>
    <td style="text-align:left;"> A1 </td>
    <td style="text-align:right;"> 0.0092110 </td>
    <td style="text-align:right;"> 0.0003426 </td>
@@ -59812,8 +60044,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 2 </td>
    <td style="text-align:left;"> lrc1 </td>
    <td style="text-align:right;"> 15.9348777 </td>
    <td style="text-align:right;"> 0.0584107 </td>
@@ -59821,8 +60053,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 2 </td>
    <td style="text-align:left;"> A2 </td>
    <td style="text-align:right;"> 0.0048765 </td>
    <td style="text-align:right;"> 0.0004044 </td>
@@ -59830,8 +60062,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 2 </td>
    <td style="text-align:left;"> lrc2 </td>
    <td style="text-align:right;"> 14.2497196 </td>
    <td style="text-align:right;"> 0.0737069 </td>
@@ -59839,8 +60071,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 3 </td>
    <td style="text-align:left;"> A1 </td>
    <td style="text-align:right;"> 0.0073517 </td>
    <td style="text-align:right;"> 0.0004783 </td>
@@ -59848,8 +60080,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 3 </td>
    <td style="text-align:left;"> lrc1 </td>
    <td style="text-align:right;"> 15.5619976 </td>
    <td style="text-align:right;"> 0.0845175 </td>
@@ -59857,8 +60089,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 3 </td>
    <td style="text-align:left;"> A2 </td>
    <td style="text-align:right;"> 0.0022718 </td>
    <td style="text-align:right;"> 0.0005358 </td>
@@ -59866,8 +60098,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000360 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 3 </td>
    <td style="text-align:left;"> lrc2 </td>
    <td style="text-align:right;"> 13.8915239 </td>
    <td style="text-align:right;"> 0.2207858 </td>
@@ -59875,8 +60107,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 4 </td>
    <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 4 </td>
    <td style="text-align:left;"> A1 </td>
    <td style="text-align:right;"> 0.0058417 </td>
    <td style="text-align:right;"> 0.0004261 </td>
@@ -59884,8 +60116,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 4 </td>
    <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 4 </td>
    <td style="text-align:left;"> lrc1 </td>
    <td style="text-align:right;"> 15.8999347 </td>
    <td style="text-align:right;"> 0.0987993 </td>
@@ -59893,8 +60125,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 4 </td>
    <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 4 </td>
    <td style="text-align:left;"> A2 </td>
    <td style="text-align:right;"> 0.0029464 </td>
    <td style="text-align:right;"> 0.0004918 </td>
@@ -59902,8 +60134,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 4 </td>
    <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 4 </td>
    <td style="text-align:left;"> lrc2 </td>
    <td style="text-align:right;"> 14.3541744 </td>
    <td style="text-align:right;"> 0.1332418 </td>
@@ -59911,8 +60143,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 5 </td>
    <td style="text-align:left;"> A1 </td>
    <td style="text-align:right;"> 0.0042328 </td>
    <td style="text-align:right;"> 0.0009684 </td>
@@ -59920,8 +60152,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000214 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 5 </td>
    <td style="text-align:left;"> lrc1 </td>
    <td style="text-align:right;"> 15.5142715 </td>
    <td style="text-align:right;"> 0.1981633 </td>
@@ -59929,8 +60161,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 5 </td>
    <td style="text-align:left;"> A2 </td>
    <td style="text-align:right;"> 0.0013619 </td>
    <td style="text-align:right;"> 0.0010316 </td>
@@ -59938,8 +60170,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.1885419 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 5 </td>
    <td style="text-align:left;"> lrc2 </td>
    <td style="text-align:right;"> 14.2522064 </td>
    <td style="text-align:right;"> 0.4972909 </td>
@@ -59947,8 +60179,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 6 </td>
    <td style="text-align:left;"> A1 </td>
    <td style="text-align:right;"> 0.0033175 </td>
    <td style="text-align:right;"> 0.0009200 </td>
@@ -59956,8 +60188,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0004075 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 6 </td>
    <td style="text-align:left;"> lrc1 </td>
    <td style="text-align:right;"> 15.3772077 </td>
    <td style="text-align:right;"> 0.2375158 </td>
@@ -59965,8 +60197,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 6 </td>
    <td style="text-align:left;"> A2 </td>
    <td style="text-align:right;"> 0.0006894 </td>
    <td style="text-align:right;"> 0.0009738 </td>
@@ -59974,8 +60206,8 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
    <td style="text-align:right;"> 0.4799763 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 6 </td>
    <td style="text-align:left;"> lrc2 </td>
    <td style="text-align:right;"> 14.0786001 </td>
    <td style="text-align:right;"> 0.9841458 </td>
@@ -59985,87 +60217,37 @@ df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 </tbody>
 </table></div>
 
+Now let's plot the background subtracted biofilm data with the model predictions.
 
 
 ```r
-ggplot(df_spec_preds, aes(x = time, group = run, color = quencher_eq)) + geom_path(aes(y = pred), color = 'black') + geom_point(aes(y = bg_sub),alpha = 0.2, shape = 21) +xlim(0,5e-7) + facet_wrap(~quencher_eq)
-```
-
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" />
-
-
-
-```r
-plot_bg_spec <- ggplot(df_spec %>% filter(run %in% 1:6), aes(x = time, group = run, color = quencher_eq)) + 
+plot_bg_spec <- ggplot(df_spec_bg %>% filter(run %in% 1:6) %>% filter(material == 'biofilm'), aes(x = time, group = run, color = quencher_eq)) + 
   geom_point( aes(y = bg_sub),alpha = 0.2, shape = 21, size = 0.5) + 
   geom_path(data = df_spec_preds,aes(y = pred)) + scale_x_continuous(limits = c(NA,1e-6), labels = nA_label, name = 'Time (ns)') + 
   ylim(-0.001, NA) + labs(y = 'Background subtracted - Intensity (620nm)', color = 'Quencher\nequivalents')+
-  guides(color = guide_colorbar(barwidth = 0.5, barheight = 2.5)) + theme(legend.position = c(0.75,0.75))
+  guides(color = guide_colorbar(barwidth = 0.5, barheight = 2.5)) + theme(legend.position = c(0.75,0.75)) 
 
 plot_bg_spec
 ```
 
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" />
 
-
-
-```r
-background_ests <- df_spec_ests %>% filter(is.na(quencher_eq))
-
-#background_ests
-
-ggplot(df_spec_ests, aes(x = quencher_eq, y = estimate)) + 
-  geom_hline(data = background_ests, aes(yintercept = estimate), linetype = 2, color = 'light gray') + 
-  geom_pointrange(aes(ymin = estimate - 2*std.error, ymax = estimate + 2*std.error)) +
-  facet_wrap(~term, scales = 'free')
-```
-
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-24-1.png" width="672" style="display: block; margin: auto;" />
-
-
-```r
-df_spec_tau <- df_spec_ests %>% filter(term %in% c('lrc1','lrc2')) %>% mutate(tau = 1/exp(estimate)) %>% mutate(tau_low = 1/exp(estimate + 2*std.error), tau_high = 1/exp(estimate - 2*std.error))
-
-
-background_spec_tau <- df_spec_tau %>% filter(is.na(quencher_eq))
-
-#background_ests
-
-plot_spec_tau <- ggplot(df_spec_tau, aes(x = quencher_eq, y = tau)) + 
-  geom_hline(data = background_spec_tau, aes(yintercept = tau), linetype = 1, color = 'light gray') + 
-  geom_pointrange(aes(ymin = tau_low, ymax = tau_high)) +
-  facet_wrap(~term, scales = 'free', labeller = labeller(term = c(lrc1 = 'Component 1', lrc2 = 'Component 2'))) + 
-  scale_y_continuous(labels = ns_label, limits = c(0,NA))
-
-plot_spec_tau
-```
-
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" />
+# Create figure
 
 
 ```r
 theme_set(theme_figure())
 
-#fig_4 <- plot_grid(plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
-#          plot_fac, plot_fac, plot_bg_spec, 
-#          ncol = 3, scale = 0.95, align = 'hv', axis = 'tblr', labels = 'AUTO', label_size = 12)
 
-#fig_4
-
-#save_plot("../../../figures/phz2019_Fig_4.pdf", fig_4, base_height = 4, base_width = 7)
-```
-
-
-```r
 fig_3 <- plot_grid(plot_ctDNA_690, plot_ctDNA_690, plot_phzET_o2,
                    plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
-          plot_fac, plot_fac, plot_bg_spec, 
+          plot_raw_spec, plot_raw_spec, plot_bg_spec, 
           ncol = 3, scale = 0.95, align = 'hv', axis = 'tlr', labels = 'AUTO', label_size = 12)
 
 fig_3
 ```
 
-<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-27-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_3_files/figure-html/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" />
 
 ```r
 save_plot("../../../figures/phz2019_Fig_3.pdf", fig_3, base_height = 6, base_width = 7)
@@ -60079,9 +60261,9 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-## Running under: macOS Mojave 10.14.6
+## Running under: macOS  10.15.6
 ## 
 ## Matrix products: default
 ## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
@@ -60094,23 +60276,26 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 broom_0.5.1      
-##  [4] modelr_0.1.2      kableExtra_1.0.1  cowplot_0.9.4    
-##  [7] forcats_0.3.0     stringr_1.3.1     dplyr_0.8.1      
-## [10] purrr_0.2.5       readr_1.3.1       tidyr_0.8.2      
-## [13] tibble_2.1.3      ggplot2_3.2.0     tidyverse_1.2.1  
+##  [1] lubridate_1.7.4   hms_0.5.3         modelr_0.1.5     
+##  [4] broom_0.5.2       kableExtra_1.1.0  cowplot_0.9.4    
+##  [7] viridis_0.5.1     viridisLite_0.3.0 knitr_1.23       
+## [10] forcats_0.4.0     stringr_1.4.0     dplyr_0.8.3      
+## [13] purrr_0.3.3       readr_1.3.1       tidyr_1.0.0      
+## [16] tibble_2.1.3      ggplot2_3.3.0     tidyverse_1.3.0  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] utf8_1.1.4       rlang_0.4.0      pillar_1.3.1     glue_1.3.1      
-## [13] withr_2.1.2      readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
-## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       fansi_0.4.0      highr_0.7        Rcpp_1.0.1      
-## [25] scales_1.0.0     backports_1.1.3  webshot_0.5.1    jsonlite_1.6    
-## [29] gridExtra_2.3    hms_0.4.2        digest_0.6.18    stringi_1.2.4   
-## [33] grid_3.5.2       cli_1.1.0        tools_3.5.2      magrittr_1.5    
-## [37] lazyeval_0.2.1   crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0      
-## [41] lubridate_1.7.4  assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0      
-## [45] rstudioapi_0.9.0 R6_2.4.0         nlme_3.1-140     compiler_3.5.2
+##  [1] Rcpp_1.0.2       lattice_0.20-38  assertthat_0.2.1 digest_0.6.21   
+##  [5] utf8_1.1.4       R6_2.4.0         cellranger_1.1.0 backports_1.1.4 
+##  [9] reprex_0.3.0     evaluate_0.14    httr_1.4.1       highr_0.8       
+## [13] pillar_1.4.2     rlang_0.4.6      readxl_1.3.1     rstudioapi_0.10 
+## [17] Matrix_1.2-15    rmarkdown_1.13   labeling_0.3     splines_3.5.3   
+## [21] webshot_0.5.1    munsell_0.5.0    compiler_3.5.3   xfun_0.7        
+## [25] pkgconfig_2.0.3  mgcv_1.8-27      htmltools_0.4.0  tidyselect_0.2.5
+## [29] gridExtra_2.3    fansi_0.4.0      crayon_1.3.4     dbplyr_1.4.2    
+## [33] withr_2.1.2      grid_3.5.3       nlme_3.1-137     jsonlite_1.6    
+## [37] gtable_0.3.0     lifecycle_0.1.0  DBI_1.0.0        magrittr_1.5    
+## [41] scales_1.0.0     cli_1.1.0        stringi_1.4.3    fs_1.3.1        
+## [45] xml2_1.2.2       ellipsis_0.3.0   generics_0.0.2   vctrs_0.3.1     
+## [49] tools_3.5.3      glue_1.3.1       yaml_2.2.0       colorspace_1.4-1
+## [53] rvest_0.3.5      haven_2.2.0
 ```

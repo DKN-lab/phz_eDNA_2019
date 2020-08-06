@@ -17,11 +17,11 @@ output:
 
 To see how we got from the raw electrochemical scans to the datasets used here, please see the following notebooks:
 
-* [IDA ∆phz biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
-* [IDA WT biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
-* [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
+* [IDA ∆phz biofilm processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
+* [IDA WT biofilm processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
+* [IDA blank processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
 
-This supplemental figure and notebook underlies some of the data in main figure 6, particularly the final panel. Specifically the model coefficients for $D_{ap}$ are calculated in the Fig. S6C and S6F sections. These data are saved as .csv files in the directory containing this notebook.
+This supplemental figure and notebook underlies some of the data in main figure 5, particularly the final panel. Specifically the model coefficients for $D_{ap}$ are calculated in the Fig. S6C and S6F sections. These data are saved as .csv files in the directory containing this notebook.
 
 
 ----
@@ -47,7 +47,7 @@ source("../../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. S6A
+# Fig. S6A - WT & ∆phz SWV vs. GC
 
 Let's compare WT and ∆phz* + PYO biofilms. We'll go ahead and read in some of the processed data from the WT and ∆phz processing notebooks. First we will look at the decays of the SWV peak currents:
 
@@ -75,7 +75,7 @@ plot_dap_combo_styled <- plot_dap_combo+
 plot_dap_combo_styled
 ```
 
-# Fig. S6B
+# Fig. S6B - WT and ∆phz signal decay
 
 ```{r}
 plot_decay_combo <- ggplot(df_combined, aes(x = time_SWV, y = signal_SWV, fill = strain, color = strain)) + 
@@ -102,7 +102,7 @@ plot_dap_combo_styled <- plot_dap_combo+
 plot_dap_combo_styled
 ```
 
-# Fig. S6C
+# Fig. S6C - ∆phz + PYO $D_{ap}$ fits
 
 First, we will read in the paired SWV and GC signals that were generated from the processing notebook. Then we can plot the SWV vs. GC signals for both biofilms and technical replicates. Each dataset is fit with a linear model shaded with a 95% confidence interval.
 
@@ -157,9 +157,9 @@ mods_swv_gc_tidy %>% kable() %>%  kable_styling() %>% scroll_box(height = '300px
 
 <br>
 
-# Fig. S6D
+# Fig. S6D - GC vs. [PYO]
 
-First we will import the blank IDA data that will be used for panels A-D. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
+Let's import the blank IDA data. This data was processed from [this notebook](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html), and includes SWV and GC scans taken with a blank IDA in solutions of known concentrations of PYO.
 
 Let's read in the data and convert the µM units to $mol / cm^3$, which will be important to calculate $D_{ap}$ in correct units.
 
@@ -227,7 +227,7 @@ lm_GC %>%
 
 <br>
 
-# Fig. S6E
+# Fig. S6E - SWV vs. [PYO]
 
 Now we will look at the relationship between concentration and peak SWV current.
 
@@ -282,7 +282,7 @@ lm_SWV %>%
 
 <br>
 
-# Fig. S6F
+# Fig. S6F - SWV vs. GC
 
 Finally, we will examine the peak SWV current vs. the peak GC current, which is not dependent on the known PYO concentrations.
 
@@ -339,7 +339,7 @@ lm_swvGC %>%
 
 <br>
 
-# Fig. S6G
+# Fig. S6G - $D_{ap}$ estimates (Blank + PYO)
 
 Now let's compare the estimates from each subset of the data:
 
@@ -359,7 +359,7 @@ plot_cal_dap_styled <- plot_cal_dap+
 plot_cal_dap_styled
 ```
 
-# Fig. S6H - Nafion
+# Fig. S6H - Nafion $D_{ap}$ estimates
 
 ```{r}
 
@@ -381,6 +381,26 @@ plot_nafion
 # Create figure
 
 ```{r}
+
+theme_figure <- function () {
+  theme_classic( ) %+replace%
+    theme(
+      axis.line = element_line(color = 'black', size = 0.25),
+      axis.ticks = element_line(color = 'black', size =0.25),
+      axis.text = element_text(color = 'black', size=8),
+      axis.title=element_text(color = 'black', size=8),
+      strip.text = element_text(color = 'black', size = 8),
+      strip.background = element_blank(),
+      legend.background = element_blank(),
+      legend.title=element_text(color = 'black',size=8),
+      legend.text=element_text(color = 'black',size=8),
+      legend.text.align=0,
+      panel.spacing = unit(0,'cm'),
+      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm'),
+      plot.title = element_text(hjust = 0.5, color = 'black', size = 8)
+    )
+}
+
 theme_set(theme_figure())
 
 fig_s6_top <- plot_grid(plot_dap_combo_styled + guides(fill = F), plot_decay_combo_styled + guides(fill = F, color= F), labels = c('A','B'), label_size = 12)

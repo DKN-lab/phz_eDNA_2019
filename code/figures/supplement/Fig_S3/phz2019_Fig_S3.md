@@ -23,6 +23,9 @@ Setup packages and plotting for the notebook:
 
 
 ```r
+# Check packages
+source("../../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -41,7 +44,9 @@ source("../../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. S3C
+# Fig. S3C - DNase colony TOTO-1 measurement
+
+Let's read in the data and make the plot:
 
 
 ```r
@@ -68,7 +73,9 @@ toto_plot_styled
 
 <img src="phz2019_Fig_S3_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" />
 
-# Fig. S3E
+# Fig. S3E - Colony biofilm eDNA quantification
+
+Let's read in the raw well data and the metadata:
 
 
 ```r
@@ -82,18 +89,18 @@ df_toto %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
     scroll_box(width = "100%", height = "400px")
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:400px; overflow-x: scroll; width:100%; "><table class="table table-condensed" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; overflow-x: scroll; width:100%; "><table class="table table-condensed" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;"> wavelength </th>
-   <th style="text-align:left;"> well </th>
-   <th style="text-align:right;"> FluorInt </th>
-   <th style="text-align:left;"> strain </th>
-   <th style="text-align:left;"> toto_added </th>
-   <th style="text-align:left;"> ctDNA_added </th>
-   <th style="text-align:right;"> well_std_conc </th>
-   <th style="text-align:right;"> bio_rep </th>
-   <th style="text-align:right;"> tech_rep </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> wavelength </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> well </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> FluorInt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> strain </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> toto_added </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> ctDNA_added </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> well_std_conc </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> bio_rep </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> tech_rep </th>
   </tr>
  </thead>
 <tbody>
@@ -760,6 +767,8 @@ df_toto %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
 </tbody>
 </table></div>
 
+Now let's make the plot:
+
 
 ```r
 bg_means <- df_toto %>% filter(strain != 'std' & tech_rep == 4) %>% group_by(strain) %>% summarise(mean = mean(FluorInt))
@@ -772,14 +781,6 @@ plot_eDNA <- ggplot(df_toto %>% filter(strain != 'std') %>% mutate(facet_labels 
   geom_jitter(data = . %>% filter(tech_rep==4), aes(x = 2), width = 1, shape = 21, color = 'light gray')+
   facet_wrap(~facet_labels, scales = 'free') + ylim(0, 30000) + guides(fill = F)
 
-'\u0394'
-```
-
-```
-## [1] "Δ"
-```
-
-```r
 # Plot styling
 
 plot_eDNA_styled <- plot_eDNA + 
@@ -816,9 +817,9 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-## Running under: macOS Mojave 10.14.6
+## Running under: macOS  10.15.6
 ## 
 ## Matrix products: default
 ## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
@@ -831,23 +832,25 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 modelr_0.1.2     
-##  [4] broom_0.5.1       kableExtra_1.0.1  cowplot_0.9.4    
-##  [7] forcats_0.3.0     stringr_1.3.1     dplyr_0.8.1      
-## [10] purrr_0.2.5       readr_1.3.1       tidyr_0.8.2      
-## [13] tibble_2.1.3      ggplot2_3.2.0     tidyverse_1.2.1  
+##  [1] lubridate_1.7.4   hms_0.5.3         modelr_0.1.5     
+##  [4] broom_0.5.2       kableExtra_1.1.0  cowplot_0.9.4    
+##  [7] viridis_0.5.1     viridisLite_0.3.0 knitr_1.23       
+## [10] forcats_0.4.0     stringr_1.4.0     dplyr_0.8.3      
+## [13] purrr_0.3.3       readr_1.3.1       tidyr_1.0.0      
+## [16] tibble_2.1.3      ggplot2_3.3.0     tidyverse_1.3.0  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
-## [13] readxl_1.2.0     munsell_0.5.0    gtable_0.2.0     cellranger_1.1.0
-## [17] rvest_0.3.2      evaluate_0.14    labeling_0.3     knitr_1.23      
-## [21] highr_0.7        Rcpp_1.0.1       scales_1.0.0     backports_1.1.3 
-## [25] webshot_0.5.1    jsonlite_1.6     gridExtra_2.3    hms_0.4.2       
-## [29] digest_0.6.18    stringi_1.2.4    grid_3.5.2       cli_1.1.0       
-## [33] tools_3.5.2      magrittr_1.5     lazyeval_0.2.1   crayon_1.3.4    
-## [37] pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4  assertthat_0.2.1
-## [41] rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0 R6_2.4.0        
-## [45] nlme_3.1-140     compiler_3.5.2
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.2.0      lattice_0.20-38 
+##  [5] colorspace_1.4-1 vctrs_0.3.1      generics_0.0.2   htmltools_0.4.0 
+##  [9] yaml_2.2.0       rlang_0.4.6      pillar_1.4.2     glue_1.3.1      
+## [13] withr_2.1.2      DBI_1.0.0        dbplyr_1.4.2     readxl_1.3.1    
+## [17] lifecycle_0.1.0  munsell_0.5.0    gtable_0.3.0     cellranger_1.1.0
+## [21] rvest_0.3.5      evaluate_0.14    labeling_0.3     highr_0.8       
+## [25] Rcpp_1.0.2       scales_1.0.0     backports_1.1.4  webshot_0.5.1   
+## [29] jsonlite_1.6     fs_1.3.1         gridExtra_2.3    digest_0.6.21   
+## [33] stringi_1.4.3    grid_3.5.3       cli_1.1.0        tools_3.5.3     
+## [37] magrittr_1.5     crayon_1.3.4     pkgconfig_2.0.3  ellipsis_0.3.0  
+## [41] xml2_1.2.2       reprex_0.3.0     assertthat_0.2.1 rmarkdown_1.13  
+## [45] httr_1.4.1       rstudioapi_0.10  R6_2.4.0         nlme_3.1-137    
+## [49] compiler_3.5.3
 ```

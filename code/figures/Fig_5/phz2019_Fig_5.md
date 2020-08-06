@@ -19,14 +19,14 @@ Panel A is a diagram.
 
 To see how we got from the raw electrochemical scans to the datasets used here, please see the following processing notebooks:
 
-* [IDA ∆phz biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
-* [IDA WT biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
-* [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
+* [IDA ∆phz biofilm processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
+* [IDA WT biofilm processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
+* [IDA blank processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
 
 Then see how those data were analyzed in these notebooks for supplemental figures S6 and S7:
 
-* [Fig. S6](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html)
-* [Fig. S7](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html)
+* [Fig. S6](https://dkn-lab.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html)
+* [Fig. S7](https://dkn-lab.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html)
 
 These supplemental figure notebooks produced model coefficients that are used in this notebook.
 
@@ -36,6 +36,9 @@ Setup packages and plotting for the notebook:
 
 
 ```r
+# Check packages
+source("../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -53,68 +56,106 @@ source("../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. 5B
 
-need to read in the model coefficients and grid predictions for these two datasets.
-
+# Fig. 5B PYO soak - transfer
 
 ```r
-df_dphz_nls_1 <- read_csv("../supplement/Fig_S7/phz2019_dPHZ_Dphys_nls_coefs.csv") %>% 
-  filter(exp == 1 & run == 1 & term == 'a')
+pyo_soak_gc <- read_csv('../../../data/Electrochemistry/IDA/75uM_control_soak_3_GC_1.txt',skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2) %>% 
+  mutate(reactor = 'soak')
 
-df_blank_nls_75 <- read_csv("../supplement/Fig_S7/phz2019_blank_Dphys_nls_coefs.csv") %>% 
-  filter(PHZadded == '75uM' & term == 'a')
+pyo_tran1_gc <- read_csv('../../../data/Electrochemistry/IDA/75uM_control_transfer_3_GC_1.txt',skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2) %>% 
+  mutate(reactor = 'transfer')
 
-df_dphz_swv_decay <- read_csv("../../processing/processed_data/phz_eDNA_2019_signals_long.csv") %>% 
-  filter(echem == 'SWV' & exp == 1 & run == 1 & reactor == 'transfer' & electrode == 'i1') %>% 
-  mutate(IDA = 'biofilm', signal = signal - df_dphz_nls_1$estimate) %>% 
-  select(time, signal, IDA)
+pyo_gc <- bind_rows(pyo_soak_gc, pyo_tran1_gc)
 
-df_blank_decay <- read_csv("../../processing/processed_data/phz_eDNA_2019_swv_blank_tran_time_signals.csv") %>% 
-  filter(PHZadded == '75uM') %>% 
-  mutate(IDA = 'blank', signal = signal - df_blank_nls_75$estimate) %>%
-  select(time, signal, IDA)
+pyo_plot <- ggplot() + 
+  geom_vline(xintercept = -0.255, color = 'light gray', size = 0.5)+
+  geom_path(data = pyo_gc %>% filter(electrode=='i1'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  geom_path(data = pyo_gc %>% filter(electrode=='i2'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)), title = 'PYO')+
+  theme(legend.position = c(0.15,0.75), legend.background = element_blank()) 
 
-df_dphz_preds <- read_csv("../supplement/Fig_S7/phz2019_dPHZ_Dphys_preds.csv") %>% 
-  filter(exp == 1 & run == 1) %>% 
-  select(time, pred, pred_low, pred_high) %>% 
-  mutate(pred = pred - df_dphz_nls_1$estimate,
-         pred_low = pred_low - df_dphz_nls_1$estimate, 
-         pred_high = pred_high - df_dphz_nls_1$estimate)%>% 
-  mutate(IDA = 'biofilm')
-
-df_blank_preds <- read_csv("../supplement/Fig_S7/phz2019_blank_Dphys_preds.csv") %>% 
-  filter(PHZadded == '75uM') %>% 
-  select(time, pred, pred_low, pred_high) %>% 
-  mutate(pred = pred - df_blank_nls_75$estimate,
-         pred_low = pred_low - df_blank_nls_75$estimate, 
-         pred_high = pred_high - df_blank_nls_75$estimate) %>% 
-  mutate(IDA = 'blank')
-
-df_preds <- bind_rows(df_dphz_preds, df_blank_preds)
-
-df_decays <- bind_rows(df_dphz_swv_decay, df_blank_decay)
-
-plot_blank_dphz_decay <- ggplot(df_preds, aes(x = time, y = pred, group = IDA, fill = time)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
-  geom_path(linetype = 2, size = 0.5)+
-  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21, size = 1) + guides(fill = 'none')
-
-plot_blank_dphz_decay_styled <- plot_blank_dphz_decay+
-  labs(x = 'Time (min)', y = expression(I[swv]~(nA)), fill = 'Time (min)') +
-  scale_fill_viridis(guide = F) +
-  scale_y_continuous(labels = nA_label)
-
-
-plot_blank_dphz_decay_styled
+pyo_plot
 ```
 
 <img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" />
 
-Let's subtract the a intercept value of these models so that we can compare the decay.
+
+```r
+pyo_plot_zoom <- ggplot(data = pyo_gc %>% filter(electrode=='i2' & reactor=='transfer'), aes(x = E, y =current)) + 
+  geom_vline(xintercept = -0.255, color = 'light gray', size = 0.5)+
+  geom_path(linetype = 'dashed', size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x=NULL, y= NULL)+
+#  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA))) +
+  theme(
+      axis.text.y = element_text(color = 'black', size=6, angle = 45, hjust = 1),
+      axis.text.x = element_text(color = 'black', size=6),
+      axis.title=element_text(color = 'black', size=6),
+      )
+
+pyo_plot_zoom
+```
+
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" />
+
+# Fig. 5C PCA soak - transfer
 
 
+```r
+pca_soak_gc <- read_csv("../../../data/Electrochemistry/IDA/75uM_PCA_dPHZstar_GC_1.txt", skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2) %>% 
+  mutate(reactor = 'soak')
 
-# Fig. 5C
+pca_tran1_gc <- read_csv("../../../data/Electrochemistry/IDA/gc_1.txt", skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2)%>% 
+  mutate(reactor = 'transfer')
+
+pca_gc <- bind_rows(pca_soak_gc, pca_tran1_gc)
+
+pca_plot <- ggplot() + 
+  geom_vline(xintercept = -0.375, color = 'light gray', size = 0.5)+
+  geom_path(data = pca_gc %>% filter(electrode=='i1'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  geom_path(data = pca_gc %>% filter(electrode=='i2'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)), title = 'PCA')+
+  theme(legend.position = c(0.15,0.75), legend.background = element_blank())
+  
+
+pca_plot
+```
+
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" />
+
+
+```r
+pca_plot_zoom <- ggplot(data = pca_gc %>% filter(electrode=='i2' & reactor=='transfer'), aes(x = E, y =current)) + 
+  geom_vline(xintercept = -0.375, color = 'light gray', size = 0.5)+
+  geom_path(linetype = 'dashed', size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+    labs(x=NULL, y= NULL)+
+#  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA))) + 
+  theme(
+      axis.text.y = element_text(color = 'black', size=6, angle = 45, hjust = 1),
+      axis.text.x = element_text(color = 'black', size=6),
+      axis.title=element_text(color = 'black', size=6),
+      )
+
+pca_plot_zoom
+```
+
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
+
+# Fig. 5D - SWV signal
+
+Let's read in the SWV data and plot it:
 
 
 ```r
@@ -141,11 +182,11 @@ plot_swv_styled <- plot_swv +
 plot_swv_styled
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
 
 ## Inset
 
-convert to norm time??
+For the inset we will just plot the peak current points over time:
 
 
 ```r
@@ -157,16 +198,21 @@ plot_swv_sig <- ggplot(data = df_swv_sig, aes(x = time, y = signal))+
 plot_swv_sig_styled <- plot_swv_sig +
   labs(x = 'Time (min)', y = NULL, fill = 'Time (min)') +
   scale_fill_viridis(guide = F) +
-  scale_y_continuous(labels = nA_label)+ xlim(0,NA)
+  scale_y_continuous(labels = nA_label)+ xlim(0,NA)+
+  theme(
+      axis.text.y = element_text(color = 'black', size=6, angle = 45, hjust = 1),
+      axis.text.x = element_text(color = 'black', size=6),
+      axis.title=element_text(color = 'black', size=6),
+      )
 
 plot_swv_sig_styled
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" />
 
-# Fig. 5D
+# Fig. 5E - GC signal
 
-need to mod
+Let's read in the GC data and plot it:
 
 ```r
 df_gc <- read_csv("../../processing/processed_data/phz_eDNA_2019_gc_raw_1_1.csv")
@@ -198,32 +244,37 @@ plot_gc_styled <- plot_gc +
 plot_gc_styled
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" />
 
 
 ## Inset
 
-need to mod
+As for the SWV, for the GC inset we will simply plot the peak current over time
 
 ```r
 # Plot Layout
-plot_gc_sig <- ggplot(data = df_gc_sig, aes(x = time, y = signal))+
+plot_gc_sig <- ggplot(data = df_gc_sig, aes(x = time, y = -signal))+
   geom_point(shape = 21, size = 0.75, aes(fill = time))
 
 # Plot Styling
 plot_gc_sig_styled <- plot_gc_sig +
   labs(x = 'Time (min)', y = NULL, fill = 'Time (min)') +
   scale_fill_viridis(guide = F) +
-  scale_y_continuous(labels = nA_label) + xlim(0,NA)
+  scale_y_reverse(labels = nA_label) + xlim(0,NA) + 
+  theme(
+      axis.text.y = element_text(color = 'black', size=6, angle = 45, hjust = 1),
+      axis.text.x = element_text(color = 'black', size=6),
+      axis.title=element_text(color = 'black', size=6),
+      )
 
 plot_gc_sig_styled
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" />
 
-# Fig. 5E
+# Fig. 5F - GC vs. SWV signal
 
-need to mod
+Now we will plot the SWV and GC peak currents against each other
 
 ```r
 df_swv_gc_sig <- read_csv("../../processing/processed_data/phz_eDNA_2019_swv_gc_signals.csv") %>% filter(exp == 1 & run == 1)
@@ -238,16 +289,86 @@ plot_swv_gc <- ggplot(df_swv_gc_sig %>% filter(rep>0),
 plot_swv_gc_styled <- plot_swv_gc + 
   scale_x_continuous(breaks=c(0,2.5e-7,5.0e-7, 7.5e-7, 1.0e-6), labels = nA_label)+
   scale_y_continuous(labels = nA_label)+
-  labs(x = expression(I[swv]~(nA)), y = expression(I[gc]~(nA))) +
+  labs(x = expression(I[swv]~(nA)), y = expression(-I[gc]~(nA))) +
   scale_fill_viridis(guide=F)
 
 
 plot_swv_gc_styled
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" />
 
-# Fig. 5F
+# Fig. 5G - Blank vs. biofilm PYO retention and $D_{loss}$
+
+To plot the SWV signals over time with the $D_{loss}$ model fits, we will read in the data, model coefficients, and predictions for the blank and ∆phz biofilm datasets. Let's read in those 6 files:
+
+
+```r
+# Model coefficients
+df_dphz_nls_1 <- read_csv("../supplement/Fig_S7/phz2019_dPHZ_Dphys_nls_coefs.csv") %>% 
+  filter(exp == 1 & run == 1 & term == 'a')
+
+df_blank_nls_75 <- read_csv("../supplement/Fig_S7/phz2019_blank_Dphys_nls_coefs.csv") %>% 
+  filter(PHZadded == '75uM' & term == 'a')
+
+# The signals are the peak current data points
+# we are subtracting the constant background signal from model fit
+df_dphz_swv_decay <- read_csv("../../processing/processed_data/phz_eDNA_2019_signals_long.csv") %>% 
+  filter(echem == 'SWV' & exp == 1 & run == 1 & reactor == 'transfer' & electrode == 'i1') %>% 
+  mutate(IDA = 'biofilm', signal = signal - df_dphz_nls_1$estimate) %>% 
+  select(time, signal, IDA)
+
+df_blank_decay <- read_csv("../../processing/processed_data/phz_eDNA_2019_swv_blank_tran_time_signals.csv") %>% 
+  filter(PHZadded == '75uM') %>% 
+  mutate(IDA = 'blank', signal = signal - df_blank_nls_75$estimate) %>%
+  select(time, signal, IDA)
+
+# Predictions are best fit lines generated from the model
+# we are subtracting the constant background signal from model fit
+df_dphz_preds <- read_csv("../supplement/Fig_S7/phz2019_dPHZ_Dphys_preds.csv") %>% 
+  filter(exp == 1 & run == 1) %>% 
+  select(time, pred, pred_low, pred_high) %>% 
+  mutate(pred = pred - df_dphz_nls_1$estimate,
+         pred_low = pred_low - df_dphz_nls_1$estimate, 
+         pred_high = pred_high - df_dphz_nls_1$estimate)%>% 
+  mutate(IDA = 'biofilm')
+
+df_blank_preds <- read_csv("../supplement/Fig_S7/phz2019_blank_Dphys_preds.csv") %>% 
+  filter(PHZadded == '75uM') %>% 
+  select(time, pred, pred_low, pred_high) %>% 
+  mutate(pred = pred - df_blank_nls_75$estimate,
+         pred_low = pred_low - df_blank_nls_75$estimate, 
+         pred_high = pred_high - df_blank_nls_75$estimate) %>% 
+  mutate(IDA = 'blank')
+
+df_preds <- bind_rows(df_dphz_preds, df_blank_preds)
+
+df_decays <- bind_rows(df_dphz_swv_decay, df_blank_decay)
+```
+
+We also are subtracting out the constant background signal as determined by the model intercept, so that both curves are easier to visually compare.
+
+Now let's make the final plot:
+
+
+```r
+plot_blank_dphz_decay <- ggplot(df_preds, aes(x = time, y = pred, group = IDA, fill = time)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
+  geom_path(linetype = 2, size = 0.5)+
+  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21, size = 1) + guides(fill = 'none')
+
+plot_blank_dphz_decay_styled <- plot_blank_dphz_decay+
+  labs(x = 'Time (min)', y = expression(I[swv]~(nA)), fill = 'Time (min)') +
+  scale_fill_viridis(guide = F) +
+  scale_y_continuous(labels = nA_label)
+
+
+plot_blank_dphz_decay_styled
+```
+
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" />
+
+
+# Fig. 5H - $D_{ap}$ vs. $D_{loss}$
 
 In order to construct figure 5F we must do a few analysis steps using data analysed for Figs S6 and S7. This is somewhat complicated, because to calculate $D_{loss}$ we need the $D_{ap}$ value and the SWV soak value (I0) for each run. Therefore we will do the following:
 
@@ -270,19 +391,19 @@ df_all_lm <- bind_rows(df_dphz_lm, df_blank_lm)
 df_all_lm %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> exp_id </th>
-   <th style="text-align:left;"> run_id </th>
-   <th style="text-align:left;"> term </th>
-   <th style="text-align:right;"> estimate </th>
-   <th style="text-align:right;"> std.error </th>
-   <th style="text-align:right;"> statistic </th>
-   <th style="text-align:right;"> p.value </th>
-   <th style="text-align:right;"> conf.low </th>
-   <th style="text-align:right;"> conf.high </th>
-   <th style="text-align:left;"> IDA </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp_id </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run_id </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> term </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> std.error </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> statistic </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> IDA </th>
   </tr>
  </thead>
 <tbody>
@@ -459,7 +580,7 @@ df_all_lm %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
 
 <br>
 
-So you can see we have estimated the slopes for each dataset (term 'signal_SWV' 'estimate'), including confidence intervals. Now let's redefine the function we used in [Fig. S7]() to calculate $D_{ap}$ from the slope of the SWV vs. GC line.
+So you can see we have estimated the slopes for each dataset (term 'signal_SWV' 'estimate'), including confidence intervals. Now let's redefine the function we used in Fig. S7 to calculate $D_{ap}$ from the slope of the SWV vs. GC line.
 
 Recall that for this type of data:
 
@@ -509,7 +630,7 @@ ggplot(df_all_dap, aes(x = exp_id, y = dap)) +
   ylim(2e-7,2e-5)
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" />
 
 ## $D_{loss}$
 
@@ -562,20 +683,20 @@ df_all_dap_i0 <- left_join(df_all_nls_i0, df_all_dap %>% select(exp, run, IDA, d
 df_all_dap_i0 %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;"> exp </th>
-   <th style="text-align:right;"> run </th>
-   <th style="text-align:right;"> b_estimate </th>
-   <th style="text-align:right;"> b_low </th>
-   <th style="text-align:right;"> b_high </th>
-   <th style="text-align:right;"> i0 </th>
-   <th style="text-align:left;"> IDA </th>
-   <th style="text-align:left;"> PHZadded </th>
-   <th style="text-align:right;"> dap </th>
-   <th style="text-align:right;"> dap_high </th>
-   <th style="text-align:right;"> dap_low </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> b_estimate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> b_low </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> b_high </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> i0 </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> IDA </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> PHZadded </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> dap </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> dap_high </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> dap_low </th>
   </tr>
  </thead>
 <tbody>
@@ -751,7 +872,7 @@ ggplot(df_dloss, aes(x = IDA, y = dloss)) +
   scale_y_log10() + scale_shape_manual(values = c(21,22,23), guide = F)
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" />
 
 Now we can compare $D_{loss}$ and $D_{ap}$ graphically:
 
@@ -770,8 +891,12 @@ df_plot_dap_dloss <- bind_rows(df_plot_dap, df_plot_dloss)
 
 plot_dap_dloss <- ggplot(df_plot_dap_dloss, aes(x = coef, y = estimate, shape = factor(exp))) + 
   geom_hline(yintercept = 7e-6, linetype = 2, color = 'light gray', size= 0.5)+
-  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + facet_wrap(~IDA, scales = 'free') + 
-  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) 
+  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), 
+                  position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + 
+  facet_wrap(~IDA, scales = 'free') + 
+    scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::scientific_format()) 
+
+#  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", format = scales::math_format(expr=10^.x))) 
 
 plot_dap_dloss_styled <- plot_dap_dloss +
   labs(x = NULL, y = expression(D~(cm^2 / sec)))+ 
@@ -781,7 +906,7 @@ plot_dap_dloss_styled <- plot_dap_dloss +
 plot_dap_dloss_styled
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" />
 
 Let's go ahead and calculate the mean values for $D_{loss}$ and $D_{ap}$ in the biofilm and the blank:
 
@@ -814,7 +939,7 @@ ggplot(df_dloss, aes(x = IDA, y = dloss)) +
   scale_y_log10()+ scale_shape_manual(values = c(21,22,23), guide = F)
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" />
 
 And comparing $D_{loss}$ and $D_{ap}$ now yields the plot for figure 5F:
 
@@ -834,7 +959,7 @@ df_plot_dap_dloss <- bind_rows(df_plot_dap, df_plot_dloss)
 plot_dap_dloss <- ggplot(df_plot_dap_dloss, aes(x = coef, y = estimate, shape = factor(exp))) + 
   geom_hline(yintercept = 7e-6, linetype = 2, color = 'light gray', size= 0.5)+
   geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + facet_wrap(~IDA, scales = 'free') + 
-  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) 
+    scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::scientific_format()) 
 
 plot_dap_dloss_styled <- plot_dap_dloss +
   labs(x = NULL, y = expression(D~(cm^2 / sec)))+ 
@@ -844,7 +969,7 @@ plot_dap_dloss_styled <- plot_dap_dloss +
 plot_dap_dloss_styled
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" />
 
 We can calculate the mean $D_{ap}$ and $D_{loss}$ values:
 
@@ -901,6 +1026,8 @@ df_dloss %>% group_by(exp, IDA) %>%
 
 # Create figure
 
+Old Fig. 5:
+
 
 ```r
 theme_set(theme_figure())
@@ -910,15 +1037,42 @@ fig_5_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, nc
 
 fig_5 <- plot_grid(fig_5_insets, plot_swv_styled, plot_gc_styled, 
                    plot_swv_gc_styled, plot_blank_dphz_decay_styled, plot_dap_dloss_styled, 
-                   ncol = 3, labels = 'AUTO', label_size = 12, scale = 0.95, align = 'hv', axis = 'tblr')
+                   ncol = 3, labels = 'AUTO', label_size = 12, scale = 1.0, align = 'hv', axis = 'tblr')
+
+fig_5
+
+save_plot("../../../figures/phz2019_Fig_5.pdf", fig_5, base_height = 4, base_width = 7)
+```
+
+Revised Fig. 5:
+
+
+```r
+theme_set(theme_figure())
+
+fig_5_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, ncol = 2, rel_heights = c(1,2), align = 'hv', axis = 'tblr')
+
+save_plot("../../../figures/phz2019_Fig_5_insets_1.pdf", fig_5_insets, base_height = 1.25, base_width = 1.6)
+
+fig_5_zoom <- plot_grid(NULL, NULL,pyo_plot_zoom, pca_plot_zoom, ncol = 2, rel_heights = c(1,2), align = 'hv', axis = 'tblr')
+
+save_plot("../../../figures/phz2019_Fig_5_insets_2.pdf", fig_5_zoom, base_height = 1.15, base_width = 1.75)
+
+#PYO plot used as a placeholder
+
+fig_5 <- plot_grid(pyo_plot, pyo_plot, 
+                   pca_plot, plot_swv_styled, 
+                   plot_gc_styled, plot_swv_gc_styled, 
+                   plot_blank_dphz_decay_styled, plot_dap_dloss_styled,
+                   ncol = 2, labels = 'AUTO', label_size = 12, scale = 1.0, align = 'hv', axis = 'tblr')
 
 fig_5
 ```
 
-<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" />
+<img src="phz2019_Fig_5_files/figure-html/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" />
 
 ```r
-save_plot("../../../figures/phz2019_Fig_5.pdf", fig_5, base_height = 4, base_width = 7)
+save_plot("../../../figures/phz2019_Fig_5.pdf", fig_5, base_height = 8, base_width = 4.5)
 ```
 
 -----
@@ -929,9 +1083,9 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-## Running under: macOS Mojave 10.14.6
+## Running under: macOS  10.15.6
 ## 
 ## Matrix products: default
 ## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
@@ -944,25 +1098,27 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.0.1 
-##  [4] cowplot_0.9.4     forcats_0.3.0     stringr_1.3.1    
-##  [7] dplyr_0.8.1       purrr_0.2.5       readr_1.3.1      
-## [10] tidyr_0.8.2       tibble_2.1.3      ggplot2_3.2.0    
-## [13] tidyverse_1.2.1  
+##  [1] lubridate_1.7.4   hms_0.5.3         modelr_0.1.5     
+##  [4] broom_0.5.2       kableExtra_1.1.0  cowplot_0.9.4    
+##  [7] viridis_0.5.1     viridisLite_0.3.0 knitr_1.23       
+## [10] forcats_0.4.0     stringr_1.4.0     dplyr_0.8.3      
+## [13] purrr_0.3.3       readr_1.3.1       tidyr_1.0.0      
+## [16] tibble_2.1.3      ggplot2_3.3.0     tidyverse_1.3.0  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] utf8_1.1.4       rlang_0.4.0      pillar_1.3.1     glue_1.3.1      
-## [13] withr_2.1.2      modelr_0.1.2     readxl_1.2.0     munsell_0.5.0   
-## [17] gtable_0.2.0     cellranger_1.1.0 rvest_0.3.2      evaluate_0.14   
-## [21] labeling_0.3     knitr_1.23       fansi_0.4.0      highr_0.7       
-## [25] broom_0.5.1      Rcpp_1.0.1       scales_1.0.0     backports_1.1.3 
-## [29] webshot_0.5.1    jsonlite_1.6     gridExtra_2.3    hms_0.4.2       
-## [33] digest_0.6.18    stringi_1.2.4    grid_3.5.2       cli_1.1.0       
-## [37] tools_3.5.2      magrittr_1.5     lazyeval_0.2.1   crayon_1.3.4    
-## [41] pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4  assertthat_0.2.1
-## [45] rmarkdown_1.13   httr_1.4.0       rstudioapi_0.9.0 R6_2.4.0        
-## [49] nlme_3.1-140     compiler_3.5.2
+##  [1] Rcpp_1.0.2       lattice_0.20-38  assertthat_0.2.1 digest_0.6.21   
+##  [5] utf8_1.1.4       R6_2.4.0         cellranger_1.1.0 backports_1.1.4 
+##  [9] reprex_0.3.0     evaluate_0.14    httr_1.4.1       highr_0.8       
+## [13] pillar_1.4.2     rlang_0.4.6      readxl_1.3.1     rstudioapi_0.10 
+## [17] Matrix_1.2-15    rmarkdown_1.13   labeling_0.3     splines_3.5.3   
+## [21] webshot_0.5.1    munsell_0.5.0    compiler_3.5.3   xfun_0.7        
+## [25] pkgconfig_2.0.3  mgcv_1.8-27      htmltools_0.4.0  tidyselect_0.2.5
+## [29] gridExtra_2.3    fansi_0.4.0      crayon_1.3.4     dbplyr_1.4.2    
+## [33] withr_2.1.2      grid_3.5.3       nlme_3.1-137     jsonlite_1.6    
+## [37] gtable_0.3.0     lifecycle_0.1.0  DBI_1.0.0        magrittr_1.5    
+## [41] scales_1.0.0     cli_1.1.0        stringi_1.4.3    fs_1.3.1        
+## [45] xml2_1.2.2       ellipsis_0.3.0   generics_0.0.2   vctrs_0.3.1     
+## [49] tools_3.5.3      glue_1.3.1       yaml_2.2.0       colorspace_1.4-1
+## [53] rvest_0.3.5      haven_2.2.0
 ```
 
