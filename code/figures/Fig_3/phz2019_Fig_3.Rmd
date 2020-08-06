@@ -15,13 +15,16 @@ output:
 
 # Notes
 
-Panel A of figure 2 is isothermal titration calorimetry data that was analyzed outside of R. 
+Panels A, D, and G of figure 3 are diagrams made in illustrator, so plots are replicated as placeholders in this R generated figure. 
 
 ----
 
 Setup packages and plotting for the notebook:
 
 ```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Check packages
+source("../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -37,11 +40,14 @@ source("../../tools/plotting_tools.R")
 
 # Modify the plot theme
 theme_set(theme_notebook())
+
+# Load text file import tools
+source("../../tools/text_file_import.R")
 ```
 
-# Results
+# Fig. 3B - Interphenazine electron transfer (anoxic)
 
-Here's the info for each well:
+This experiment was conducted in a plate reader - here's the info for each well:
 ```{r}
 metadata <- read_csv("../../../data/Spectroscopy/2019_10_18_ET_ctDNA_metadata.csv")
 
@@ -49,7 +55,7 @@ metadata %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 
 ```
 
-## Abs Spectrum 1
+## Absorbance Spectra
 
 Now let's read in the first absorbance spectra taken for each condition and we'll add the appropriate metadata:
 ```{r}
@@ -72,51 +78,46 @@ ggplot(df_meta, aes(x = Wavelength, y = intensity, color = red_ox)) + geom_point
 
 ```
 
-This looks pretty much like the past notebook with interphenazine ET. If we look out at 690 for the PYO abs peak it looks like the orange PYOox is higher than all the other conditions. Let's zoom into that region for a closer look:
+These match characteristic phenazine spectra. If we look out at 690 for the PYO abs peak it looks like the orange PYOox is higher than all the other conditions. Let's zoom into that region for a closer look:
 
 ```{r}
 ggplot(df_meta, aes(x = Wavelength, y = intensity, color = red_ox)) + 
   geom_jitter(shape=21)+coord_cartesian(xlim = c(600,700), ylim = c(0,0.2))
 ```
 
-Ok, this looks pretty much as we expected. All of the conditions show 690 abs closer to PYOred than PYOox.
+All of the conditions show 690 abs closer to PYOred than PYOox, except for the control condition that only contains oxidized PYO.
 
 Let's try and condense this info into some pointranges:
 
 ```{r}
-df_690 <- df_meta %>% group_by(red_ox, Wavelength, DNA) %>% mutate(mean = mean(intensity), sd = sd(intensity))  %>% filter(Wavelength == 690)
-
-ggplot(df_690, aes(x = red_ox, y = intensity, color = DNA )) + 
-  geom_jitter(shape = 21, width = 0.1) + 
-  geom_pointrange(data = . %>% filter(rep ==1), 
-                  aes(y = mean,ymin = mean-sd,ymax = mean+sd), 
-                  position = position_jitter(width = 0.1))
-```
-
-
-```{r}
-
+df_690 <- df_meta %>% 
+  group_by(red_ox, Wavelength, DNA) %>% 
+  mutate(mean = mean(intensity), sd = sd(intensity))  %>% 
+  filter(Wavelength == 690)
 
 labels = c('PBS + PYO[ox]','PYO[red] + PBS','PCA[red] + PYO[ox]','PCN[red] + PYO[ox]')
 
 
 plot_ctDNA_690 <- ggplot(df_690, aes(x = red_ox, y = mean, color = DNA)) +  
   geom_hline(yintercept = 0.033, linetype = 2, color = 'light gray')+
-  geom_jitter(aes(y = intensity, shape = DNA),color = 'black', size = 0.5, stroke = 0.2, position = position_jitterdodge(dodge.width = 0.4, jitter.width = 0.1, jitter.height = 0))+
-  geom_pointrange(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.4),size = 0.5, fatten = 0.5) + 
+  geom_jitter(aes(y = intensity, shape = DNA),color = 'black', size = 0.5, stroke = 0.2, 
+              position = position_jitterdodge(dodge.width = 0.4, jitter.width = 0.1, jitter.height = 0))+
+  geom_pointrange(aes(ymin = mean - sd, ymax = mean + sd), 
+                  position = position_dodge(width = 0.4),size = 0.5, fatten = 0.5) + 
   scale_x_discrete(limits = c('PBS_PYO','PYO_PBS','PCA_PYO','PCN_PYO'), labels = parse(text = labels )) + 
   scale_color_manual(breaks = c(F,T), labels = c('-DNA','+DNA'), values = colorblind_palette)+
   labs(x = NULL, y = 'Absorbance at 690nm', color = NULL) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.5,1)) + scale_shape_manual(values = c(21,22))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.5,1)) + 
+  scale_shape_manual(values = c(21,22))
 
 plot_ctDNA_690
 ```
 
-Ok these pointranges show mean +/- 2 standard deviations. So it looks like for all of the conditions there's no significant difference +/- ctDNA.
+Ok these pointranges show mean +/- standard deviations. So it looks like for all of the conditions there's no significant difference +/- ctDNA, but the reactions with reduced PCA and PCN yield reduced PYO (and therefore a reaction occured).
 
-## Abs690 Kinetic
+## Kinetics
 
-The Spectrum data looks good, let's also take a look at the kinetic data at 690 to see if there's a difference in the reaction rates. First we'll read it in:
+In addition to spectra taken immediately following mixing, we also acquired time courses at 690nm to see if there's a difference in the reaction rates. First we'll read in the data:
 
 ```{r}
 
@@ -139,21 +140,7 @@ ggplot(df_kin_meta, aes(x = min, y = intensity, color = DNA)) + geom_point() + f
 
 Ok, the intensity trends we observed with the spectra looks the same here. There are no obvious differences in slope, so I still don't think we can say anything about reaction rates...they all proceed too fast.
 
-```{r}
-
-theme_set(theme_figure())
-
-fig_3 <- plot_grid(NULL, plot_ctDNA_690, ncol = 2, scale = 0.95, labels = 'AUTO', label_size = 12, rel_widths = c(1,1.5))
-
-fig_3
-
-save_plot("../../../figures/phz2019_Fig_3.pdf", fig_3, base_height = 2, base_width = 3.4)
-```
-
-```{r}
-
-source("../../tools/text_file_import.R")
-```
+# Fig. 3C - Interphenazine ET with oxygen
 
 Now let's setup the filenames, data columns etc, and we can go ahead and import and view the dataframe:
 
@@ -185,21 +172,29 @@ df %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 <br>
 
+Let's take a look at the conditions (triplicates) individually.
+
 ```{r}
 
 ggplot(df, aes(x = t, y = abs690)) + geom_point(shape = 21) + facet_wrap(~phz_redox)
 
 ```
 
+And now we can assemble the final plot:
+
 ```{r}
 
-
-
 plot_phzET_o2 <- ggplot(df %>% filter(abs690>-0.01), aes(x = t-15, y = abs690, color = phz_redox)) + 
-  geom_point(data = . %>% filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))),shape = 21, alpha = 0.5, size = 0.5) + 
-  geom_smooth(data = . %>% filter(abs690>0.01 & abs690<0.4) %>% filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))), size = 0.5) + 
-  geom_line(data = . %>% filter(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred') & t >11), aes(group = phz_redox), color = 'light gray', linetype = 2)+
-  scale_color_manual(values = c('gray', "#56B4E9","#E69F00", "#000000")) +  labs(x = 'Time (sec)',y = 'Absorbance at 690nm') +  theme(legend.position = c(0.5, 0.8))
+  geom_point(data = . %>% filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))),
+             shape = 21, alpha = 0.5, size = 0.5) + 
+  geom_smooth(data = . %>% filter(abs690>0.01 & abs690<0.4) %>% 
+                filter(!(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred'))), 
+              size = 0.5) + 
+  geom_line(data = . %>% filter(phz_redox %in% c('PBSox + PCAred', 'PBSox + PCNred') & t >11), 
+            aes(group = phz_redox), color = 'light gray', linetype = 2)+
+  scale_color_manual(values = c('gray', "#56B4E9","#E69F00", "#000000")) +  
+  labs(x = 'Time (sec)',y = 'Absorbance at 690nm') +  
+  theme(legend.position = c(0.5, 0.8))
 
 plot_phzET_o2
 ```
@@ -207,13 +202,10 @@ plot_phzET_o2
 
 ------
 
-# Adding DNA CT to same figure
-
------
-
-# Panel E - MM Discrimination
+# Fig. 3E - DNA modified electrode (anoxic)
 
 This data is electrochemical and contains the third/final sweep of an electrode with two different DNA monolayers.
+
 ```{r}
 df_noO2 <- read_csv('../../../data/Electrochemistry/DNA_modified_electrode_noO2.csv',comment = "#") %>% 
   mutate(Construct=fct_relevel(Construct,'wm','mm'))
@@ -243,9 +235,9 @@ plot_dnaCT_noO2_styled
 ```
 
 
+# Fig. 3F - DNA modified electrode (with oxygen)
 
-
-# Panel F - DNA CT Catalytic
+Let's read in the echem data:
 
 ```{r}
 df_wO2 <- read_csv('../../../data/Electrochemistry/DNA_modified_electrode_wO2.csv',comment = "#") %>% 
@@ -257,6 +249,8 @@ df_wO2 %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>% 
   scroll_box(height = '250px')
 ```
+
+And let's make the figure:
 
 ```{r}
 plot_dnaCT_wO2 <- ggplot(df_wO2 %>% filter(Aerobic==T),aes(x = E, y = Current, color = Condition))+
@@ -278,55 +272,96 @@ plot_dnaCT_wO2_styled <- plot_dnaCT_wO2 +
 plot_dnaCT_wO2_styled
 ```
 
-# Spectroscopy
+# Fig. 3H - Time resolved spectroscopy - raw data: liquid cells vs. biofilm
+
+First let's read in the raw datasets. This uses the function `import_to_df()` from the `text_file_import.R` tool.
 
 ```{r}
+data_path = '../../../data/Spectroscopy/Ru_Rh_time_resolved_spectroscopy/'
 
+data_cols <-  c('time','intensity')
 
-df_spec <- read_csv("../../../data/Spectroscopy/2019_08_29_spectroscopy_RuRh_dphz.csv") %>% filter(exp_num == 2)
+skip_rows=16
 
-df_spec <- df_spec %>% 
-  mutate(min = ifelse(ruphen_conc==0,intensity, NA)) %>% 
-  group_by(time) %>% 
-  mutate(bg = min(min, na.rm = T)) %>% 
-  mutate(bg_sub = intensity - bg)
+# Add 'reactor' to file name so it is parsed into column
+filename_cols = c('date','rep','compressed')
 
-plot_raw_spec <- ggplot(df_spec %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
-  geom_path() + 
-  scale_x_continuous(limits = c(NA, 5e-7), labels = ns_label) +
-  labs(x = 'Time', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + 
-  guides(color = F)
-  
-plot_raw_spec
+data_names <- dir(path=data_path, pattern = ".+[dat]$")
 
-df_liq <- read_csv("../../../data/Spectroscopy/2019_08_29_spectroscopy_RuRh_dphz.csv") %>% filter(exp_num == 7)
+# Add correct paths separate from filenames
+data_paths <- data_names %>% paste(data_path, ., sep='')
 
-plot_liq_spec <- ggplot(df_liq %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
-  geom_path() + 
-  scale_x_continuous(limits = c(NA, 5e-7), labels = ns_label) + 
-  labs(x = 'Time', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + guides(color = F)
+# Read in all SWVs with one function call 
+spec_data <- import_to_df(filenames = data_names, file_paths = data_paths, data_cols = data_cols, 
+                          skip_rows = skip_rows, filename_cols = filename_cols, rep = T, PHZadded = F, n_max = 500)
 
-plot_liq_spec
-
-ggplot(df_spec %>% filter(run %in% 2:6) %>% filter(time>30e-9), aes(x = time, y = bg_sub, color = quencher_eq, group = quencher_eq)) + geom_path()
-
-df_fac <- bind_rows(df_spec, df_liq)
-
-labels <- c('2' = "biofilm", '7' = "liquid")
-
-df_fac$exp_num <- factor(df_fac$exp_num, levels = c('7','2'))
-
-plot_fac <- ggplot(df_fac %>% filter(run <= 6), aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
-  geom_path() + 
-  scale_x_continuous(limits = c(NA, 5e-7), labels = nA_label) + 
-  labs(x = 'Time (ns)', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + guides(color = F) + facet_wrap(~exp_num, labeller=labeller(exp_num = labels), scale = 'free')
-
-plot_fac
+spec_data %>% head() %>% kable(digits = 10) %>% kable_styling(bootstrap_options = 'condensed')
 
 ```
 
+Next let's read in the metadata for the files. 
+
 ```{r}
-df_spec_fit <- df_spec %>% 
+
+metadata <- read_csv("../../../data/Spectroscopy/Ru_Rh_time_resolved_spectroscopy/time_resolved_spectroscopy_metadata.csv") %>% 
+  group_by(material, material_id) %>% 
+  mutate(run = rep - min(rep) + 1)
+
+
+metadata %>% kable() %>% kable_styling(bootstrap_options = 'condensed') %>%
+    scroll_box(width = "100%", height = "400px")
+
+```
+
+We will join the metadata with the raw data and make the plot comparing biofilm to liquid cells. We will only examine the first 6 conditions, since at higher quencher levels the signal exhibits complex behavior below the background signal.
+
+```{r}
+df_spec <- left_join(spec_data, metadata, by = 'rep') 
+
+plot_raw_spec <- ggplot(df_spec %>% filter(run<= 6), 
+                        aes(x = time, y = intensity, color = quencher_eq, group = quencher_eq)) + 
+  geom_path() + 
+  scale_x_continuous(limits = c(NA, 5e-7), labels = nA_label) + 
+  labs(x = 'Time (ns)', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + guides(color = F) +
+  facet_wrap(~material, scale = 'free') 
+
+plot_raw_spec
+
+
+```
+
+Now we will background subtract from the cell only acquisition - "run 1".
+
+```{r}
+df_spec_bg <- df_spec %>% 
+  group_by(material, material_id, time) %>% 
+  mutate(min = min(ifelse(run == 1, intensity, NA), na.rm = T)) %>% 
+  mutate(bg_sub = intensity - min)
+
+plot_bg_spec <- ggplot(df_spec_bg %>% filter(run <= 6 & bg_sub>=0), 
+                       aes(x = time, y = bg_sub, color = quencher_eq, group = quencher_eq)) + 
+  geom_path() + 
+  scale_x_continuous(limits = c(NA, 5e-7), labels = nA_label) + 
+  labs(x = 'Time (ns)', y = 'Intensity (620nm)', color = 'Quencher\nEquivalents') + 
+  guides(color = F) + facet_wrap(~material)
+
+plot_bg_spec
+
+```
+
+Clearly the biofilm signal shows the lifetime of the Ru probe, while the liquid sample shows mostly noise. There may be a small amount of signal in the absence of the quencher.
+
+Now let's fit biexponential decays to the background subtracted biofilm datasets. This makes use of the self starting non-linear least squares biexponential function, `SSbiexp()`. This function is parameterized in the following way:
+
+`output = A1*exp(-exp(lrc1)*input) + A2*exp(-exp(lrc2)*input)`
+
+Where input is our time vector and output is the background subtracted intensity vector. A is the multiplier of the first (A1) and second (A2) exponential. Lrc is the natural log of the rate constant for the first (lrc1) and second (lrc2) exponential.
+
+For figure S4, lrc parameters are converted into tau half lives `tau = 1/exp(lrc)`.
+
+```{r}
+df_spec_fit <- df_spec_bg %>% 
+  filter(material == 'biofilm') %>% 
   filter(run %in% 2:6) %>% 
   filter(time>30e-9) %>% 
   filter(bg_sub>0) %>% 
@@ -354,124 +389,44 @@ df_spec_ests <- df_spec_models %>%
   unnest(ests)
 
 
-df_spec_preds %>% head()
+df_spec_ests %>% head()
 
 ```
 
-Exponential decay, parameterized with half-life.
-
-$$ N(t) = N_0 2^{-t / t_h} $$ 
-```{r eval = F}
-
-### for testing what single exponential looks like. 
-
-df_spec_fit <- df_spec %>% 
-  filter(run %in% 2:6) %>% 
-  filter(time>30e-9) %>% 
-  filter(bg_sub>0) %>% 
-  group_by(run, quencher_eq) %>% 
-  nest()
-
-fit_exp_bg_sub <- function(df){
-  
-  A1 = 0.02; lrc1 = 16.5; A2 = 0.02; lrc2 = 15.7
-  
-  mod <- nls(bg_sub~A*2^(-time / half_life), start = c(A = 0.02, half_life = 2e-7),data = df)
-  
-  mod
-}
-
-df_spec_models <- df_spec_fit %>% 
-  mutate(models = map(data, fit_exp_bg_sub)) 
-
-df_spec_preds <- df_spec_models %>% 
-  mutate(preds = map2(data, models, add_predictions)) %>% 
-  unnest(preds)
-
-df_spec_ests <- df_spec_models %>% 
-  mutate(ests = map(models, tidy)) %>% 
-  unnest(ests)
-
-
-df_spec_preds %>% head()
-
-```
-
-
-```{r}
-#write_csv(df_exp_2_ests, "2019_09_27_spectroscopy_fits_bg_sub.csv")
-
-write_csv(df_spec_ests, "phz2019_dna_ct_spec_biexp_fits.csv")
-
-df_spec_ests %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
-```
-
+Let's save these parameter estimates for use in supplemental figure S4. 
 
 ```{r}
 
-ggplot(df_spec_preds, aes(x = time, group = run, color = quencher_eq)) + geom_path(aes(y = pred), color = 'black') + geom_point(aes(y = bg_sub),alpha = 0.2, shape = 21) +xlim(0,5e-7) + facet_wrap(~quencher_eq)
+write_csv(df_spec_ests %>% select(-data, -models), "phz2019_dna_ct_spec_biexp_fits.csv")
+
+df_spec_ests %>% select(-data, -models) %>% kable() %>% kable_styling() %>% scroll_box(height = '400px')
 
 ```
 
+Now let's plot the background subtracted biofilm data with the model predictions.
 
 ```{r}
 
-plot_bg_spec <- ggplot(df_spec %>% filter(run %in% 1:6), aes(x = time, group = run, color = quencher_eq)) + 
+plot_bg_spec <- ggplot(df_spec_bg %>% filter(run %in% 1:6) %>% filter(material == 'biofilm'), aes(x = time, group = run, color = quencher_eq)) + 
   geom_point( aes(y = bg_sub),alpha = 0.2, shape = 21, size = 0.5) + 
   geom_path(data = df_spec_preds,aes(y = pred)) + scale_x_continuous(limits = c(NA,1e-6), labels = nA_label, name = 'Time (ns)') + 
   ylim(-0.001, NA) + labs(y = 'Background subtracted - Intensity (620nm)', color = 'Quencher\nequivalents')+
-  guides(color = guide_colorbar(barwidth = 0.5, barheight = 2.5)) + theme(legend.position = c(0.75,0.75))
+  guides(color = guide_colorbar(barwidth = 0.5, barheight = 2.5)) + theme(legend.position = c(0.75,0.75)) 
 
 plot_bg_spec
 
 ```
 
+# Create figure
 
 ```{r}
-background_ests <- df_spec_ests %>% filter(is.na(quencher_eq))
 
-#background_ests
-
-ggplot(df_spec_ests, aes(x = quencher_eq, y = estimate)) + 
-  geom_hline(data = background_ests, aes(yintercept = estimate), linetype = 2, color = 'light gray') + 
-  geom_pointrange(aes(ymin = estimate - 2*std.error, ymax = estimate + 2*std.error)) +
-  facet_wrap(~term, scales = 'free')
-
-```
-
-```{r}
-df_spec_tau <- df_spec_ests %>% filter(term %in% c('lrc1','lrc2')) %>% mutate(tau = 1/exp(estimate)) %>% mutate(tau_low = 1/exp(estimate + 2*std.error), tau_high = 1/exp(estimate - 2*std.error))
-
-
-background_spec_tau <- df_spec_tau %>% filter(is.na(quencher_eq))
-
-#background_ests
-
-plot_spec_tau <- ggplot(df_spec_tau, aes(x = quencher_eq, y = tau)) + 
-  geom_hline(data = background_spec_tau, aes(yintercept = tau), linetype = 1, color = 'light gray') + 
-  geom_pointrange(aes(ymin = tau_low, ymax = tau_high)) +
-  facet_wrap(~term, scales = 'free', labeller = labeller(term = c(lrc1 = 'Component 1', lrc2 = 'Component 2'))) + 
-  scale_y_continuous(labels = ns_label, limits = c(0,NA))
-
-plot_spec_tau
-```
-
-```{r}
 theme_set(theme_figure())
 
-#fig_4 <- plot_grid(plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
-#          plot_fac, plot_fac, plot_bg_spec, 
-#          ncol = 3, scale = 0.95, align = 'hv', axis = 'tblr', labels = 'AUTO', label_size = 12)
 
-#fig_4
-
-#save_plot("../../../figures/phz2019_Fig_4.pdf", fig_4, base_height = 4, base_width = 7)
-```
-
-```{r}
 fig_3 <- plot_grid(plot_ctDNA_690, plot_ctDNA_690, plot_phzET_o2,
                    plot_dnaCT_noO2_styled, plot_dnaCT_noO2_styled, plot_dnaCT_wO2_styled,
-          plot_fac, plot_fac, plot_bg_spec, 
+          plot_raw_spec, plot_raw_spec, plot_bg_spec, 
           ncol = 3, scale = 0.95, align = 'hv', axis = 'tlr', labels = 'AUTO', label_size = 12)
 
 fig_3

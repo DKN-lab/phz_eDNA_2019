@@ -19,14 +19,14 @@ Panel A is a diagram.
 
 To see how we got from the raw electrochemical scans to the datasets used here, please see the following processing notebooks:
 
-* [IDA ∆phz biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
-* [IDA WT biofilm processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
-* [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
+* [IDA ∆phz biofilm processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
+* [IDA WT biofilm processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_WT/IDA_WT_processing.html)
+* [IDA blank processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
 
 Then see how those data were analyzed in these notebooks for supplemental figures S6 and S7:
 
-* [Fig. S6](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html)
-* [Fig. S7](https://scott-saunders.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html)
+* [Fig. S6](https://dkn-lab.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S6/phz2019_Fig_S6.html)
+* [Fig. S7](https://dkn-lab.github.io/phz_eDNA_2019/code/figures/supplement/Fig_S7/phz2019_Fig_S7.html)
 
 These supplemental figure notebooks produced model coefficients that are used in this notebook.
 
@@ -35,6 +35,9 @@ These supplemental figure notebooks produced model coefficients that are used in
 Setup packages and plotting for the notebook:
 
 ```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Check packages
+source("../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -52,66 +55,99 @@ source("../../tools/plotting_tools.R")
 theme_set(theme_notebook())
 ```
 
-# Fig. 5B
 
-need to read in the model coefficients and grid predictions for these two datasets.
+# Fig. 5B PYO soak - transfer
+```{r}
+pyo_soak_gc <- read_csv('../../../data/Electrochemistry/IDA/75uM_control_soak_3_GC_1.txt',skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2) %>% 
+  mutate(reactor = 'soak')
+
+pyo_tran1_gc <- read_csv('../../../data/Electrochemistry/IDA/75uM_control_transfer_3_GC_1.txt',skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2) %>% 
+  mutate(reactor = 'transfer')
+
+pyo_gc <- bind_rows(pyo_soak_gc, pyo_tran1_gc)
+
+pyo_plot <- ggplot() + 
+  geom_vline(xintercept = -0.255, color = 'light gray', size = 0.5)+
+  geom_path(data = pyo_gc %>% filter(electrode=='i1'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  geom_path(data = pyo_gc %>% filter(electrode=='i2'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)), title = 'PYO')+
+  theme(legend.position = c(0.15,0.75), legend.background = element_blank()) 
+
+pyo_plot
+```
 
 ```{r}
-df_dphz_nls_1 <- read_csv("../supplement/Fig_S7/phz2019_dPHZ_Dphys_nls_coefs.csv") %>% 
-  filter(exp == 1 & run == 1 & term == 'a')
+pyo_plot_zoom <- ggplot(data = pyo_gc %>% filter(electrode=='i2' & reactor=='transfer'), aes(x = E, y =current)) + 
+  geom_vline(xintercept = -0.255, color = 'light gray', size = 0.5)+
+  geom_path(linetype = 'dashed', size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x=NULL, y= NULL)+
+#  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA))) +
+  theme(
+      axis.text.y = element_text(color = 'black', size=6, angle = 45, hjust = 1),
+      axis.text.x = element_text(color = 'black', size=6),
+      axis.title=element_text(color = 'black', size=6),
+      )
 
-df_blank_nls_75 <- read_csv("../supplement/Fig_S7/phz2019_blank_Dphys_nls_coefs.csv") %>% 
-  filter(PHZadded == '75uM' & term == 'a')
-
-df_dphz_swv_decay <- read_csv("../../processing/processed_data/phz_eDNA_2019_signals_long.csv") %>% 
-  filter(echem == 'SWV' & exp == 1 & run == 1 & reactor == 'transfer' & electrode == 'i1') %>% 
-  mutate(IDA = 'biofilm', signal = signal - df_dphz_nls_1$estimate) %>% 
-  select(time, signal, IDA)
-
-df_blank_decay <- read_csv("../../processing/processed_data/phz_eDNA_2019_swv_blank_tran_time_signals.csv") %>% 
-  filter(PHZadded == '75uM') %>% 
-  mutate(IDA = 'blank', signal = signal - df_blank_nls_75$estimate) %>%
-  select(time, signal, IDA)
-
-df_dphz_preds <- read_csv("../supplement/Fig_S7/phz2019_dPHZ_Dphys_preds.csv") %>% 
-  filter(exp == 1 & run == 1) %>% 
-  select(time, pred, pred_low, pred_high) %>% 
-  mutate(pred = pred - df_dphz_nls_1$estimate,
-         pred_low = pred_low - df_dphz_nls_1$estimate, 
-         pred_high = pred_high - df_dphz_nls_1$estimate)%>% 
-  mutate(IDA = 'biofilm')
-
-df_blank_preds <- read_csv("../supplement/Fig_S7/phz2019_blank_Dphys_preds.csv") %>% 
-  filter(PHZadded == '75uM') %>% 
-  select(time, pred, pred_low, pred_high) %>% 
-  mutate(pred = pred - df_blank_nls_75$estimate,
-         pred_low = pred_low - df_blank_nls_75$estimate, 
-         pred_high = pred_high - df_blank_nls_75$estimate) %>% 
-  mutate(IDA = 'blank')
-
-df_preds <- bind_rows(df_dphz_preds, df_blank_preds)
-
-df_decays <- bind_rows(df_dphz_swv_decay, df_blank_decay)
-
-plot_blank_dphz_decay <- ggplot(df_preds, aes(x = time, y = pred, group = IDA, fill = time)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
-  geom_path(linetype = 2, size = 0.5)+
-  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21, size = 1) + guides(fill = 'none')
-
-plot_blank_dphz_decay_styled <- plot_blank_dphz_decay+
-  labs(x = 'Time (min)', y = expression(I[swv]~(nA)), fill = 'Time (min)') +
-  scale_fill_viridis(guide = F) +
-  scale_y_continuous(labels = nA_label)
-
-
-plot_blank_dphz_decay_styled
+pyo_plot_zoom
 
 ```
 
-Let's subtract the a intercept value of these models so that we can compare the decay.
+# Fig. 5C PCA soak - transfer
+
+```{r}
 
 
+pca_soak_gc <- read_csv("../../../data/Electrochemistry/IDA/75uM_PCA_dPHZstar_GC_1.txt", skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2) %>% 
+  mutate(reactor = 'soak')
 
-# Fig. 5C
+pca_tran1_gc <- read_csv("../../../data/Electrochemistry/IDA/gc_1.txt", skip = 21, col_names = c('E','i1','i2')) %>% 
+  gather(key = 'electrode', value = 'current', i1, i2)%>% 
+  mutate(reactor = 'transfer')
+
+pca_gc <- bind_rows(pca_soak_gc, pca_tran1_gc)
+
+pca_plot <- ggplot() + 
+  geom_vline(xintercept = -0.375, color = 'light gray', size = 0.5)+
+  geom_path(data = pca_gc %>% filter(electrode=='i1'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  geom_path(data = pca_gc %>% filter(electrode=='i2'), aes(x = E, y =current, linetype = reactor), size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA)), title = 'PCA')+
+  theme(legend.position = c(0.15,0.75), legend.background = element_blank())
+  
+
+pca_plot
+
+```
+
+```{r}
+
+pca_plot_zoom <- ggplot(data = pca_gc %>% filter(electrode=='i2' & reactor=='transfer'), aes(x = E, y =current)) + 
+  geom_vline(xintercept = -0.375, color = 'light gray', size = 0.5)+
+  geom_path(linetype = 'dashed', size = 0.5)+
+  scale_x_reverse(labels = mV_label)+
+  scale_y_continuous(labels = nA_label)+
+    labs(x=NULL, y= NULL)+
+#  labs(x = "E (mV vs. Ag/AgCl)", y = expression(I[gc]~(nA))) + 
+  theme(
+      axis.text.y = element_text(color = 'black', size=6, angle = 45, hjust = 1),
+      axis.text.x = element_text(color = 'black', size=6),
+      axis.title=element_text(color = 'black', size=6),
+      )
+
+pca_plot_zoom
+```
+
+# Fig. 5D - SWV signal
+
+Let's read in the SWV data and plot it:
 
 ```{r}
 
@@ -140,7 +176,7 @@ plot_swv_styled
 
 ## Inset
 
-convert to norm time??
+For the inset we will just plot the peak current points over time:
 
 ```{r}
 
@@ -152,15 +188,20 @@ plot_swv_sig <- ggplot(data = df_swv_sig, aes(x = time, y = signal))+
 plot_swv_sig_styled <- plot_swv_sig +
   labs(x = 'Time (min)', y = NULL, fill = 'Time (min)') +
   scale_fill_viridis(guide = F) +
-  scale_y_continuous(labels = nA_label)+ xlim(0,NA)
+  scale_y_continuous(labels = nA_label)+ xlim(0,NA)+
+  theme(
+      axis.text.y = element_text(color = 'black', size=6, angle = 45, hjust = 1),
+      axis.text.x = element_text(color = 'black', size=6),
+      axis.title=element_text(color = 'black', size=6),
+      )
 
 plot_swv_sig_styled
 
 ```
 
-# Fig. 5D
+# Fig. 5E - GC signal
 
-need to mod
+Let's read in the GC data and plot it:
 ```{r}
 
 df_gc <- read_csv("../../processing/processed_data/phz_eDNA_2019_gc_raw_1_1.csv")
@@ -195,26 +236,31 @@ plot_gc_styled
 
 ## Inset
 
-need to mod
+As for the SWV, for the GC inset we will simply plot the peak current over time
 ```{r}
 
 # Plot Layout
-plot_gc_sig <- ggplot(data = df_gc_sig, aes(x = time, y = signal))+
+plot_gc_sig <- ggplot(data = df_gc_sig, aes(x = time, y = -signal))+
   geom_point(shape = 21, size = 0.75, aes(fill = time))
 
 # Plot Styling
 plot_gc_sig_styled <- plot_gc_sig +
   labs(x = 'Time (min)', y = NULL, fill = 'Time (min)') +
   scale_fill_viridis(guide = F) +
-  scale_y_continuous(labels = nA_label) + xlim(0,NA)
+  scale_y_reverse(labels = nA_label) + xlim(0,NA) + 
+  theme(
+      axis.text.y = element_text(color = 'black', size=6, angle = 45, hjust = 1),
+      axis.text.x = element_text(color = 'black', size=6),
+      axis.title=element_text(color = 'black', size=6),
+      )
 
 plot_gc_sig_styled
 
 ```
 
-# Fig. 5E
+# Fig. 5F - GC vs. SWV signal
 
-need to mod
+Now we will plot the SWV and GC peak currents against each other
 ```{r}
 
 df_swv_gc_sig <- read_csv("../../processing/processed_data/phz_eDNA_2019_swv_gc_signals.csv") %>% filter(exp == 1 & run == 1)
@@ -229,14 +275,83 @@ plot_swv_gc <- ggplot(df_swv_gc_sig %>% filter(rep>0),
 plot_swv_gc_styled <- plot_swv_gc + 
   scale_x_continuous(breaks=c(0,2.5e-7,5.0e-7, 7.5e-7, 1.0e-6), labels = nA_label)+
   scale_y_continuous(labels = nA_label)+
-  labs(x = expression(I[swv]~(nA)), y = expression(I[gc]~(nA))) +
+  labs(x = expression(I[swv]~(nA)), y = expression(-I[gc]~(nA))) +
   scale_fill_viridis(guide=F)
 
 
 plot_swv_gc_styled
 ```
 
-# Fig. 5F
+# Fig. 5G - Blank vs. biofilm PYO retention and $D_{loss}$
+
+To plot the SWV signals over time with the $D_{loss}$ model fits, we will read in the data, model coefficients, and predictions for the blank and ∆phz biofilm datasets. Let's read in those 6 files:
+
+```{r}
+# Model coefficients
+df_dphz_nls_1 <- read_csv("../supplement/Fig_S7/phz2019_dPHZ_Dphys_nls_coefs.csv") %>% 
+  filter(exp == 1 & run == 1 & term == 'a')
+
+df_blank_nls_75 <- read_csv("../supplement/Fig_S7/phz2019_blank_Dphys_nls_coefs.csv") %>% 
+  filter(PHZadded == '75uM' & term == 'a')
+
+# The signals are the peak current data points
+# we are subtracting the constant background signal from model fit
+df_dphz_swv_decay <- read_csv("../../processing/processed_data/phz_eDNA_2019_signals_long.csv") %>% 
+  filter(echem == 'SWV' & exp == 1 & run == 1 & reactor == 'transfer' & electrode == 'i1') %>% 
+  mutate(IDA = 'biofilm', signal = signal - df_dphz_nls_1$estimate) %>% 
+  select(time, signal, IDA)
+
+df_blank_decay <- read_csv("../../processing/processed_data/phz_eDNA_2019_swv_blank_tran_time_signals.csv") %>% 
+  filter(PHZadded == '75uM') %>% 
+  mutate(IDA = 'blank', signal = signal - df_blank_nls_75$estimate) %>%
+  select(time, signal, IDA)
+
+# Predictions are best fit lines generated from the model
+# we are subtracting the constant background signal from model fit
+df_dphz_preds <- read_csv("../supplement/Fig_S7/phz2019_dPHZ_Dphys_preds.csv") %>% 
+  filter(exp == 1 & run == 1) %>% 
+  select(time, pred, pred_low, pred_high) %>% 
+  mutate(pred = pred - df_dphz_nls_1$estimate,
+         pred_low = pred_low - df_dphz_nls_1$estimate, 
+         pred_high = pred_high - df_dphz_nls_1$estimate)%>% 
+  mutate(IDA = 'biofilm')
+
+df_blank_preds <- read_csv("../supplement/Fig_S7/phz2019_blank_Dphys_preds.csv") %>% 
+  filter(PHZadded == '75uM') %>% 
+  select(time, pred, pred_low, pred_high) %>% 
+  mutate(pred = pred - df_blank_nls_75$estimate,
+         pred_low = pred_low - df_blank_nls_75$estimate, 
+         pred_high = pred_high - df_blank_nls_75$estimate) %>% 
+  mutate(IDA = 'blank')
+
+df_preds <- bind_rows(df_dphz_preds, df_blank_preds)
+
+df_decays <- bind_rows(df_dphz_swv_decay, df_blank_decay)
+
+```
+
+We also are subtracting out the constant background signal as determined by the model intercept, so that both curves are easier to visually compare.
+
+Now let's make the final plot:
+
+```{r}
+
+plot_blank_dphz_decay <- ggplot(df_preds, aes(x = time, y = pred, group = IDA, fill = time)) + geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray') +
+  geom_path(linetype = 2, size = 0.5)+
+  geom_point(data =df_decays, aes(x = time, y = signal) , shape = 21, size = 1) + guides(fill = 'none')
+
+plot_blank_dphz_decay_styled <- plot_blank_dphz_decay+
+  labs(x = 'Time (min)', y = expression(I[swv]~(nA)), fill = 'Time (min)') +
+  scale_fill_viridis(guide = F) +
+  scale_y_continuous(labels = nA_label)
+
+
+plot_blank_dphz_decay_styled
+
+```
+
+
+# Fig. 5H - $D_{ap}$ vs. $D_{loss}$
 
 In order to construct figure 5F we must do a few analysis steps using data analysed for Figs S6 and S7. This is somewhat complicated, because to calculate $D_{loss}$ we need the $D_{ap}$ value and the SWV soak value (I0) for each run. Therefore we will do the following:
 
@@ -261,7 +376,7 @@ df_all_lm %>% kable() %>% kable_styling() %>% scroll_box(height = '300px')
 
 <br>
 
-So you can see we have estimated the slopes for each dataset (term 'signal_SWV' 'estimate'), including confidence intervals. Now let's redefine the function we used in [Fig. S7]() to calculate $D_{ap}$ from the slope of the SWV vs. GC line.
+So you can see we have estimated the slopes for each dataset (term 'signal_SWV' 'estimate'), including confidence intervals. Now let's redefine the function we used in Fig. S7 to calculate $D_{ap}$ from the slope of the SWV vs. GC line.
 
 Recall that for this type of data:
 
@@ -415,8 +530,12 @@ df_plot_dap_dloss <- bind_rows(df_plot_dap, df_plot_dloss)
 
 plot_dap_dloss <- ggplot(df_plot_dap_dloss, aes(x = coef, y = estimate, shape = factor(exp))) + 
   geom_hline(yintercept = 7e-6, linetype = 2, color = 'light gray', size= 0.5)+
-  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + facet_wrap(~IDA, scales = 'free') + 
-  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) 
+  geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), 
+                  position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + 
+  facet_wrap(~IDA, scales = 'free') + 
+    scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::scientific_format()) 
+
+#  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", format = scales::math_format(expr=10^.x))) 
 
 plot_dap_dloss_styled <- plot_dap_dloss +
   labs(x = NULL, y = expression(D~(cm^2 / sec)))+ 
@@ -466,7 +585,7 @@ df_plot_dap_dloss <- bind_rows(df_plot_dap, df_plot_dloss)
 plot_dap_dloss <- ggplot(df_plot_dap_dloss, aes(x = coef, y = estimate, shape = factor(exp))) + 
   geom_hline(yintercept = 7e-6, linetype = 2, color = 'light gray', size= 0.5)+
   geom_pointrange(aes(ymin = estimate_low, ymax = estimate_high), position = position_jitter(width =0.1, height = 0), fatten = 3,stroke = 0.5) + facet_wrap(~IDA, scales = 'free') + 
-  scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::trans_format("log10", scales::math_format(10^.x))) 
+    scale_y_log10(limits = c(1e-8, 2e-5), labels = scales::scientific_format()) 
 
 plot_dap_dloss_styled <- plot_dap_dloss +
   labs(x = NULL, y = expression(D~(cm^2 / sec)))+ 
@@ -503,7 +622,10 @@ df_dloss %>% group_by(exp, IDA) %>%
 
 # Create figure
 
-```{r}
+Old Fig. 5:
+
+```{r eval = F}
+
 theme_set(theme_figure())
 
 fig_5_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, ncol = 2, rel_heights = c(1,2))
@@ -511,11 +633,38 @@ fig_5_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, nc
 
 fig_5 <- plot_grid(fig_5_insets, plot_swv_styled, plot_gc_styled, 
                    plot_swv_gc_styled, plot_blank_dphz_decay_styled, plot_dap_dloss_styled, 
-                   ncol = 3, labels = 'AUTO', label_size = 12, scale = 0.95, align = 'hv', axis = 'tblr')
+                   ncol = 3, labels = 'AUTO', label_size = 12, scale = 1.0, align = 'hv', axis = 'tblr')
 
 fig_5
 
 save_plot("../../../figures/phz2019_Fig_5.pdf", fig_5, base_height = 4, base_width = 7)
+```
+
+Revised Fig. 5:
+
+```{r}
+
+theme_set(theme_figure())
+
+fig_5_insets <- plot_grid(NULL, NULL,plot_swv_sig_styled, plot_gc_sig_styled, ncol = 2, rel_heights = c(1,2), align = 'hv', axis = 'tblr')
+
+save_plot("../../../figures/phz2019_Fig_5_insets_1.pdf", fig_5_insets, base_height = 1.25, base_width = 1.6)
+
+fig_5_zoom <- plot_grid(NULL, NULL,pyo_plot_zoom, pca_plot_zoom, ncol = 2, rel_heights = c(1,2), align = 'hv', axis = 'tblr')
+
+save_plot("../../../figures/phz2019_Fig_5_insets_2.pdf", fig_5_zoom, base_height = 1.15, base_width = 1.75)
+
+#PYO plot used as a placeholder
+
+fig_5 <- plot_grid(pyo_plot, pyo_plot, 
+                   pca_plot, plot_swv_styled, 
+                   plot_gc_styled, plot_swv_gc_styled, 
+                   plot_blank_dphz_decay_styled, plot_dap_dloss_styled,
+                   ncol = 2, labels = 'AUTO', label_size = 12, scale = 1.0, align = 'hv', axis = 'tblr')
+
+fig_5
+
+save_plot("../../../figures/phz2019_Fig_5.pdf", fig_5, base_height = 8, base_width = 4.5)
 ```
 
 -----

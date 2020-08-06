@@ -13,15 +13,13 @@ output:
 
 --------
 
-# Notes
-
-
-
-----
 
 Setup packages and plotting for the notebook:
 
 ```{r setup, echo=T, message=FALSE, warning=FALSE}
+# Check packages
+source("../../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -42,10 +40,19 @@ theme_set(theme_notebook())
 
 # Fig. S2A - EtBr binding
 
+Let's read in the EtBr data and take a look:
 ```{r}
 etbr_data <- read_csv("../../../../data/Spectroscopy/phz_etbr_competitive_binding.csv") %>% 
   gather(key = 'rep', value = 'fluor', -phz_conc, -phz_mol)
 
+
+etbr_data %>% group_by(phz_mol, phz_conc) %>% summarise(mean_fluor = mean(fluor)) 
+
+```
+
+Let's plot the data, and we will add a smoothed trendline just to visualize the pattern.
+
+```{r}
 # Plot layout
 etbr_plot <- ggplot(etbr_data %>% filter(phz_conc>0), aes(x = phz_conc, y = fluor)) + 
   geom_point(shape = 21) + 
@@ -60,9 +67,11 @@ etbr_plot_styled <- etbr_plot +
   
 etbr_plot_styled
 
-
-etbr_data %>% group_by(phz_mol, phz_conc) %>% summarise(mean_fluor = mean(fluor)) 
 ```
+
+When PCN and PYO are added the ethidium fluorescence goes down, as expected. For PCA it remains relatively unchanged or perhaps slightly higher. This pattern is not consistent with the binding model, so we will only fit models to PCN and PYO data.
+
+First let's fit PYO with a hill model to calculate the IC50 using the `nls()` function.
 
 ```{r}
 etbr_model_pyo <- nls(data = etbr_data %>% 
@@ -72,23 +81,29 @@ etbr_model_pyo <- nls(data = etbr_data %>%
 
 etbr_model_pyo_CI <- tidy(etbr_model_pyo, conf.int = T) %>% filter(term=='ic50')
 
+summary(etbr_model_pyo)
+```
 
+Now let's fit the PCN data:
 
+```{r}
 
 etbr_model_pcn <- nls(data = etbr_data %>% 
                         filter(phz_conc>0 & phz_mol=='PCN'), 
                       formula = fluor~max - (max*(phz_conc^hill)/((ic50^hill)+(phz_conc^hill))),
                       start=c(max=1500,hill=1,ic50=300))
 
-#confint(etbr_model_pcn)
-
-summary(etbr_model_pyo)
 
 etbr_model_pcn_CI <- tidy(etbr_model_pcn) %>% filter(term=='ic50') %>% 
   mutate(conf.low = estimate - (1.96 * std.error)) %>% 
   mutate(conf.high = estimate + (1.96 * std.error))
 
-etbr_pred_pyo <- etbr_data %>% filter(phz_mol=='PYO') %>% add_predictions(etbr_model_pyo)
+summary(etbr_model_pcn)
+```
+
+With the models we can now predict the best fit lines with confidence intervals:
+
+```{r}
 
 etbr_pred_pyo <- etbr_data %>% filter(phz_mol=='PYO') %>% 
   mutate(max = coef(etbr_model_pyo)[1], hill = coef(etbr_model_pyo)[2], ic50 = coef(etbr_model_pyo)[3]) %>% 
@@ -104,26 +119,9 @@ etbr_pred_pcn <- etbr_data %>% filter(phz_mol=='PCN') %>%
   mutate(pred_high = max - (max*(phz_conc^hill)/((ic50_high^hill)+(phz_conc^hill)))) %>% 
   mutate(pred_low = max - (max*(phz_conc^hill)/((ic50_low^hill)+(phz_conc^hill))))
 
-#etbr_pred_pcn <- etbr_data %>% filter(phz_mol=='PCN') %>% add_predictions(etbr_model_pcn)
-
-ggplot(etbr_pred_pyo, aes(x = phz_conc, y = fluor)) + 
-  geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray')+
-  geom_line(aes(y = pred), linetype = 2) + 
-  geom_point(shape = 21) + 
-  scale_x_log10()
-
-ggplot(etbr_pred_pcn, aes(x = phz_conc, y = fluor)) + 
-  geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray')+
-  geom_line(aes(y = pred), linetype = 2) + 
-  geom_point(shape = 21) + 
-  scale_x_log10()
-
-ggplot(etbr_data %>% filter(phz_conc>0 & phz_mol=='PYO') %>% mutate(norm_fluor = -fluor + 1500), 
-       aes(x = phz_conc, y = norm_fluor)) + 
-  geom_point(shape = 21) + 
-  scale_x_log10()
-
 ```
+
+And now we can make the final plots:
 
 ```{r}
 etbr_preds = bind_rows(etbr_pred_pyo, etbr_pred_pcn, etbr_data %>% filter(phz_mol=='PCA'))
@@ -141,33 +139,34 @@ etbr_plot_styled <- etbr_plot +
 etbr_plot_styled
 ```
 
+We can calculate the binding affinity of the phenazines from the IC50 according to the following formula:
+
+$$K_i = \frac{IC_{50}}{1+\frac{[EtBr]}{K_d}}$$
+
+Under these conditions the Kd of ethidium bromide is ~1 µM and the assay used 5 µM EtBr, which gives:
+
+$$K_i = \frac{IC_{50}}{6}$$
+
+So calculating the $K_i$ from the IC50 values for the high, low and best estimates for PYO and PCN yields:
+
 ```{r}
 
 etbr_kd = 1 #uM
 
 etbr_conc = 5 #uM 
 
+etrbr_model_phz_CI <- bind_rows(etbr_model_pcn_CI  %>%  select(estimate, conf.low, conf.high)%>% mutate(PHZ = 'PCN'),
+          etbr_model_pyo_CI  %>%  select(estimate, conf.low, conf.high)%>% mutate(PHZ = 'PYO'))
 
-```
 
-$$K_i = \frac{IC_{50}}{1+\frac{[EtBr]}{K_d}}$$
-
-$$K_i = \frac{IC_{50}}{6}$$
-
-For PCN Ki = 612 / 6 = 102uM
-PCN low Ki = 450 / 6 = 75
-PCN high Ki = 774 / 6 = 129
-
-For PYO Ki = 275 / 6 = 45.8 uM
-PYO low Ki = 214 / 6 = 35.8
-PYO high Ki = 364 / 6 = 60.7
-
-```{r}
-#save_plot("../figures/03_14_19_fig_supp_etbr.pdf", etbr_plot_styled ,base_width = 4, base_height = 6 )
-
+etrbr_model_phz_CI %>% 
+  pivot_longer(cols = c(estimate, conf.low, conf.high), names_to = "pred_level", values_to = "IC_50") %>% 
+  mutate(K_i = IC_50 / (1 + (etbr_conc / etbr_kd)))
 ```
 
 # Fig. S2B - MST data
+
+Let's read in the data and take a look at the plot:
 
 ```{r}
 mst_data <- read_csv("../../../../data/Spectroscopy/MST_data_phz_DNA.csv") %>% 
@@ -175,23 +174,32 @@ mst_data <- read_csv("../../../../data/Spectroscopy/MST_data_phz_DNA.csv") %>%
 
 ggplot(mst_data, aes(x = Dose, y = norm_resp)) + 
   geom_point() + 
-  geom_smooth(method='nls',
-              formula=y~max*(x^hill)/((Kd^hill)+(x^hill)),
-              method.args=list(start=c(max=400,hill=1,Kd=100)),
-              se=F, color = 'black', linetype = 'dashed', size = 0.5) +
-  facet_wrap(~phz_mol, scales = 'free', ncol=1)
-
+  facet_wrap(~phz_mol, scales = 'free', ncol=1) + scale_x_log10()
+```
+The PCA data shows no obvious binding, so we will only fit PYO and PCN data with a hill model. Let's start with PYO:
+```{r}
 model_pyo <- nls(data = mst_data %>% filter(phz_mol=='PYO') ,formula = norm_resp~max*(Dose^hill)/((Kd^hill)+(Dose^hill)),start=c(max=400,hill=1,Kd=100) )
-  
-model_pcn <- nls(data = mst_data %>% filter(phz_mol=='PCN') ,formula = norm_resp~max*(Dose^hill)/((Kd^hill)+(Dose^hill)),start=c(max=400,hill=1,Kd=100) )
 
 confint_pyo <- tidy(model_pyo, conf.int = T) %>% filter(term=='Kd')
 
-summary(model_pcn)
+summary(model_pyo)
+
+```
+
+
+Next let's fit the model to the PCN data:
+```{r}
+model_pcn <- nls(data = mst_data %>% filter(phz_mol=='PCN') ,formula = norm_resp~max*(Dose^hill)/((Kd^hill)+(Dose^hill)),start=c(max=400,hill=1,Kd=100) )
+
 
 confint_pcn <- tidy(model_pcn) %>% filter(term=='Kd') %>% 
   mutate(conf.low = estimate - (1.96*std.error), conf.high = estimate + (1.96*std.error))
-  
+
+summary(model_pcn)
+```
+
+From those models we can predict the best fit lines with confidence intervals:
+```{r}
 pred_pyo <- mst_data %>% filter(phz_mol=='PYO') %>% 
   mutate(max = coef(model_pyo)[1], hill = coef(model_pyo)[2], kd = coef(model_pyo)[3]) %>% 
   mutate(kd_low = confint_pyo$conf.low,kd_high = confint_pyo$conf.high ) %>% 
@@ -208,6 +216,11 @@ pred_pcn <- mst_data %>% filter(phz_mol=='PCN') %>%
 
 preds <- bind_rows(pred_pyo,pred_pcn,mst_data %>% filter(phz_mol=='PCA'))
 
+```
+
+And we can construct the final plot:
+
+```{r}
 # Plot layout
 mst_plot <- ggplot(preds, aes(x = Dose, y = norm_resp)) + 
   geom_ribbon(aes(ymin = pred_low, ymax = pred_high), fill = 'light gray')+
@@ -223,13 +236,11 @@ mst_plot_styled <- mst_plot +
 mst_plot_styled
 ```
 
-Kd for PCN = 133.6 uM
-Kd for PYO = 536.4 uM (but doesn't saturate)
 
-# Fig. S2C - PHZred binding
+# Fig. S2C - Reduced phenazine DNA binding
 
 
-## Import data
+Let's import the data and add the DNA concentrations:
 
 ```{r}
 df_360 <- read_csv("../../../../data/Spectroscopy/2019_10_09_PHZred_top_360-460.csv") %>% 
@@ -262,84 +273,9 @@ df_485_meta <- left_join(df_485, df_meta, by = c('row','column')) %>%
   ))
 ```
 
+We'll examine the fluorescence emission wavelength characteristic for each phenazine - 360nm for PYO, 485nm for PCA and 485nm for PCN (although PCN does not have measureable fluorescence).
 
-## 360nm ex
-
-```{r}
-ggplot(df_360_meta %>% filter(id %in% c('control','PBS','PCA','PCN','PYO')), aes(x = dna, y = intensity)) + geom_point() + facet_wrap(~id, scales = 'free')
-
-ggplot(df_360_meta %>% filter(id %in% c('control','PBS','PCA','PCN','PYO')), aes(x = dna, y = intensity, color = id)) + geom_point() + geom_smooth(method = 'lm')
-```
-
-```{r}
-#ggplot(df_360_meta %>% filter(id=='empty'), aes(x = as.integer(column), y = intensity, color = row)) + geom_point()
-
-#ggplot(df_360_meta %>% filter(id=='PBS'), aes(x = as.integer(column), y = intensity, color = row)) + geom_point()
-
-#ggplot(df_360_meta %>% filter(id %in% c('empty','PBS')), aes(x = as.integer(column), y = intensity, color = id)) + geom_point()
-```
-
-```{r}
-ggplot(df_360_meta %>% filter(id %in% c('control','PBS','PCA')), aes(x = as.integer(column), y = intensity, color = id)) + geom_point()
-
-ggplot(df_360_meta %>% filter(id %in% c('empty','PBS','PCN')), aes(x = as.integer(column), y = intensity, color = id)) + geom_point()
-
-ggplot(df_360_meta %>% filter(id %in% c('control','PBS','PYO')), aes(x = as.integer(column), y = intensity, color = id)) + geom_point()
-
-```
-
-```{r}
-#ggplot(df_360_meta %>% filter(id %in% c('PYO')), aes(x = dna, y = intensity, color = id)) + geom_point()
-
-#ggplot(df_360_meta %>% filter(id %in% c('PBS')), aes(x = dna, y = intensity, color = id)) + geom_jitter(shape = 21)
-
-
-```
-
-## 485nm ex
-
-```{r}
-ggplot(df_485_meta %>% filter(id %in% c('control','empty','PBS','PCA','PCN','PYO')), aes(x = dna, y = intensity)) + geom_point() + facet_wrap(~id, scales = 'free')
-
-ggplot(df_485_meta %>% filter(id %in% c('control','empty','PBS','PCA','PCN','PYO')), aes(x = dna, y = intensity, color = id)) + geom_point() + geom_smooth(method = 'lm')
-```
-
-## Figure 
-
-```{r}
-
-df_fig <- bind_rows(df_360_meta %>% group_by(id, dna) %>% mutate(mean = mean(intensity)) %>% filter(id %in% c('PYO','PBS','control')) %>% mutate(ex = '360'),
-          df_485_meta %>% group_by(id, dna) %>% mutate(mean = mean(intensity)) %>% filter(id %in% c('PCA','PBS','control')) %>% mutate(ex = '485')
-          )
-
-df_fig <- df_fig %>% group_by(id,ex) %>% mutate(max = max(mean)) %>% mutate(norm_int = intensity / max, norm_mean = mean / max)
-
-#ggplot(df_fig, aes(x = dna, y = norm_int, color = id, shape = ex)) + geom_point()
-
-#ggplot(df_fig, aes(x = dna, y = norm_mean, color = id, shape = ex)) + geom_point()
-
-#ggplot(df_fig, aes(x = dna, y = norm_mean, color = id, shape = ex, linetype = ex)) + geom_point(aes(y = norm_int)) + geom_line() + ylim(0,NA)
-
-ggplot(df_fig, aes(x = dna, y = norm_mean, color = id)) + geom_point(aes(y = norm_int)) + geom_line() + ylim(0,NA) + facet_wrap(~ex)
-
-#ggplot(df_fig %>% filter(id != 'PBS'), aes(x = dna, y = norm_mean, color = id)) + geom_jitter(aes(y = norm_int)) + geom_line() + ylim(0,NA)
-
-facet_names <- list(
-  '360'="PYO",
-  '485'="PCA"
-)
-
-facet_labeller <- function(variable,value){
-  return(facet_names[value])
-}
-
-ggplot(df_fig %>% filter(id != 'PBS'), aes(x = dna, y = norm_mean, color = id)) + geom_jitter(aes(y = norm_int), shape = 21) + geom_line() + 
-  facet_wrap(~ex, labeller = facet_labeller, scales = 'free') + 
-  scale_color_manual(values = c('light gray','black','black')) + scale_y_continuous(labels = scales::percent, limits = c(0,NA)) + 
-  labs(x = 'bp DNA (uM)', y = 'Normalized fluorescence')
-```
-
-Trying to make figure to match etbr and mst data:
+First let's organize the data and standardize the intensities to the no DNA well:
 
 ```{r}
 df_fig_2 <- bind_rows(df_360_meta %>% group_by(id, dna) %>% mutate(mean = mean(intensity)) %>% filter(id %in% c('PYO','control')) %>% mutate(ex = '360_PYO'),
@@ -351,22 +287,18 @@ df_fig_2 <- df_fig_2 %>% group_by(id,ex) %>% mutate(max = max(mean)) %>% mutate(
   ungroup() %>% 
   mutate(ex = fct_relevel(ex,'485_PCA','485_PCN','360_PYO' ))
 
-facet_names <- list(
-    '485_PCA'="PCA",'485_PCN'="PCN",'360_PYO'="PYO"
-)
 
-facet_labeller <- function(variable,value){
-  return(facet_names[value])
-}
-
-#df_fig_2$ex = factor(df_fig_2$ex, levels=c('485_PCA','485_PCN','360_PYO'))
-
-#scale_color_manual(values = c('light gray','black','black')) + 
-
-plot_phz_red <- ggplot(df_fig_2, aes(x = dna, y = norm_mean, color = id)) + geom_point(aes(y = norm_int), shape = 21, size = 1) + geom_line(size = 0.5) + 
+ggplot(df_fig_2, aes(x = dna, y = norm_mean, color = id)) + geom_point(aes(y = norm_int), shape = 21, size = 1) + geom_line(size = 0.5) + 
   facet_wrap(~ex, scales = 'free', ncol = 3) + 
   scale_y_continuous(labels = scales::percent, limits = c(0,1.25)) + 
   labs(x = 'bp DNA (uM)', y = 'Normalized fluorescence') + scale_color_manual(values = c('light gray','light gray','black','black','black')) + guides(color = F) + xlim(0,300)
+```
+
+As a percentage of the no DNA well you can see there is no clear difference between the phenazine sample and the buffer only control in gray.
+
+The final plot we show in the figure has the raw intensity values:
+
+```{r}
 
 plot_phz_red <- ggplot(df_fig_2, aes(x = dna, y = mean, color = id)) + geom_point(aes(y = intensity), shape = 21, size = 1) + geom_line(size = 0.5) + 
   facet_wrap(~ex, scales = 'free', ncol = 3) + 
@@ -375,18 +307,16 @@ plot_phz_red <- ggplot(df_fig_2, aes(x = dna, y = mean, color = id)) + geom_poin
 
 plot_phz_red
 
-
-ggplot(df_fig_2 %>% filter(id != 'control'), aes(x = dna, y = mean, color = id)) + geom_point(aes(y = intensity), shape = 21, size = 1) + geom_line(size = 0.5) + 
-  labs(x = 'bp DNA (uM)', y = 'Fluorescence (A.U.)')  + xlim(0,300)
 ```
-Conclusions: does not seem to be signficant fluorescence change compared to empty wells. Note that there is nonzero variation between wells in plate reader. Reduced phenazines do not bind strongly to DNA.
-
-Caveats: 90uM phenazine may be well below the Kd, so this only provides some evidence that there's no binding at this concentration of phenazine.
 
 # Create Figure
 
 ```{r}
-binding_plots <- plot_grid(etbr_plot_styled,mst_plot_styled, ncol=2, scale = 0.95, align = 'hv', axis = 'tblr', labels = c("A","B"))
+
+theme_set(theme_figure())
+
+binding_plots <- plot_grid(etbr_plot_styled,mst_plot_styled, 
+                           ncol=2, scale = 0.95, align = 'hv', axis = 'tblr', labels = c("A","B"))
 
 bottom_plot <- plot_grid(plot_phz_red, ncol=1, align = 'hv', axis = 'tblr', labels = c('C'), scale = 0.95)
 

@@ -15,7 +15,7 @@ output:
 
 # Notes
 
-Panels A-X of Figure 1 are diagrams and images. The remaining panels were generated in R as shown here. Note all LC-MS data was quantified via absorbance. Chromatogram peaks were integrated in the Waters Empower software and integrations were exported and are contained in the csv files used here.
+Panels A-D of Figure 1 are diagrams and images. The remaining panels were generated in R as shown here. Note all LC-MS data was quantified via absorbance. Chromatogram peaks were integrated in the Waters Empower software and integrations were exported and are contained in the csv files used here.
 
 ----
 
@@ -23,6 +23,9 @@ Setup packages and plotting for the notebook:
 
 
 ```r
+# Check packages
+source("../../tools/package_setup.R")
+
 # Load packages
 library(tidyverse)
 library(cowplot)
@@ -51,17 +54,17 @@ wt_extracts <- read_csv('../../../data/LC-MS/HPLC_data_colonies_02_16_18.csv')
 wt_extracts %>% kable() %>% kable_styling() %>% scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> Name </th>
-   <th style="text-align:left;"> strain </th>
-   <th style="text-align:left;"> material </th>
-   <th style="text-align:right;"> replicate </th>
-   <th style="text-align:right;"> RT </th>
-   <th style="text-align:right;"> Area </th>
-   <th style="text-align:left;"> Channel Name </th>
-   <th style="text-align:right;"> Amount </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Name </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> strain </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> material </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> replicate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> RT </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Area </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Channel Name </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Amount </th>
   </tr>
  </thead>
 <tbody>
@@ -251,6 +254,7 @@ wt_extracts %>% kable() %>% kable_styling() %>% scroll_box(height = '250px')
 
 Now we need to convert the concentration (Amount column) into the concentration that existed in the biofilm or the agar, not the sample tube. For the agar, we know that there is 5mL and in this case 2mL of solution was added for extraction. For the biofilm, we estimate that the volume of the colony is about 60uL, and we resuspended it in 800uL. Here, I'll also calculate the means, so we can look at the mean and individual measurements.
 
+
 ```r
 # Calculate concentration from Amount. For biofilm: Amount * 800 / 62, for agar: Amount * 7/5
 wt_conc <- wt_extracts %>% 
@@ -265,6 +269,7 @@ wt_conc_means <- wt_conc %>%
 
 
 Let's plot the data with a fixed scale, so we can see the pattern of phenazine production by the WT cells:
+
 
 ```r
 #Plot layout
@@ -294,9 +299,10 @@ plot_wt_free <- ggplot(wt_conc_means, aes(x = material)) +
 
 #Plot styling
 plot_wt_free_styled <- plot_wt_free +
-  labs(x = NULL, y = expression("Phenazine concentration" ~ ( mu*M ))) + 
+  labs(x = NULL, y = expression("Phenazine\nconcentration" ~ ( mu*M ))) + 
   theme(axis.title.x = element_text(size = 14)) + 
-  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66"))
+  scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66"))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
 plot_wt_free_styled     
 ```
@@ -332,7 +338,8 @@ wt_ret_ratio <- ggplot(wt_conc_means_join ,aes(x=Name,y=retention_ratio))+
 wt_ret_ratio_styled <- wt_ret_ratio +
   guides(fill=F) +
   scale_y_continuous(labels = fold_label) + 
-  labs(x = NULL, y = "[Biofilm] / [Agar]")
+  labs(x = NULL, y = "[Biofilm] / [Agar]") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 wt_ret_ratio_styled
 ```
@@ -358,21 +365,21 @@ dphz_extracts %>%
   scroll_box(height = '250px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:250px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> measured_phenazine </th>
-   <th style="text-align:left;"> strain </th>
-   <th style="text-align:left;"> amount_added </th>
-   <th style="text-align:left;"> added_phenazine </th>
-   <th style="text-align:left;"> material </th>
-   <th style="text-align:right;"> replicate </th>
-   <th style="text-align:right;"> RT </th>
-   <th style="text-align:right;"> Area </th>
-   <th style="text-align:left;"> Channel Name </th>
-   <th style="text-align:right;"> Amount </th>
-   <th style="text-align:right;"> calcConc </th>
-   <th style="text-align:right;"> added_phz_num </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> measured_phenazine </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> strain </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> amount_added </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> added_phenazine </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> material </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> replicate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> RT </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Area </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Channel Name </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Amount </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> calcConc </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> added_phz_num </th>
   </tr>
  </thead>
 <tbody>
@@ -2558,24 +2565,19 @@ dphz_extracts_means <- dphz_extracts %>%
 
 # Plot layout
 plot_dphz_binding <- ggplot(dphz_extracts_means, aes(x=added_phz_num,y=calcConc))+
-  geom_line(size=0.5, aes(y=mean,color=measured_phenazine))+
-  geom_point(size=1, shape = 21, aes(fill=measured_phenazine))
-
-plot_dphz_binding <- ggplot(dphz_extracts_means, aes(x=added_phz_num,y=calcConc))+
   geom_line(size=0.5, aes(y=mean, group = measured_phenazine))+
-  geom_point(size=1, aes(shape=measured_phenazine))
+  geom_point(size=1, aes(shape=measured_phenazine)) +
+  geom_abline(slope=1, intercept =0, linetype = 2)
 
 # Plot styling
 plot_dphz_binding_styled <- plot_dphz_binding + 
   scale_shape_discrete(solid=F, guide = F)+
   labs(x=expression('Phenazine added to agar ('~mu*"M)"), 
-       y = expression("Biofilm concentration" ~ ( mu*M )) ) +
+       y = expression("Biofilm\nconcentration" ~ ( mu*M )) ) +
   theme(legend.position = c(0.5, 0.9),
         legend.title = element_blank(),
-        legend.background = element_rect(fill=NA))
-
-
-#coord_fixed(ratio = 0.75)
+        legend.background = element_rect(fill=NA),
+        axis.text.y = element_text(angle = 45, hjust = 1))
 
 plot_dphz_binding_styled
 ```
@@ -2627,7 +2629,8 @@ pdaMan_indPhz_plot_styled <- pdaMan_indPhz_plot +
   labs(x = NULL, y = expression("Biofilm concentration" ~ (mu*M ))) + 
   theme(axis.title.x = element_text(size = 14)) + 
   scale_fill_manual(guide = F, values = c("#66CCFF","#FFCC66")) + 
-  scale_x_discrete(breaks = c('D3','D4'), labels=c("Day 3","Day 4"))
+  scale_x_discrete(breaks = c('D3','D4'), labels=c("Day 3","Day 4"))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 pdaMan_indPhz_plot_styled
 ```
@@ -2652,8 +2655,9 @@ per_ret_plot <- ggplot(df_d3_d4, aes(x = measured_phenazine, y = percent_retaine
 
 #Plot styling
 per_ret_plot_styled <- per_ret_plot +
-  labs(x = NULL, y = 'Biofilm retained phenazine', title = '24 hrs post incubation') + 
-  scale_y_continuous(labels = scales::percent) 
+  labs(x = NULL, y = 'Biofilm retained\nphenazine', title = '24 hrs post incubation') + 
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 per_ret_plot_styled
 ```
@@ -2668,26 +2672,18 @@ per_ret_plot_styled
 ```r
 theme_set(theme_figure())
 
-#top_panel <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, ncol = 2, rel_widths = c(1.5,1), scale = 0.95, labels = c('E',"F"), align = 'hv', axis = 'tblr',label_size = 12)
-
-#bottom_panel <- plot_grid(plot_dphz_binding_styled, per_ret_plot_styled, ncol = 2, rel_widths = c(1,1.5), scale = 0.95, labels = c('G',"H"), align = 'hv', axis = 'tblr',label_size = 12)
-
-fig_1 <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, plot_dphz_binding_styled, per_ret_plot_styled, 
+fig_1 <- plot_grid(plot_wt_free_styled,wt_ret_ratio_styled, 
+                   plot_dphz_binding_styled, per_ret_plot_styled, 
                    ncol = 2, rel_heights = c(1,1), rel_widths = c(1.5,1), 
-                   align = 'hv', axis = 'tblr', scale = 0.95,
+                   align = 'hv', axis = 'lr', scale = 1.0,
                    labels = c('E','F','G','H'))
-
-#fig_1 <- plot_grid(top_panel, bottom_panel, ncol = 1)
 
 fig_1
 ```
 
 <img src="phz2019_Fig_1_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
 
-
 ```r
-#save_plot("../figures/02_12_19_fig_1_draft_2.pdf", fig_1, base_width = 8.5, base_height = 6)
-
 save_plot("../../../figures/phz2019_Fig_1.pdf", fig_1, base_width = 3.42, base_height = 3)
 ```
 
@@ -2700,9 +2696,9 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-## Running under: macOS Mojave 10.14.6
+## Running under: macOS  10.15.6
 ## 
 ## Matrix products: default
 ## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
@@ -2715,23 +2711,24 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 kableExtra_1.0.1 
-##  [4] cowplot_0.9.4     forcats_0.3.0     stringr_1.3.1    
-##  [7] dplyr_0.8.1       purrr_0.2.5       readr_1.3.1      
-## [10] tidyr_0.8.2       tibble_2.1.3      ggplot2_3.2.0    
-## [13] tidyverse_1.2.1  
+##  [1] lubridate_1.7.4   hms_0.5.3         modelr_0.1.5     
+##  [4] broom_0.5.2       kableExtra_1.1.0  cowplot_0.9.4    
+##  [7] viridis_0.5.1     viridisLite_0.3.0 knitr_1.23       
+## [10] forcats_0.4.0     stringr_1.4.0     dplyr_0.8.3      
+## [13] purrr_0.3.3       readr_1.3.1       tidyr_1.0.0      
+## [16] tibble_2.1.3      ggplot2_3.3.0     tidyverse_1.3.0  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
-## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       highr_0.7        broom_0.5.1      Rcpp_1.0.1      
-## [25] scales_1.0.0     backports_1.1.3  webshot_0.5.1    jsonlite_1.6    
-## [29] gridExtra_2.3    hms_0.4.2        digest_0.6.18    stringi_1.2.4   
-## [33] grid_3.5.2       cli_1.1.0        tools_3.5.2      magrittr_1.5    
-## [37] lazyeval_0.2.1   crayon_1.3.4     pkgconfig_2.0.2  xml2_1.2.0      
-## [41] lubridate_1.7.4  assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0      
-## [45] rstudioapi_0.9.0 R6_2.4.0         nlme_3.1-140     compiler_3.5.2
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.2.0      lattice_0.20-38 
+##  [5] colorspace_1.4-1 vctrs_0.3.1      generics_0.0.2   htmltools_0.4.0 
+##  [9] yaml_2.2.0       rlang_0.4.6      pillar_1.4.2     glue_1.3.1      
+## [13] withr_2.1.2      DBI_1.0.0        dbplyr_1.4.2     readxl_1.3.1    
+## [17] lifecycle_0.1.0  munsell_0.5.0    gtable_0.3.0     cellranger_1.1.0
+## [21] rvest_0.3.5      evaluate_0.14    labeling_0.3     highr_0.8       
+## [25] Rcpp_1.0.2       scales_1.0.0     backports_1.1.4  webshot_0.5.1   
+## [29] jsonlite_1.6     fs_1.3.1         gridExtra_2.3    digest_0.6.21   
+## [33] stringi_1.4.3    grid_3.5.3       cli_1.1.0        tools_3.5.3     
+## [37] magrittr_1.5     crayon_1.3.4     pkgconfig_2.0.3  xml2_1.2.2      
+## [41] reprex_0.3.0     assertthat_0.2.1 rmarkdown_1.13   httr_1.4.1      
+## [45] rstudioapi_0.10  R6_2.4.0         nlme_3.1-137     compiler_3.5.3
 ```

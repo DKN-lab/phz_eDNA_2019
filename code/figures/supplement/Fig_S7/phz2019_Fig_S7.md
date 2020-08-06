@@ -17,7 +17,8 @@ output:
 
 To see how we got from the raw electrochemical scans to the datasets used here, please see the following notebooks:
 
-* [IDA blank processing](https://scott-saunders.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
+* [IDA ∆phz biofilm processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_dPHZ/IDA_dPHZ_processing.html)
+* [IDA blank processing](https://dkn-lab.github.io/phz_eDNA_2019/code/processing/IDA_blank/IDA_blank_processing.html)
 
 This supplemental figure and notebook underlies some of the data in main figure 6, particularly the final panel. Specifically the model coefficients for $D_{loss}$. These data are saved as .csv files in the directory containing this notebook.
 
@@ -81,17 +82,17 @@ write_csv(blank_nls, "phz2019_blank_Dphys_nls_coefs.csv")
 blank_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> PHZadded </th>
-   <th style="text-align:left;"> term </th>
-   <th style="text-align:right;"> estimate </th>
-   <th style="text-align:right;"> std.error </th>
-   <th style="text-align:right;"> statistic </th>
-   <th style="text-align:right;"> p.value </th>
-   <th style="text-align:right;"> conf.low </th>
-   <th style="text-align:right;"> conf.high </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> PHZadded </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> term </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> std.error </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> statistic </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high </th>
   </tr>
  </thead>
 <tbody>
@@ -208,21 +209,21 @@ blank_preds %>%
   head() %>% kable(digits = 7) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> reactor </th>
-   <th style="text-align:left;"> PHZadded </th>
-   <th style="text-align:right;"> time </th>
-   <th style="text-align:right;"> pred </th>
-   <th style="text-align:right;"> pred_high </th>
-   <th style="text-align:right;"> pred_low </th>
-   <th style="text-align:right;"> estimate_b </th>
-   <th style="text-align:right;"> conf.low_b </th>
-   <th style="text-align:right;"> conf.high_b </th>
-   <th style="text-align:right;"> estimate_a </th>
-   <th style="text-align:right;"> conf.low_a </th>
-   <th style="text-align:right;"> conf.high_a </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> reactor </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> PHZadded </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> time </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred_high </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred_low </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate_b </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low_b </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high_b </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate_a </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low_a </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high_a </th>
   </tr>
  </thead>
 <tbody>
@@ -353,6 +354,7 @@ ggplot(df_dphz_swv %>% filter(reactor == 'transfer'), aes(x = time, y = signal))
 <img src="phz2019_Fig_S7_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
 
 Now we will fit each of these decays with the expression: 
+
 $$y = b (x)^{-0.5} + a$$ 
 
 We will fit using a nonlinear least squares method, the `nls()` function. Here you can see the model coefficient estimates and confidence intervals for each data set. We will go ahead and save these coefficients as a csv, so that we can use them to calculate $D_{phys}$ values in main figure 6.
@@ -376,18 +378,18 @@ write_csv(dphz_nls, "phz2019_dPHZ_Dphys_nls_coefs.csv")
 dphz_nls %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:right;"> exp </th>
-   <th style="text-align:left;"> run </th>
-   <th style="text-align:left;"> term </th>
-   <th style="text-align:right;"> estimate </th>
-   <th style="text-align:right;"> std.error </th>
-   <th style="text-align:right;"> statistic </th>
-   <th style="text-align:right;"> p.value </th>
-   <th style="text-align:right;"> conf.low </th>
-   <th style="text-align:right;"> conf.high </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> term </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> std.error </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> statistic </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p.value </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high </th>
   </tr>
  </thead>
 <tbody>
@@ -556,23 +558,23 @@ dphz_preds %>%
   head() %>% kable(digits = 10) %>% kable_styling() %>% scroll_box(height = '300px')
 ```
 
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; "><table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
-   <th style="text-align:left;"> exp_id </th>
-   <th style="text-align:left;"> reactor </th>
-   <th style="text-align:right;"> exp </th>
-   <th style="text-align:left;"> run </th>
-   <th style="text-align:right;"> time </th>
-   <th style="text-align:right;"> pred </th>
-   <th style="text-align:right;"> pred_high </th>
-   <th style="text-align:right;"> pred_low </th>
-   <th style="text-align:right;"> estimate_b </th>
-   <th style="text-align:right;"> conf.low_b </th>
-   <th style="text-align:right;"> conf.high_b </th>
-   <th style="text-align:right;"> estimate_a </th>
-   <th style="text-align:right;"> conf.low_a </th>
-   <th style="text-align:right;"> conf.high_a </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> exp_id </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> reactor </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> exp </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> run </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> time </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred_high </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> pred_low </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate_b </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low_b </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high_b </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> estimate_a </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.low_a </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> conf.high_a </th>
   </tr>
  </thead>
 <tbody>
@@ -702,6 +704,25 @@ plot_decays_dphz_styled
 
 
 ```r
+theme_figure <- function () {
+  theme_classic( ) %+replace%
+    theme(
+      axis.line = element_line(color = 'black', size = 0.25),
+      axis.ticks = element_line(color = 'black', size =0.25),
+      axis.text = element_text(color = 'black', size=8),
+      axis.title=element_text(color = 'black', size=8),
+      strip.text = element_text(color = 'black', size = 8),
+      strip.background = element_blank(),
+      legend.background = element_blank(),
+      legend.title=element_text(color = 'black',size=8),
+      legend.text=element_text(color = 'black',size=8),
+      legend.text.align=0,
+      panel.spacing = unit(0,'cm'),
+      plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm'),
+      plot.title = element_text(hjust = 0.5, color = 'black', size = 8)
+    )
+}
+
 theme_set(theme_figure())
 
 
@@ -725,9 +746,9 @@ sessionInfo()
 ```
 
 ```
-## R version 3.5.2 (2018-12-20)
+## R version 3.5.3 (2019-03-11)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-## Running under: macOS Mojave 10.14.6
+## Running under: macOS  10.15.6
 ## 
 ## Matrix products: default
 ## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
@@ -740,23 +761,25 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] viridis_0.5.1     viridisLite_0.3.0 broom_0.5.1      
-##  [4] kableExtra_1.0.1  cowplot_0.9.4     forcats_0.3.0    
-##  [7] stringr_1.3.1     dplyr_0.8.1       purrr_0.2.5      
-## [10] readr_1.3.1       tidyr_0.8.2       tibble_2.1.3     
-## [13] ggplot2_3.2.0     tidyverse_1.2.1  
+##  [1] viridis_0.5.1     viridisLite_0.3.0 broom_0.5.2      
+##  [4] kableExtra_1.1.0  cowplot_0.9.4     forcats_0.4.0    
+##  [7] stringr_1.4.0     dplyr_0.8.3       purrr_0.3.3      
+## [10] readr_1.3.1       tidyr_1.0.0       tibble_2.1.3     
+## [13] ggplot2_3.3.0     tidyverse_1.3.0  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.0.0      lattice_0.20-38 
-##  [5] colorspace_1.4-0 generics_0.0.2   htmltools_0.3.6  yaml_2.2.0      
-##  [9] rlang_0.4.0      pillar_1.3.1     glue_1.3.1       withr_2.1.2     
-## [13] modelr_0.1.2     readxl_1.2.0     munsell_0.5.0    gtable_0.2.0    
-## [17] cellranger_1.1.0 rvest_0.3.2      evaluate_0.14    labeling_0.3    
-## [21] knitr_1.23       highr_0.7        Rcpp_1.0.1       scales_1.0.0    
-## [25] backports_1.1.3  webshot_0.5.1    jsonlite_1.6     gridExtra_2.3   
-## [29] hms_0.4.2        digest_0.6.18    stringi_1.2.4    grid_3.5.2      
-## [33] cli_1.1.0        tools_3.5.2      magrittr_1.5     lazyeval_0.2.1  
-## [37] crayon_1.3.4     pkgconfig_2.0.2  MASS_7.3-51.1    xml2_1.2.0      
-## [41] lubridate_1.7.4  assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0      
-## [45] rstudioapi_0.9.0 R6_2.4.0         nlme_3.1-140     compiler_3.5.2
+##  [1] tidyselect_0.2.5 xfun_0.7         haven_2.2.0      lattice_0.20-38 
+##  [5] colorspace_1.4-1 vctrs_0.3.1      generics_0.0.2   htmltools_0.4.0 
+##  [9] yaml_2.2.0       rlang_0.4.6      pillar_1.4.2     glue_1.3.1      
+## [13] withr_2.1.2      DBI_1.0.0        dbplyr_1.4.2     modelr_0.1.5    
+## [17] readxl_1.3.1     lifecycle_0.1.0  munsell_0.5.0    gtable_0.3.0    
+## [21] cellranger_1.1.0 rvest_0.3.5      evaluate_0.14    labeling_0.3    
+## [25] knitr_1.23       highr_0.8        Rcpp_1.0.2       scales_1.0.0    
+## [29] backports_1.1.4  webshot_0.5.1    jsonlite_1.6     fs_1.3.1        
+## [33] gridExtra_2.3    hms_0.5.3        digest_0.6.21    stringi_1.4.3   
+## [37] grid_3.5.3       cli_1.1.0        tools_3.5.3      magrittr_1.5    
+## [41] crayon_1.3.4     pkgconfig_2.0.3  MASS_7.3-51.1    xml2_1.2.2      
+## [45] reprex_0.3.0     lubridate_1.7.4  assertthat_0.2.1 rmarkdown_1.13  
+## [49] httr_1.4.1       rstudioapi_0.10  R6_2.4.0         nlme_3.1-137    
+## [53] compiler_3.5.3
 ```

@@ -46,7 +46,7 @@ theme_1 <- function () {
 }
 
 
-theme_set(theme_1())
+theme_set(theme_notebook())
 ```
 
 # Import
@@ -98,7 +98,11 @@ swv_data <- echem_import_to_df(filenames = swv_filenames,
 
 ```{r}
 
-ggplot(swv_data %>% filter(electrode == 'i1' & reactor == 'soak'), aes(x = E, y = current, color = PHZaddedInt, group = PHZadded)) + geom_path() + facet_wrap(~echem)
+ggplot(swv_data %>% filter(electrode == 'i1' & reactor == 'soak'), 
+       aes(x = E, y = current, color = PHZaddedInt, group = PHZadded)) + 
+  geom_path(size = 1) + scale_x_reverse(label = mV_label) + scale_y_continuous(label = nA_label) +
+  scale_color_viridis(breaks = c(25, 50, 75, 100), labels = c('25 µM', '50 µM','75 µM','100 µM'), name = 'PYO added') + 
+  labs(x = "Potential - E (mV vs. Ag/AgCl)", y = "Current - I (nA)")
        
 ggplot(swv_data %>% filter(electrode == 'i1' & reactor == 'transfer'), aes(x = E, y = current, color = rep, group = rep)) + geom_path() + facet_wrap(~PHZadded, scales = 'free') + scale_x_reverse()
        

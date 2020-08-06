@@ -1,3 +1,5 @@
+# Ggplot2 themes and details for consistent plotting across the repository
+
 library(ggplot2)
 library(viridis)
 
@@ -25,13 +27,13 @@ theme_figure <- function () {
     theme(
       axis.line = element_line(color = 'black', size = 0.25),
       axis.ticks = element_line(color = 'black', size =0.25),
-      axis.text = element_text(color = 'black', size=6),
-      axis.title=element_text(color = 'black', size=6),
-      strip.text = element_text(color = 'black', size = 6),
+      axis.text = element_text(color = 'black', size=8),
+      axis.title=element_text(color = 'black', size=8),
+      strip.text = element_text(color = 'black', size = 8),
       strip.background = element_blank(),
       legend.background = element_blank(),
-      legend.title=element_text(color = 'black',size=6),
-      legend.text=element_text(color = 'black',size=6),
+      legend.title=element_text(color = 'black',size=8),
+      legend.text=element_text(color = 'black',size=8),
       legend.text.align=0,
       panel.spacing = unit(0,'cm'),
       plot.margin = margin(t=0.25, b = 0.25, l = 0.25, r = 0.25, unit = 'cm'),
